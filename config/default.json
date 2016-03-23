@@ -1,0 +1,7 @@
+{
+	"origin": "https://127.0.0.1:8080",
+	"sslOption":{
+		"key": "./config/ssl/server.key",
+		"cert": "./config/ssl/server.crt"
+	}
+}

@@ -1,4 +1,13 @@
 var path = require('path');
+var conf = require('config');
+var urlParse = require('url-parse');
+conf.originParsed = new urlParse(conf.origin);
+conf.originParsed.protocol = conf.originParsed.protocol.replace(':','');
+if(!conf.originParsed.port){
+	conf.originParsed.port = (conf.originParsed.protocol=='https' ? 443 : 80);
+}
+console.log(conf);
+
 var gulp = require('gulp');
 var sass = require('gulp-sass');//CSSコンパイラ
 var autoprefixer = require("gulp-autoprefixer");//CSSにベンダープレフィックスを付与してくれる
@@ -14,9 +23,17 @@ var _tasks = [
 	'.html.twig',
 	'.css',
 	'.css.scss',
-	'.js'
+	'.js',
+	'replace-package-dist'
 ];
 
+
+// broccoli-client (frontend) , bootstrap などを処理
+gulp.task("replace-package-dist", function() {
+	gulp.src(["node_modules/bootstrap/dist/**/*"])
+		.pipe(gulp.dest( './dist/common/bootstrap/dist/' ))
+	;
+});
 
 // src 中の *.css.scss を処理
 gulp.task('.css.scss', function(){
@@ -73,7 +90,7 @@ gulp.task(".html.twig", function() {
 gulp.task("watch", function() {
 	gulp.watch(["src/**/*"], _tasks);
 	require('child_process').exec('npm run up');
-	require('child_process').exec('open http://127.0.0.1:8080/');
+	require('child_process').exec('open '+conf.origin+'/');
 });
 
 // src 中のすべての拡張子を処理(default)

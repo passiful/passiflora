@@ -11,13 +11,13 @@ $(window).load(function(){
                 'board_theme': board_theme
             } ,
             'success': function(data){
-                alert(data);
+                console.log(data);
             },
             'error': function(err){
-                alert('ERROR: '+err);
+                console.log('ERROR: '+err);
             },
             'complete': function(){
-                alert('done');
+                console.info('done');
             }
         });
     });

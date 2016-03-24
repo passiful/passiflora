@@ -92,8 +92,8 @@ gulp.task(".html.twig", function() {
 // src 中のすべての拡張子を監視して処理
 gulp.task("watch", function() {
 	gulp.watch(["src/**/*"], _tasks);
-	require('child_process').exec('npm run up');
-	require('child_process').exec('open '+conf.origin+'/');
+	// require('child_process').exec('npm run up');
+	// require('child_process').exec('open '+conf.origin+'/');
 });
 
 // src 中のすべての拡張子を処理(default)

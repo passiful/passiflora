@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>PASSIFLORA</title>
+		<title>Create New Board | PASSIFLORA</title>
 <!-- Required meta tags always come first -->
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 <meta http-equiv="x-ua-compatible" content="ie=edge" />
@@ -15,17 +15,12 @@
 		<link rel="stylesheet" href="index_files/styles/contents.css" type="text/css" />
 	</head>
 	<body>
-		<h1>PASSIFLORA</h1>
-		<form action="javascript:;" method="get">
-			<div>BOARD ID:
-				<input type="text" name="board_id" />
-				<button type="submit">go</button>
-			</div>
-		</form>
-		or
-		<form action="/create/" method="get">
-			<div>
-				<button type="submit" class="btn btn-secondary">create new board</button>
+		<p><a href="/">PASSIFLORA</a></p>
+		<h1>Create New Board</h1>
+		<form action="javascript:;" class="cont_create_board" method="get">
+			<div>BOARD THEME:
+				<input type="text" name="board_theme" />
+				<button type="submit">create</button>
 			</div>
 		</form>
 <!-- project common -->
@@ -34,6 +29,6 @@
 <!-- jQuery first, then Bootstrap 4 JS. -->
 <script src="/common/bootstrap/dist/js/bootstrap.min.js"></script>
 
-<script type="text/javascript" src="index_files/styles/contents.js"></script>
+<script type="text/javascript" src="index_files/scripts/contents.js"></script>
 	</body>
 </html>

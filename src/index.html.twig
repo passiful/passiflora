@@ -2,12 +2,12 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>passiflora</title>
+		<title>{{conf.appName}}</title>
 {% include 'common/includes/head.inc' %}
 		<link rel="stylesheet" href="index_files/styles/contents.css" type="text/css" />
 	</head>
 	<body>
-		<h1>PASSIFLORA</h1>
+		<h1>{{conf.appName}}</h1>
 		<form action="javascript:;" method="get">
 			<div>BOARD ID:
 				<input type="text" name="board_id" />
@@ -15,11 +15,13 @@
 			</div>
 		</form>
 		or
-		<form action="javascript:;" method="get">
+		<form action="/create/" method="get">
 			<div>
-				<button type="submit">create new board</button>
+				<button type="submit" class="btn btn-secondary">create new board</button>
 			</div>
 		</form>
 {% include 'common/includes/foot.inc' %}
+
+<script type="text/javascript" src="index_files/styles/contents.js"></script>
 	</body>
 </html>

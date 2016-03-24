@@ -39,7 +39,8 @@ var mdlWareSession = session({
 });
 app.use( mdlWareSession );
 
-// middleware - frontend documents
+// middleware
+app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );
 app.use( express.static( __dirname+'/../dist/' ) );
 
 // {$_port}番ポートでLISTEN状態にする

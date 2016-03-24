@@ -78,7 +78,10 @@ gulp.task(".html.twig", function() {
 	gulp.src(["src/**/*.html.twig"])
 		.pipe(plumber())
 		.pipe(twig({
-			data: {packageJson: packageJson}
+			data: {
+				packageJson: packageJson ,
+				conf: conf
+			}
 		}))
 		.pipe(rename({extname: ''}))
 		.pipe(gulp.dest( './dist/' ))

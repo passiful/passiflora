@@ -3,13 +3,7 @@
  */
 var fs = require('fs');
 var path = require('path');
-var conf = require('config');
-var urlParse = require('url-parse');
-conf.originParsed = new urlParse(conf.origin);
-conf.originParsed.protocol = conf.originParsed.protocol.replace(':','');
-if(!conf.originParsed.port){
-	conf.originParsed.port = (conf.originParsed.protocol=='https' ? 443 : 80);
-}
+var conf = require('./confo.js');
 console.log(conf);
 
 var sslOption = {
@@ -39,11 +33,18 @@ var mdlWareSession = session({
 });
 app.use( mdlWareSession );
 
+app.use( function(req, res, next){
+	req.app = new (function(){
+		this.board = new(require('./board.js'))(conf);
+	})();
+	next();
+} );
+
 // middleware
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );
 app.use( express.static( __dirname+'/../dist/' ) );
 
-// {$_port}番ポートでLISTEN状態にする
+// {conf.originParsed.port}番ポートでLISTEN状態にする
 server.listen( conf.originParsed.port, function(){
 	console.log('message: server-standby');
 } );

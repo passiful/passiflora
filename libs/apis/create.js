@@ -13,11 +13,17 @@ module.exports = function(conf){
 		// console.log(req.method);
 		// console.log(req.body);
 		// console.log(req.originalUrl);
+		// console.log(req.app);
+		// console.log(req.app.board);
 		// console.log( JSON.stringify(userInfo) );
 		var result = {
 			result: true,
-			message: null
+			message: null,
+			boardId: null
 		};
+
+		res.status(200);
+		res.set('Content-Type', 'text/json')
 
 		utils79.validate(
 			req.body,
@@ -30,11 +36,22 @@ module.exports = function(conf){
 				if(err){
 					result.result = false;
 					result.message = err;
+
+					res.send(JSON.stringify(result)).end();
+					return;
 				}
 
-				res.status(200);
-				res.set('Content-Type', 'text/json')
-				res.send(JSON.stringify(result)).end();
+				req.app.board.createNewBoard(
+					{
+						"theme": req.body.board_theme
+					} ,
+					function( boardId ){
+						result.boardId = boardId;
+
+						res.send(JSON.stringify(result)).end();
+						return;
+					}
+				);
 			}
 		);
 

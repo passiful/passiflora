@@ -8,10 +8,10 @@
 	</head>
 	<body>
 		<h1>{{conf.appName}}</h1>
-		<form action="javascript:;" method="get">
+		<form action="javascript:;" method="get" class="gotoBoard">
 			<div>BOARD ID:
 				<input type="text" name="board_id" />
-				<button type="submit">go</button>
+				<button type="submit" class="btn btn-primary">go</button>
 			</div>
 		</form>
 		or
@@ -22,6 +22,6 @@
 		</form>
 {% include 'common/includes/foot.inc' %}
 
-<script type="text/javascript" src="index_files/styles/contents.js"></script>
+<script type="text/javascript" src="index_files/scripts/contents.js"></script>
 	</body>
 </html>

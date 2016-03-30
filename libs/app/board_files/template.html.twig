@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>board - {{ boardInfo.theme }} - {{ boardId }}</title>
+
+		<!-- Required meta tags always come first -->
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge" />
+
+		<!-- Bootstrap 4 CSS -->
+		<link rel="stylesheet" href="/common/bootstrap/dist/css/bootstrap.min.css" />
+
+		<!-- project common -->
+		<link rel="stylesheet" href="/common/styles/common.css" type="text/css" />
+
+		<!-- app local -->
+		<link rel="stylesheet" href="/board/board_files/styles/app.css" />
+	</head>
+	<body>
+		<div>
+			<h1>{{ boardInfo.theme }}</h1>
+			<p>boardID: {{ boardId }}</p>
+			<p><a href="/">退出</a></p>
+		</div>
+
+		<!-- project common -->
+		<script type="text/javascript" src="/common/scripts/main.js"></script>
+
+		<!-- Bootstrap 4 JS. -->
+		<script src="/common/bootstrap/dist/js/bootstrap.min.js"></script>
+
+		<!-- app local -->
+		<script src="/board/board_files/scripts/app.js"></script>
+	</body>
+</html>

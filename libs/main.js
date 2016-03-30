@@ -42,10 +42,7 @@ app.use( function(req, res, next){
 
 // middleware
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );
-app.get('/board/:boardId/', function (req, res, next) {
-	// console.log('ID:', req.params.boardId);
-	res.send('BoardId = '+req.params.boardId).end();
-});
+app.get( '/board/:boardId/', require( __dirname+'/app/board.js' )(conf) );
 app.use( express.static( __dirname+'/../dist/' ) );
 
 // {conf.originParsed.port}番ポートでLISTEN状態にする

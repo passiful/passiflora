@@ -46,4 +46,24 @@ module.exports = function(conf){
 		return;
 	}
 
+	/**
+	 * ボード情報を取得する
+	 */
+	this.getBoardInfo = function(boardId, callback){
+		callback = callback || function(){};
+
+		var dirPath = require('path').resolve(conf.dataDir, ''+boardId);
+
+		if( !utils79.is_dir(dirPath) ){
+			callback(false);
+			return;
+		}
+
+		var bin = fs.readFileSync(require('path').resolve(dirPath, 'info.json'));
+		var json = JSON.parse(bin);
+
+		callback(json);
+		return;
+	}
+
 }

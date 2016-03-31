@@ -35,10 +35,15 @@ app.use( mdlWareSession );
 
 app.use( function(req, res, next){
 	req.app = new (function(){
-		this.board = new(require('./board.js'))(conf);
+		this.board = new (require('./board.js'))(conf);
 	})();
 	next();
 } );
+
+// middleware - biflora resources
+var biflora = require('biflora');
+app.use( biflora.clientLibs() );
+biflora.setupWebSocket(server, require('./apis/bifloraApi.js'), new (require('./bifloraMain.js'))(conf));
 
 // middleware
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );

@@ -5,7 +5,7 @@
     "up": "node ./libs/main.js",
     "dev": "gulp watch;",
     "ssl-key-gen": "openssl genrsa -aes128 -out config/ssl/server.key 2048; openssl req -new -key config/ssl/server.key -sha256 -out config/ssl/server.csr; openssl x509 -in config/ssl/server.csr -days 365 -req -signkey config/ssl/server.key -sha256 -out config/ssl/server.crt;",
-    "submodules-update": "rm -rfv node_modules/utils79; npm install; gulp;",
+    "submodules-update": "rm -rfv node_modules/utils79; rm -rfv node_modules/biflora; npm install; gulp;",
     "test": "gulp; mocha --ui tdd ./tests/"
   },
   "repository": {
@@ -32,6 +32,7 @@
     "twig": "^0.8.9",
     "url-parse": "^1.0.5",
     "utils79": "file:submodules/node-utils79",
+    "biflora": "file:submodules/node-biflora",
     "validator": "^5.1.0"
   },
   "devDependencies": {

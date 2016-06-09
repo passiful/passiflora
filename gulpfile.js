@@ -84,6 +84,13 @@ gulp.task(".html.twig", function() {
 });
 
 
+// 標準ブラウザを立ち上げてプレビューする
+gulp.task("preview", function() {
+	require('child_process').spawn('node', ['./libs/main.js']);
+	require('child_process').exec('open '+conf.origin+'/');
+});
+
+
 // src 中のすべての拡張子を監視して処理
 gulp.task("watch", function() {
 	gulp.watch(["src/**/*"], _tasks);

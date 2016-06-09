@@ -1,0 +1,31 @@
+html, body {
+  height: 100%; }
+
+.board {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  overflow: hidden; }
+  .board__field {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 70%;
+    height: 100%;
+    overflow: hidden; }
+  .board__timeline {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30%;
+    height: 100%;
+    overflow: hidden; }
+    .board__timeline_list {
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: auto; }
+    .board__timeline_form {
+      position: absolute;
+      left: 0;
+      bottom: 0; }

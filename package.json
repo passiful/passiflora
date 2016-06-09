@@ -1,9 +1,11 @@
 {
   "main": "libs/main.js",
+  "private": true,
   "scripts": {
     "start": "node ./libs/main.js",
     "up": "node ./libs/main.js",
     "dev": "gulp watch;",
+    "preview": "gulp preview;",
     "ssl-key-gen": "openssl genrsa -aes128 -out config/ssl/server.key 2048; openssl req -new -key config/ssl/server.key -sha256 -out config/ssl/server.csr; openssl x509 -in config/ssl/server.csr -days 365 -req -signkey config/ssl/server.key -sha256 -out config/ssl/server.crt;",
     "submodules-update": "rm -rfv node_modules/utils79; rm -rfv node_modules/biflora; npm install; gulp;",
     "test": "gulp; mocha --ui tdd ./tests/"

@@ -1,7 +1,7 @@
 /**
  * board.js
  */
-module.exports = function(conf, app){
+module.exports = function(conf, main){
 	delete(require.cache[require('path').resolve(__filename)]);
 	var fs = require('fs');
 	var fsX = require('fs-extra');
@@ -35,7 +35,7 @@ module.exports = function(conf, app){
 				// info.json 生成
 				fs.writeFileSync(require('path').resolve(newDirPath, 'info.json'), JSON.stringify(boardInfo, null, 1));
 
-				app.dbh.initDb(newBoardId, function(dbInfo){
+				main.dbh.initDb(newBoardId, function(dbInfo){
 					// 返却
 					// console.log(dbInfo);
 					callback(newBoardId);

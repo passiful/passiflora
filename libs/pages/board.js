@@ -15,8 +15,8 @@ module.exports = function(conf){
 		// console.log(req.method);
 		// console.log(req.body);
 		// console.log(req.originalUrl);
-		// console.log(req.app);
-		// console.log(req.app.board);
+		// console.log(req.main);
+		// console.log(req.main.board);
 		// console.log( JSON.stringify(userInfo) );
 
 		var boardInfo,
@@ -34,7 +34,7 @@ module.exports = function(conf){
 			})
 		}).then(function(){
 			return new Promise(function(rlv, rjc){
-				req.app.board.getBoardInfo( req.params.boardId, function( _boardInfo ){
+				req.main.board.getBoardInfo( req.params.boardId, function( _boardInfo ){
 					if( _boardInfo === false ){
 						rjc();
 						return;

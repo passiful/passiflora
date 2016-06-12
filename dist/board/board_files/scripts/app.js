@@ -14848,6 +14848,7 @@ window.app = new (function(){
 			'name': 'new Commer'
 		};
 	var $timeline;
+	var boardId;
 
 	/**
 	 * 初期化
@@ -14856,6 +14857,15 @@ window.app = new (function(){
 		callback = callback || function(){};
 
 		new Promise(function(rlv){rlv();})
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// BoardID を取得
+
+				var pathname = window.location.pathname;
+				pathname.match(new RegExp('\\/board\\/([0-9a-zA-Z]+)\\/'));
+				boardId = RegExp.$1;
+
+				rlv();
+			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// DOM Setup
 				$timeline = $('.board__timeline .board__timeline_list');
@@ -14885,7 +14895,7 @@ window.app = new (function(){
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// (biflora 送信テスト)
 				socket.send(
-					'api1',
+					'ping',
 					{
 					} ,
 					function(rtn){
@@ -14935,8 +14945,10 @@ window.app = new (function(){
 							// alert('enter');
 							var $this = $(e.target);
 							var msg = {
-								'content': $this.val() ,
-								'userName': userInfo.name
+								'boardId': boardId,
+								'owner': userInfo.name,
+								'content': $this.val(),
+								'contentType': 'text/markdown'
 							};
 							socket.send(
 								'message',

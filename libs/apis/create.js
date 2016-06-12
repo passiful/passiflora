@@ -13,8 +13,8 @@ module.exports = function(conf){
 		// console.log(req.method);
 		// console.log(req.body);
 		// console.log(req.originalUrl);
-		// console.log(req.app);
-		// console.log(req.app.board);
+		// console.log(req.main);
+		// console.log(req.main.board);
 		// console.log( JSON.stringify(userInfo) );
 		var result = {
 			result: true,
@@ -41,7 +41,7 @@ module.exports = function(conf){
 					return;
 				}
 
-				req.app.board.createNewBoard(
+				req.main.board.createNewBoard(
 					{
 						"theme": req.body.board_theme
 					} ,

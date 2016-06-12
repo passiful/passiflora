@@ -1,7 +1,7 @@
 /**
  * dbh.js
  */
-module.exports = function(conf, app){
+module.exports = function(conf, main){
 	delete(require.cache[require('path').resolve(__filename)]);
 	var fs = require('fs');
 	var fsX = require('fs-extra');
@@ -51,6 +51,32 @@ module.exports = function(conf, app){
 		console.log(dbs);
 
 		callback(dbs[boardId]);
+		return;
+	}
+
+	/**
+	 * メッセージをDBに挿入する
+	 * @param  {[type]}   boardId  [description]
+	 * @param  {[type]}   message  [description]
+	 * @param  {Function} callback [description]
+	 * @return {[type]}            [description]
+	 */
+	this.insertMessage = function(boardId, message, callback){
+		callback = callback || function(){};
+
+		this.initDb(boardId, function(){
+
+			var hdl = dbs[boardId].tbls.timeline.create({
+				'content': message.content,
+				'contentType': message.contentType,
+				'owner': message.owner,
+				'microtime': message.microtime
+			});
+			// console.log(hdl);
+
+			callback(true);
+
+		});
 		return;
 	}
 

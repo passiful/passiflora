@@ -4,29 +4,34 @@
 module.exports = (function(){
 	delete(require.cache[require('path').resolve(__filename)]);
 	return {
-		'api1': function( data, callback, main, socket ){
-			callback('result-1');
+		'ping': function( data, callback, main, socket ){
+			callback('ping OK.');
+			return;
 		} ,
 		'message': function( data, callback, main, socket ){
-			data.time = Date.now();
+			// クライアントからのメッセージを受け付ける
+			data.microtime = Date.now();
 
-			var marked = require('marked');
-			marked.setOptions({
-				renderer: new marked.Renderer(),
-				gfm: true,
-				tables: true,
-				breaks: false,
-				pedantic: false,
-				sanitize: false,
-				smartLists: true,
-				smartypants: false
-			});
-			if(typeof(data.content)===typeof('')){
+			if(typeof(data.content)===typeof('') && data.contentType == 'text/markdown'){
+				var marked = require('marked');
+				marked.setOptions({
+					renderer: new marked.Renderer(),
+					gfm: true,
+					tables: true,
+					breaks: false,
+					pedantic: false,
+					sanitize: false,
+					smartLists: true,
+					smartypants: false
+				});
 				data.content = marked(data.content);
+				data.contentType = 'text/html';
 			}
 
 			console.log(data);
-			callback(data);
+			main.dbh.insertMessage(data.boardId, data, function(result){
+				callback(data);
+			});
 			return;
 		}
 	};

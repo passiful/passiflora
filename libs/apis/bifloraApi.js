@@ -7,8 +7,11 @@ module.exports = (function(){
 		'api1': function( data, callback, main, socket ){
 			callback('result-1');
 		} ,
-		'api2': function( data, callback, main, socket ){
-			callback('result-2');
+		'message': function( data, callback, main, socket ){
+			data.time = Date.now();
+			console.log(data);
+			callback(data);
+			return;
 		}
 	};
 })();

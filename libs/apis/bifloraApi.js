@@ -29,6 +29,10 @@ module.exports = (function(){
 			}
 
 			console.log(data);
+			socket.send('receiveBroadcast', data, function(){
+				console.log('broadcast message');
+			});
+
 			main.dbh.insertMessage(data.boardId, data, function(result){
 				callback(data);
 			});

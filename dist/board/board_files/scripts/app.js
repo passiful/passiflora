@@ -14834,6 +14834,18 @@ function whitelist(str, chars) {
 }
 module.exports = exports['default'];
 },{"./util/assertString":70}],74:[function(require,module,exports){
+/**
+ * bifloraApi - receiveBroadcast.js
+ */
+module.exports = function( data, callback, main, socket ){
+	// console.log(data);
+	// console.log(callback);
+	main.addMessageToTimeline(data);
+	callback(true);
+	return;
+}
+
+},{}],75:[function(require,module,exports){
 window.app = new (function(){
 	// app "board"
 	var _this = this;
@@ -14859,7 +14871,6 @@ window.app = new (function(){
 		new Promise(function(rlv){rlv();})
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// BoardID を取得
-
 				var pathname = window.location.pathname;
 				pathname.match(new RegExp('\\/board\\/([0-9a-zA-Z]+)\\/'));
 				boardId = RegExp.$1;
@@ -14875,18 +14886,10 @@ window.app = new (function(){
 				// init biflora framework
 				socket = _this.socket = window.biflora
 					.createSocket(
-						new (function(){
-
-						})(),
+						_this,
 						io,
 						{
-							'showSocketTest': function( data, callback, main, socket ){
-								console.log(data);
-								// alert(data.message);
-								console.log(callback);
-								callback(data);
-								return;
-							}
+							'receiveBroadcast': require('../../board/board_files/scripts/apis/receiveBroadcast.js')
 						}
 					)
 				;
@@ -14956,7 +14959,6 @@ window.app = new (function(){
 								function(rtn){
 									console.log('Your message was sent.');
 									console.log(rtn);
-									_this.addMessageToTimeline(rtn);
 									$this.val('').focus();
 								}
 							);
@@ -14993,4 +14995,4 @@ window.app = new (function(){
 
 })();
 
-},{"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[74])
+},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[75])

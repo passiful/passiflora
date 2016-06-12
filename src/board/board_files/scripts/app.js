@@ -23,7 +23,6 @@ window.app = new (function(){
 		new Promise(function(rlv){rlv();})
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// BoardID を取得
-
 				var pathname = window.location.pathname;
 				pathname.match(new RegExp('\\/board\\/([0-9a-zA-Z]+)\\/'));
 				boardId = RegExp.$1;
@@ -39,18 +38,10 @@ window.app = new (function(){
 				// init biflora framework
 				socket = _this.socket = window.biflora
 					.createSocket(
-						new (function(){
-
-						})(),
+						_this,
 						io,
 						{
-							'showSocketTest': function( data, callback, main, socket ){
-								console.log(data);
-								// alert(data.message);
-								console.log(callback);
-								callback(data);
-								return;
-							}
+							'receiveBroadcast': require('../../board/board_files/scripts/apis/receiveBroadcast.js')
 						}
 					)
 				;
@@ -120,7 +111,6 @@ window.app = new (function(){
 								function(rtn){
 									console.log('Your message was sent.');
 									console.log(rtn);
-									_this.addMessageToTimeline(rtn);
 									$this.val('').focus();
 								}
 							);

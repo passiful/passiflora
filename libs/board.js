@@ -1,11 +1,13 @@
 /**
  * board.js
  */
-module.exports = function(conf){
+module.exports = function(conf, app){
 	delete(require.cache[require('path').resolve(__filename)]);
 	var fs = require('fs');
 	var fsX = require('fs-extra');
 	var utils79 = require('utils79');
+	var Sequelize = require('sequelize');
+	var sqlite = require('sqlite3');
 
 	/**
 	 * 新しいボードを生成する
@@ -33,8 +35,11 @@ module.exports = function(conf){
 				// info.json 生成
 				fs.writeFileSync(require('path').resolve(newDirPath, 'info.json'), JSON.stringify(boardInfo, null, 1));
 
-				// 返却
-				callback(newBoardId);
+				app.dbh.initDb(newBoardId, function(dbInfo){
+					// 返却
+					// console.log(dbInfo);
+					callback(newBoardId);
+				});
 				break;
 
 			} catch (e) {
@@ -43,6 +48,7 @@ module.exports = function(conf){
 			}
 
 		}
+
 		return;
 	}
 

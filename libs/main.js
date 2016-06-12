@@ -35,7 +35,8 @@ app.use( mdlWareSession );
 
 app.use( function(req, res, next){
 	req.app = new (function(){
-		this.board = new (require('./board.js'))(conf);
+		this.dbh = new (require('./dbh.js'))(conf, this);
+		this.board = new (require('./board.js'))(conf, this);
 	})();
 	next();
 } );
@@ -47,7 +48,7 @@ biflora.setupWebSocket(server, require('./apis/bifloraApi.js'), new (require('./
 
 // middleware
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );
-app.get( '/board/:boardId/', require( __dirname+'/app/board.js' )(conf) );
+app.get( '/board/:boardId/', require( __dirname+'/pages/board.js' )(conf) );
 app.use( express.static( __dirname+'/../dist/' ) );
 
 // {conf.originParsed.port}番ポートでLISTEN状態にする

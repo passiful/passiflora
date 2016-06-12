@@ -47,8 +47,11 @@ module.exports = function(conf){
 					} ,
 					function( boardId ){
 						result.boardId = boardId;
+						// console.log(result);
+						var rtn = JSON.stringify(result);
+						// console.log(rtn);
 
-						res.send(JSON.stringify(result)).end();
+						res.send(rtn).end();
 						return;
 					}
 				);

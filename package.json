@@ -21,11 +21,14 @@
   },
   "homepage": "https://github.com/tomk79/passiflora#readme",
   "dependencies": {
+    "biflora": "file:submodules/node-biflora",
     "body-parser": "^1.15.0",
     "bootstrap": "^4.0.0-alpha.2",
     "config": "^1.19.0",
+    "es6-promise": "^3.2.1",
     "express": "^4.13.3",
     "express-session": "^1.13.0",
+    "iterate79": "0.0.1",
     "jquery": "^2.2.2",
     "phpjs": "^1.3.2",
     "purl": "^1.0.4",
@@ -34,7 +37,6 @@
     "twig": "^0.8.9",
     "url-parse": "^1.0.5",
     "utils79": "file:submodules/node-utils79",
-    "biflora": "file:submodules/node-biflora",
     "validator": "^5.1.0"
   },
   "devDependencies": {

@@ -138,7 +138,7 @@ window.app = new (function(){
 	 */
 	this.addMessageToTimeline = function(message){
 		$timeline.append( $('<div>')
-			.text( message.content )
+			.html( message.content )
 		);
 		return;
 	}

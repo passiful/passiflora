@@ -30,6 +30,7 @@
     "express-session": "^1.13.0",
     "iterate79": "0.0.1",
     "jquery": "^2.2.2",
+    "marked": "^0.3.5",
     "phpjs": "^1.3.2",
     "purl": "^1.0.4",
     "socket.io": "^1.3.6",

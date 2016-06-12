@@ -40,6 +40,12 @@ module.exports = (function(){
 				callback(data);
 			});
 			return;
+		},
+		'getMessageList': function( data, callback, main, biflora ){
+			main.dbh.getMessageList(data.boardId, {}, function(result){
+				callback(result);
+			});
+			return;
 		}
 	};
 })();

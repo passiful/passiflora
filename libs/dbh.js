@@ -80,4 +80,29 @@ module.exports = function(conf, main){
 		return;
 	}
 
+	/**
+	 * メッセージ一覧を取得する
+	 * @param  {[type]}   boardId  [description]
+	 * @param  {[type]}   options  [description]
+	 * @param  {Function} callback [description]
+	 * @return {[type]}            [description]
+	 */
+	this.getMessageList = function(boardId, options, callback){
+		callback = callback || function(){};
+
+		this.initDb(boardId, function(){
+
+			dbs[boardId].tbls.timeline
+				.findAndCountAll({})
+				.then(function(result) {
+					result.rows = JSON.parse(JSON.stringify(result.rows));
+					// console.log(result);
+					callback(result);
+				})
+			;
+
+		});
+		return;
+	}
+
 }

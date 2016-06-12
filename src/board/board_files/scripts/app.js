@@ -11,7 +11,9 @@ window.app = new (function(){
 		userInfo = {
 			'name': 'new Commer'
 		};
-	var $timeline;
+	var $timeline,
+		$timelineList,
+		$timelineForm;
 	var boardId;
 
 	/**
@@ -31,7 +33,9 @@ window.app = new (function(){
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// DOM Setup
-				$timeline = $('.board__timeline .board__timeline_list');
+				$timeline = $('.board__timeline');
+				$timelineList = $('.board__timeline .board__timeline_list');
+				$timelineForm = $('.board__timeline .board__timeline_form');
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
@@ -45,6 +49,13 @@ window.app = new (function(){
 						}
 					)
 				;
+				rlv();
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				windowResized();
+				$(window).resize(function(){
+					windowResized();
+				});
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
@@ -68,6 +79,27 @@ window.app = new (function(){
 					function(rtn){
 						console.log(rtn);
 						rlv();
+					}
+				);
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// boardId のこれまでのメッセージを取得する
+				console.log('getting messages: '+boardId);
+				biflora.send(
+					'getMessageList',
+					{'boardId': boardId},
+					function(rtn){
+						console.log(rtn);
+						it79.ary(
+							rtn.rows,
+							function(it1, row1, idx1){
+								_this.addMessageToTimeline(row1);
+								it1.next();
+							},
+							function(){
+								rlv();
+							}
+						);
 					}
 				);
 			}); })
@@ -148,12 +180,32 @@ window.app = new (function(){
 	}
 
 	/**
+	 * Window Resized
+	 */
+	function windowResized(callback){
+		callback = callback || function(){};
+
+		$timelineList.css({
+			'height': $timeline.outerHeight() - $timelineForm.outerHeight()
+		});
+
+		callback();
+		return;
+	}
+
+	/**
 	 * タイムラインにメッセージを追加
 	 */
 	this.addMessageToTimeline = function(message){
-		$timeline.append( $('<div>')
-			.html( message.content )
+		$timelineList.append( $('<div class="message-unit">')
+			.append( $('<div class="message-unit__owner">').text(message.owner) )
+			.append( $('<div class="message-unit__content">').html(message.content) )
 		);
+		var scrTop = $timelineList.scrollTop();
+		var oH = $timelineList.outerHeight();
+		var iH = $timelineList.get(0).scrollHeight;
+		$timelineList.scrollTop(iH-oH);
+		// console.log(scrTop, oH, iH);
 		return;
 	}
 

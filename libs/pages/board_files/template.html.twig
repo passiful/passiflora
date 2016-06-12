@@ -23,15 +23,17 @@
 	<body>
 		<div class="board">
 			<div class="board__field">
-				<h1>{{ boardInfo.theme }}</h1>
-				<p>boardID: {{ boardId }}</p>
-				<p><a href="/">退出</a></p>
+				<div class="board__field-inner">
+					<h1>{{ boardInfo.theme }}</h1>
+					<p>boardID: {{ boardId }}</p>
+					<p><a href="/">退出</a></p>
+				</div>
 			</div>
 			<div class="board__timeline">
 				<div class="board__timeline_list">
 				</div>
 				<div class="board__timeline_form">
-					<textarea></textarea>
+					<textarea class="form-control"></textarea>
 				</div>
 			</div>
 		</div>

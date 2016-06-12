@@ -1,10 +1,18 @@
 html, body {
-  height: 100%; }
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 0;
+  top: 0; }
 
 .board {
   height: 100%;
   width: 100%;
   position: absolute;
+  left: 0;
+  top: 0;
   overflow: hidden; }
   .board__field {
     position: absolute;
@@ -12,7 +20,14 @@ html, body {
     left: 0;
     width: 70%;
     height: 100%;
-    overflow: hidden; }
+    overflow: auto; }
+    .board__field .board__field-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10000px;
+      height: 10000px;
+      overflow: visible; }
   .board__timeline {
     position: absolute;
     top: 0;
@@ -24,8 +39,28 @@ html, body {
       position: absolute;
       left: 0;
       top: 0;
-      overflow: auto; }
+      overflow: auto;
+      width: 100%; }
     .board__timeline_form {
       position: absolute;
       left: 0;
-      bottom: 0; }
+      bottom: 0;
+      width: 100%; }
+    .board__timeline textarea {
+      width: 100%; }
+
+.message-unit {
+  font-size: 13px;
+  padding: 0.5em;
+  margin: 0 0 1px 0;
+  border-bottom: 1px solid #eee; }
+  .message-unit:last-child {
+    border: none; }
+  .message-unit .message-unit__owner {
+    font-weight: bold; }
+  .message-unit .message-unit__content {
+    font-weight: normal; }
+    .message-unit .message-unit__content > :first-child {
+      margin-top: 0; }
+    .message-unit .message-unit__content > :last-child {
+      margin-bottom: 0; }

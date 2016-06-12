@@ -1,37 +1,79 @@
-html, body{ height: 100%; }
+html, body{
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	left:0; top:0;
+}
 .board{
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    overflow: hidden;
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	left:0; top:0;
+	overflow: hidden;
 
-    &__field{
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 70%;
-        height: 100%;
-        overflow: hidden;
-    }
-    &__timeline{
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 30%;
-        height: 100%;
-        overflow: hidden;
+	&__field{
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 70%;
+		height: 100%;
+		overflow: auto;
+		.board__field-inner{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 10000px;
+			height: 10000px;
+			overflow: visible;
+		}
+	}
+	&__timeline{
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 30%;
+		height: 100%;
+		overflow: hidden;
 
-        &_list{
-            position:absolute;
-            left:0;
-            top:0;
-            overflow: auto;
-        }
-        &_form{
-            position:absolute;
-            left:0;
-            bottom:0;
-        }
+		&_list{
+			position:absolute;
+			left:0;
+			top:0;
+			overflow: auto;
+			width: 100%;
+		}
+		&_form{
+			position:absolute;
+			left:0;
+			bottom:0;
+			width: 100%;
+		}
+		textarea{
+			width: 100%;
+		}
 
-    }
+	}
+}
+.message-unit{
+	font-size:13px;
+	padding: 0.5em;
+	margin: 0 0 1px 0;
+	border-bottom: 1px solid #eee;
+	&:last-child{
+		border: none;
+	}
+	.message-unit__owner{
+		font-weight: bold;
+	}
+	.message-unit__content{
+		font-weight: normal;
+		>:first-child{
+			margin-top: 0;
+		}
+		>:last-child{
+			margin-bottom: 0;
+		}
+	}
 }

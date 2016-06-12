@@ -6,7 +6,7 @@ window.app = new (function(){
 	var utils79 = require('utils79');
 	var it79 = require('iterate79');
 	var twig = require('twig');
-	var socket,
+	var biflora,
 		Keypress,
 		userInfo = {
 			'name': 'new Commer'
@@ -36,7 +36,7 @@ window.app = new (function(){
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// init biflora framework
-				socket = _this.socket = window.biflora
+				biflora = _this.biflora = window.biflora
 					.createSocket(
 						_this,
 						io,
@@ -49,10 +49,22 @@ window.app = new (function(){
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// (biflora 送信テスト)
-				socket.send(
+				biflora.send(
 					'ping',
 					{
 					} ,
+					function(rtn){
+						console.log(rtn);
+						rlv();
+					}
+				);
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// boardId ルームに参加する
+				console.log('join to room: '+boardId);
+				biflora.joinRoom(
+					boardId,
+					1,
 					function(rtn){
 						console.log(rtn);
 						rlv();
@@ -105,7 +117,7 @@ window.app = new (function(){
 								'content': $this.val(),
 								'contentType': 'text/markdown'
 							};
-							socket.send(
+							biflora.send(
 								'message',
 								msg,
 								function(rtn){

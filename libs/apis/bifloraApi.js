@@ -4,11 +4,11 @@
 module.exports = (function(){
 	delete(require.cache[require('path').resolve(__filename)]);
 	return {
-		'ping': function( data, callback, main, socket ){
+		'ping': function( data, callback, main, biflora ){
 			callback('ping OK.');
 			return;
 		} ,
-		'message': function( data, callback, main, socket ){
+		'message': function( data, callback, main, biflora ){
 			// クライアントからのメッセージを受け付ける
 			data.microtime = Date.now();
 
@@ -29,8 +29,11 @@ module.exports = (function(){
 			}
 
 			console.log(data);
-			socket.send('receiveBroadcast', data, function(){
-				console.log('broadcast message');
+			biflora.send('receiveBroadcast', data, function(){
+				console.log('send message');
+			});
+			biflora.sendToRoom('receiveBroadcast', data, data.boardId, function(){
+				console.log('send message to room');
 			});
 
 			main.dbh.insertMessage(data.boardId, data, function(result){

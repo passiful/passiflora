@@ -12585,6 +12585,30 @@ token.value=token.match[1];output.push(token)},parse:function(token,stack,contex
 	}
 
 	/**
+	 * パス文字列から、ファイル名を取り出す
+	 */
+	exports.basename = function( path ){
+		var rtn = '';
+		rtn = path.replace( new RegExp('^.*[\\/\\\\]'), '' );
+		return rtn;
+	}
+
+	/**
+	 * ディレクトリ名を得る
+	 */
+	exports.dirname = function(path){
+		return path.replace(/(?:\/|\\)[^\/\\]*(?:\/|\\)?$/, '');
+	}
+
+	/**
+	 * 正規表現で使えるようにエスケープ処理を施す
+	 */
+	exports.regexp_quote = function(str) {
+		if( typeof(str) !== typeof('') ){return str;}
+		return str.replace(/([.*+?^=!:${}()|[\]\/\\])/g, "\\$1");
+	}
+
+	/**
 	 * 入力値のセットを確認する
 	 * 内部で validator を使用します。
 	 * validator のAPI一覧 https://www.npmjs.com/package/validator を参照してください。
@@ -14854,7 +14878,7 @@ window.app = new (function(){
 	var utils79 = require('utils79');
 	var it79 = require('iterate79');
 	var twig = require('twig');
-	var socket,
+	var biflora,
 		Keypress,
 		userInfo = {
 			'name': 'new Commer'
@@ -14884,7 +14908,7 @@ window.app = new (function(){
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// init biflora framework
-				socket = _this.socket = window.biflora
+				biflora = _this.biflora = window.biflora
 					.createSocket(
 						_this,
 						io,
@@ -14897,10 +14921,22 @@ window.app = new (function(){
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// (biflora 送信テスト)
-				socket.send(
+				biflora.send(
 					'ping',
 					{
 					} ,
+					function(rtn){
+						console.log(rtn);
+						rlv();
+					}
+				);
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// boardId ルームに参加する
+				console.log('join to room: '+boardId);
+				biflora.joinRoom(
+					boardId,
+					1,
 					function(rtn){
 						console.log(rtn);
 						rlv();
@@ -14953,7 +14989,7 @@ window.app = new (function(){
 								'content': $this.val(),
 								'contentType': 'text/markdown'
 							};
-							socket.send(
+							biflora.send(
 								'message',
 								msg,
 								function(rtn){

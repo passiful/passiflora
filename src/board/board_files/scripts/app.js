@@ -169,6 +169,12 @@ window.app = new (function(){
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
+				// プロフィールを入力する
+				_this.editProfile(function(){
+					rlv();
+				});
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
 				// 返却
 				console.log('standby.');
 				callback(rtn);
@@ -190,6 +196,30 @@ window.app = new (function(){
 		});
 
 		callback();
+		return;
+	}
+
+	/**
+	 * プロフィールを編集
+	 */
+	this.editProfile = function(callback){
+		callback = callback || function(){};
+		console.log('profile dialog:');
+		var $body = $('<form><input type="text" name="userName" value="{% userName %}" class="form-control" /></form>');
+		$body.find('[name=userName]').val( userInfo.name );
+		window.main.modal.dialog({
+			'title': 'プロフィール',
+			'body': $body,
+			'buttons': [
+				$('<button>')
+					.text('OK')
+					.click(function(){
+						userInfo.name = $body.find('[name=userName]').val();
+						window.main.modal.close();
+						callback();
+					})
+			]
+		});
 		return;
 	}
 

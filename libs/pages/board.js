@@ -27,7 +27,7 @@ module.exports = function(conf){
 			return;
 		}).then(function(){
 			return new Promise(function(rlv, rjc){
-				var realpathTemplate = require('path').resolve(__dirname, './board_files/template.html.twig');
+				var realpathTemplate = require('path').resolve(__dirname, '../../src/board/board.html.twig');
 				html = fs.readFileSync( realpathTemplate ).toString('utf8');
 				rlv();
 				return;

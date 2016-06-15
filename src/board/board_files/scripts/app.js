@@ -13,7 +13,9 @@ window.app = new (function(){
 		};
 	var $timeline,
 		$timelineList,
-		$timelineForm;
+		$timelineForm,
+		$field,
+		$fieldInner;
 	var boardId;
 
 	/**
@@ -36,6 +38,11 @@ window.app = new (function(){
 				$timeline = $('.board__timeline');
 				$timelineList = $('.board__timeline .board__timeline_list');
 				$timelineForm = $('.board__timeline .board__timeline_form');
+				$field = $('.board__field');
+				$fieldInner = $('.board__field .board__field-inner');
+
+				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
+
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
@@ -166,6 +173,24 @@ window.app = new (function(){
 				// 	px.message('cmd x');
 				// 	e.preventDefault();
 				// });
+				rlv();
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// フィールドのイベントセット
+				var mkWidget = function(e){
+					// console.log(e);
+					_this.fieldContextMenu.open(e.offsetX, e.offsetY);
+					e.preventDefault();
+				};
+				$fieldInner
+					.bind('dblclick', mkWidget)
+					.bind('contextmenu', mkWidget)
+				;
+
+				$('body').on('click', function(){
+					_this.fieldContextMenu.close();
+				});
+
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){

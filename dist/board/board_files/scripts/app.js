@@ -14870,6 +14870,77 @@ module.exports = function( data, callback, main, socket ){
 }
 
 },{}],75:[function(require,module,exports){
+/**
+ * fieldContextMenu.js
+ */
+module.exports = function( app, $fieldInner ){
+	var _this = this;
+	var $contextmenu = $('<div class="contextmenu">')
+	;
+
+	/**
+	 * コンテキストメニューを開く
+	 */
+	this.open = function(x, y){
+		// alert(x, y);
+		$fieldInner.append( $contextmenu
+			.css({
+				'position': 'absolute',
+				'top': y-5,
+				'left': x-5
+			})
+			.click(function(e){
+				e.stopPropagation();
+			})
+			.dblclick(function(e){
+				e.stopPropagation();
+			})
+			.contextmenu(function(e){
+				e.stopPropagation();
+			})
+			.html('')
+			.append( $('<ul>')
+				.append( $('<li>')
+					.append( $('<a>')
+						.text('Stickies')
+						.attr({
+							'href': 'javascript:;'
+						})
+						.click(function(e){
+							console.log('Stickies');
+							e.stopPropagation();
+							_this.close();
+						})
+					)
+				)
+				.append( $('<li>')
+					.append( $('<a>')
+						.text('Issue Tree')
+						.attr({
+							'href': 'javascript:;'
+						})
+						.click(function(e){
+							console.log('Issue Tree');
+							e.stopPropagation();
+							_this.close();
+						})
+					)
+				)
+			)
+		);
+	}
+
+	/**
+	 * コンテキストメニューを閉じる
+	 */
+	this.close = function(){
+		$contextmenu.remove();
+		return;
+	}
+	return;
+}
+
+},{}],76:[function(require,module,exports){
 window.app = new (function(){
 	// app "board"
 	var _this = this;
@@ -14885,7 +14956,9 @@ window.app = new (function(){
 		};
 	var $timeline,
 		$timelineList,
-		$timelineForm;
+		$timelineForm,
+		$field,
+		$fieldInner;
 	var boardId;
 
 	/**
@@ -14908,6 +14981,11 @@ window.app = new (function(){
 				$timeline = $('.board__timeline');
 				$timelineList = $('.board__timeline .board__timeline_list');
 				$timelineForm = $('.board__timeline .board__timeline_form');
+				$field = $('.board__field');
+				$fieldInner = $('.board__field .board__field-inner');
+
+				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
+
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
@@ -15041,6 +15119,24 @@ window.app = new (function(){
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
+				// フィールドのイベントセット
+				var mkWidget = function(e){
+					// console.log(e);
+					_this.fieldContextMenu.open(e.offsetX, e.offsetY);
+					e.preventDefault();
+				};
+				$fieldInner
+					.bind('dblclick', mkWidget)
+					.bind('contextmenu', mkWidget)
+				;
+
+				$('body').on('click', function(){
+					_this.fieldContextMenu.close();
+				});
+
+				rlv();
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
 				// プロフィールを入力する
 				_this.editProfile(function(){
 					rlv();
@@ -15113,4 +15209,4 @@ window.app = new (function(){
 
 })();
 
-},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[75])
+},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"../../board/board_files/scripts/libs/fieldContextMenu.js":75,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[76])

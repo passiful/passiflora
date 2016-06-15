@@ -27,7 +27,7 @@ html, body {
       left: 0;
       width: 10000px;
       height: 10000px;
-      overflow: visible; }
+      overflow: hidden; }
   .board__timeline {
     position: absolute;
     top: 0;
@@ -48,6 +48,23 @@ html, body {
       width: 100%; }
     .board__timeline textarea {
       width: 100%; }
+
+.contextmenu {
+  background-color: #fff;
+  border: 1px solid #eee; }
+  .contextmenu ul {
+    margin: 0;
+    padding: 0; }
+    .contextmenu ul li {
+      list-style-type: none;
+      margin: 0;
+      padding: 0; }
+      .contextmenu ul li a {
+        display: block;
+        padding: 1em 2em;
+        text-decoration: none; }
+        .contextmenu ul li a:hover {
+          background-color: #f8f8f8; }
 
 .message-unit {
   font-size: 13px;

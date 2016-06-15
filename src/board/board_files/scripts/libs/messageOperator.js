@@ -4,11 +4,29 @@
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
 
+	$fieldInner
+		.bind('dragover', function(e){
+			e.stopPropagation();
+			e.preventDefault();
+			// console.log(e);
+		})
+		.bind('dragleave', function(e){
+			e.stopPropagation();
+			e.preventDefault();
+			// console.log(e);
+		})
+		.bind('drop', function(e){
+			e.stopPropagation();
+			e.preventDefault();
+			console.log(e);
+		})
+	;
+
 	/**
 	 * タイムラインメッセージを処理する
 	 */
 	this.exec = function(message){
-		console.log(message);
+		// console.log(message);
 
 		var $messageUnit = $('<div class="message-unit">')
 			.attr({
@@ -62,6 +80,12 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			})
 			.on('dblclick contextmenu', function(e){
 				e.stopPropagation();
+			})
+			.bind('dragstart', function(e){
+				e.stopPropagation();
+				var event = e.originalEvent;
+				event.dataTransfer.setData("method", 'moveWidget' );
+				console.log(e);
 			})
 		);
 	}

@@ -82,6 +82,13 @@ html, body{
 	padding: 0.5em;
 	margin: 0 0 1px 0;
 	border-bottom: 1px solid #eee;
+
+	&.message-unit--operation{
+		background-color: #eeeef9;
+		color: #77b;
+		font-size: 70%;
+	}
+
 	&:last-child{
 		border: none;
 	}
@@ -97,4 +104,14 @@ html, body{
 			margin-bottom: 0;
 		}
 	}
+	.message-unit__operation-message{
+		text-align: center;
+	}
+}
+.widget{
+	position: absolute;
+	left: 0; top: 0;
+	width: 100px;
+	height: 100px;
+	background-color: #ddd;
 }

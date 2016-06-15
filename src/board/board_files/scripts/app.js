@@ -41,7 +41,9 @@ window.app = new (function(){
 				$field = $('.board__field');
 				$fieldInner = $('.board__field .board__field-inner');
 
+				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
+				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
 
 				rlv();
 			}); })
@@ -100,7 +102,7 @@ window.app = new (function(){
 						it79.ary(
 							rtn.rows,
 							function(it1, row1, idx1){
-								_this.addMessageToTimeline(row1);
+								_this.messageOperator.exec(row1);
 								it1.next();
 							},
 							function(){
@@ -151,13 +153,10 @@ window.app = new (function(){
 							// alert('enter');
 							var $this = $(e.target);
 							var msg = {
-								'boardId': boardId,
-								'owner': userInfo.name,
 								'content': $this.val(),
 								'contentType': 'text/markdown'
 							};
-							biflora.send(
-								'message',
+							_this.sendMessage(
 								msg,
 								function(rtn){
 									console.log('Your message was sent.');
@@ -249,9 +248,34 @@ window.app = new (function(){
 	}
 
 	/**
+	 * メッセージを送信する
+	 */
+	this.sendMessage = function(msg, callback){
+		callback = callback || function(){};
+		if(typeof(msg) !== typeof({}) && msg === null){
+			callback(false);
+			return;
+		}
+		msg.boardId = boardId;
+		msg.owner = userInfo.name;
+
+		biflora.send(
+			'message',
+			msg,
+			function(rtn){
+				callback(rtn);
+			}
+		);
+		return;
+	}
+
+	/**
 	 * タイムラインにメッセージを追加
 	 */
 	this.addMessageToTimeline = function(message){
+
+
+
 		$timelineList.append( $('<div class="message-unit">')
 			.append( $('<div class="message-unit__owner">').text(message.owner) )
 			.append( $('<div class="message-unit__content">').html(message.content) )

@@ -14864,7 +14864,7 @@ module.exports = exports['default'];
 module.exports = function( data, callback, main, socket ){
 	// console.log(data);
 	// console.log(callback);
-	main.addMessageToTimeline(data);
+	main.messageOperator.exec(data);
 	callback(true);
 	return;
 }
@@ -14883,6 +14883,42 @@ module.exports = function( app, $fieldInner ){
 	 */
 	this.open = function(x, y){
 		// alert(x, y);
+		var $ul = $('<ul>');
+		var widgets = {
+			'stickies': 'Stickies',
+			'issuetree': 'Issue Tree'
+		};
+		for( var widgetName in widgets ){
+			$ul
+				.append( $('<li>')
+					.append( $('<a>')
+						.text(widgets[widgetName])
+						.attr({
+							'href': 'javascript:;'
+						})
+						.click(function(e){
+							console.log(widgets[widgetName]);
+							e.stopPropagation();
+							_this.close();
+							app.sendMessage(
+								{
+									'contentType': 'application/command',
+									'content': JSON.stringify({
+										'operation':'createWidget',
+										'widgetType': widgetName,
+										'x': x,
+										'y': y
+									})
+								} ,
+								function(rtn){
+									console.log(rtn);
+								}
+							);
+						})
+					)
+				)
+			;
+		}
 		$fieldInner.append( $contextmenu
 			.css({
 				'position': 'absolute',
@@ -14899,34 +14935,7 @@ module.exports = function( app, $fieldInner ){
 				e.stopPropagation();
 			})
 			.html('')
-			.append( $('<ul>')
-				.append( $('<li>')
-					.append( $('<a>')
-						.text('Stickies')
-						.attr({
-							'href': 'javascript:;'
-						})
-						.click(function(e){
-							console.log('Stickies');
-							e.stopPropagation();
-							_this.close();
-						})
-					)
-				)
-				.append( $('<li>')
-					.append( $('<a>')
-						.text('Issue Tree')
-						.attr({
-							'href': 'javascript:;'
-						})
-						.click(function(e){
-							console.log('Issue Tree');
-							e.stopPropagation();
-							_this.close();
-						})
-					)
-				)
-			)
+			.append( $ul )
 		);
 	}
 
@@ -14941,6 +14950,78 @@ module.exports = function( app, $fieldInner ){
 }
 
 },{}],76:[function(require,module,exports){
+/**
+ * messageOperator.js
+ */
+module.exports = function( app, $timelineList, $fieldInner ){
+	var _this = this;
+
+	/**
+	 * タイムラインメッセージを処理する
+	 */
+	this.exec = function(message){
+		console.log(message);
+
+		var $messageUnit = $('<div class="message-unit">')
+			.attr({
+				'data-message-id': message.id
+			})
+		;
+
+		switch( message.contentType ){
+			case 'application/command':
+				message.content = JSON.parse(message.content);
+				var str = '';
+				str += message.owner;
+				str += ' が ';
+				str += message.content.operation;
+				str += ' しました。';
+				$timelineList.append( $messageUnit
+					.addClass('message-unit--operation')
+					.append( $('<div class="message-unit__operation-message">').text(str) )
+				);
+				this.createWidget( message.content.widgetType, message.content.x, message.content.y );
+				break;
+			case 'text/html':
+				$timelineList.append( $messageUnit
+					.append( $('<div class="message-unit__owner">').text(message.owner) )
+					.append( $('<div class="message-unit__content">').html(message.content) )
+				);
+				break;
+		}
+
+		var scrTop = $timelineList.scrollTop();
+		var oH = $timelineList.outerHeight();
+		var iH = $timelineList.get(0).scrollHeight;
+		$timelineList.scrollTop(iH-oH);
+		// console.log(scrTop, oH, iH);
+
+		return;
+	}
+
+
+	/**
+	 * ウィジェットを配置する
+	 */
+	this.createWidget = function(widgetType, x, y){
+		$fieldInner.append( $('<div class="widget">')
+			.css({
+				'left': x,
+				'top': y
+			})
+			.attr({
+				'draggable': true
+			})
+			.on('dblclick contextmenu', function(e){
+				e.stopPropagation();
+			})
+		);
+	}
+
+	return;
+}
+
+},{}],77:[function(require,module,exports){
 window.app = new (function(){
 	// app "board"
 	var _this = this;
@@ -14984,7 +15065,9 @@ window.app = new (function(){
 				$field = $('.board__field');
 				$fieldInner = $('.board__field .board__field-inner');
 
+				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
+				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
 
 				rlv();
 			}); })
@@ -15043,7 +15126,7 @@ window.app = new (function(){
 						it79.ary(
 							rtn.rows,
 							function(it1, row1, idx1){
-								_this.addMessageToTimeline(row1);
+								_this.messageOperator.exec(row1);
 								it1.next();
 							},
 							function(){
@@ -15094,13 +15177,10 @@ window.app = new (function(){
 							// alert('enter');
 							var $this = $(e.target);
 							var msg = {
-								'boardId': boardId,
-								'owner': userInfo.name,
 								'content': $this.val(),
 								'contentType': 'text/markdown'
 							};
-							biflora.send(
-								'message',
+							_this.sendMessage(
 								msg,
 								function(rtn){
 									console.log('Your message was sent.');
@@ -15192,9 +15272,34 @@ window.app = new (function(){
 	}
 
 	/**
+	 * メッセージを送信する
+	 */
+	this.sendMessage = function(msg, callback){
+		callback = callback || function(){};
+		if(typeof(msg) !== typeof({}) && msg === null){
+			callback(false);
+			return;
+		}
+		msg.boardId = boardId;
+		msg.owner = userInfo.name;
+
+		biflora.send(
+			'message',
+			msg,
+			function(rtn){
+				callback(rtn);
+			}
+		);
+		return;
+	}
+
+	/**
 	 * タイムラインにメッセージを追加
 	 */
 	this.addMessageToTimeline = function(message){
+
+
+
 		$timelineList.append( $('<div class="message-unit">')
 			.append( $('<div class="message-unit__owner">').text(message.owner) )
 			.append( $('<div class="message-unit__content">').html(message.content) )
@@ -15209,4 +15314,4 @@ window.app = new (function(){
 
 })();
 
-},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"../../board/board_files/scripts/libs/fieldContextMenu.js":75,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[76])
+},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"../../board/board_files/scripts/libs/fieldContextMenu.js":75,"../../board/board_files/scripts/libs/messageOperator.js":76,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[77])

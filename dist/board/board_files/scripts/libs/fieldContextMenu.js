@@ -12,6 +12,42 @@ module.exports = function( app, $fieldInner ){
 	 */
 	this.open = function(x, y){
 		// alert(x, y);
+		var $ul = $('<ul>');
+		var widgets = {
+			'stickies': 'Stickies',
+			'issuetree': 'Issue Tree'
+		};
+		for( var widgetName in widgets ){
+			$ul
+				.append( $('<li>')
+					.append( $('<a>')
+						.text(widgets[widgetName])
+						.attr({
+							'href': 'javascript:;'
+						})
+						.click(function(e){
+							console.log(widgets[widgetName]);
+							e.stopPropagation();
+							_this.close();
+							app.sendMessage(
+								{
+									'contentType': 'application/command',
+									'content': JSON.stringify({
+										'operation':'createWidget',
+										'widgetType': widgetName,
+										'x': x,
+										'y': y
+									})
+								} ,
+								function(rtn){
+									console.log(rtn);
+								}
+							);
+						})
+					)
+				)
+			;
+		}
 		$fieldInner.append( $contextmenu
 			.css({
 				'position': 'absolute',
@@ -28,34 +64,7 @@ module.exports = function( app, $fieldInner ){
 				e.stopPropagation();
 			})
 			.html('')
-			.append( $('<ul>')
-				.append( $('<li>')
-					.append( $('<a>')
-						.text('Stickies')
-						.attr({
-							'href': 'javascript:;'
-						})
-						.click(function(e){
-							console.log('Stickies');
-							e.stopPropagation();
-							_this.close();
-						})
-					)
-				)
-				.append( $('<li>')
-					.append( $('<a>')
-						.text('Issue Tree')
-						.attr({
-							'href': 'javascript:;'
-						})
-						.click(function(e){
-							console.log('Issue Tree');
-							e.stopPropagation();
-							_this.close();
-						})
-					)
-				)
-			)
+			.append( $ul )
 		);
 	}
 

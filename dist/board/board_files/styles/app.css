@@ -71,6 +71,10 @@ html, body {
   padding: 0.5em;
   margin: 0 0 1px 0;
   border-bottom: 1px solid #eee; }
+  .message-unit.message-unit--operation {
+    background-color: #eeeef9;
+    color: #77b;
+    font-size: 70%; }
   .message-unit:last-child {
     border: none; }
   .message-unit .message-unit__owner {
@@ -81,3 +85,13 @@ html, body {
       margin-top: 0; }
     .message-unit .message-unit__content > :last-child {
       margin-bottom: 0; }
+  .message-unit .message-unit__operation-message {
+    text-align: center; }
+
+.widget {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100px;
+  height: 100px;
+  background-color: #ddd; }

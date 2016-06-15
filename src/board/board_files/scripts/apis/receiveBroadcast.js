@@ -4,7 +4,7 @@
 module.exports = function( data, callback, main, socket ){
 	// console.log(data);
 	// console.log(callback);
-	main.addMessageToTimeline(data);
+	main.messageOperator.exec(data);
 	callback(true);
 	return;
 }

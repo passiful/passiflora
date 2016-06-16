@@ -184,6 +184,46 @@ window.app = new (function(){
 				$fieldInner
 					.bind('dblclick', mkWidget)
 					.bind('contextmenu', mkWidget)
+					.bind('dragover', function(e){
+						e.stopPropagation();
+						e.preventDefault();
+						// console.log(e);
+					})
+					.bind('dragleave', function(e){
+						e.stopPropagation();
+						e.preventDefault();
+						// console.log(e);
+					})
+					.bind('drop', function(e){
+						e.stopPropagation();
+						e.preventDefault();
+						// console.log(e);
+						var event = e.originalEvent;
+						var method = event.dataTransfer.getData("method");
+						switch(method){
+							case 'moveWidget':
+								var targetWidgetId = event.dataTransfer.getData("widget-id");
+								var fromX = event.dataTransfer.getData("offset-x");
+								var fromY = event.dataTransfer.getData("offset-y");
+								console.log(targetWidgetId, fromX, fromY);
+								console.log(e.offsetX, e.offsetY);
+								_this.sendMessage(
+									{
+										'contentType': 'application/x-passiflora-command',
+										'content': JSON.stringify({
+											'operation': method,
+											'targetWidgetId': targetWidgetId,
+											'moveToX': e.offsetX,
+											'moveToY': e.offsetY
+										})
+									},
+									function(rtn){
+										console.log('command moveWidget was sent.');
+									}
+								);
+								break;
+						}
+					})
 				;
 
 				$('body').on('click', function(){
@@ -229,7 +269,7 @@ window.app = new (function(){
 	this.editProfile = function(callback){
 		callback = callback || function(){};
 		console.log('profile dialog:');
-		var $body = $('<form><input type="text" name="userName" value="{% userName %}" class="form-control" /></form>');
+		var $body = $('<form action="javascript:;" method="post">YourName: <input type="text" name="userName" value="{% userName %}" class="form-control" /></form>');
 		$body.find('[name=userName]').val( userInfo.name );
 		window.main.modal.dialog({
 			'title': 'プロフィール',
@@ -237,6 +277,7 @@ window.app = new (function(){
 			'buttons': [
 				$('<button>')
 					.text('OK')
+					.addClass('btn-primary')
 					.click(function(){
 						userInfo.name = $body.find('[name=userName]').val();
 						window.main.modal.close();
@@ -266,25 +307,6 @@ window.app = new (function(){
 				callback(rtn);
 			}
 		);
-		return;
-	}
-
-	/**
-	 * タイムラインにメッセージを追加
-	 */
-	this.addMessageToTimeline = function(message){
-
-
-
-		$timelineList.append( $('<div class="message-unit">')
-			.append( $('<div class="message-unit__owner">').text(message.owner) )
-			.append( $('<div class="message-unit__content">').html(message.content) )
-		);
-		var scrTop = $timelineList.scrollTop();
-		var oH = $timelineList.outerHeight();
-		var iH = $timelineList.get(0).scrollHeight;
-		$timelineList.scrollTop(iH-oH);
-		// console.log(scrTop, oH, iH);
 		return;
 	}
 

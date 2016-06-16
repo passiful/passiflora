@@ -14902,7 +14902,7 @@ module.exports = function( app, $fieldInner ){
 							_this.close();
 							app.sendMessage(
 								{
-									'contentType': 'application/command',
+									'contentType': 'application/x-passiflora-command',
 									'content': JSON.stringify({
 										'operation':'createWidget',
 										'widgetType': widgetName,
@@ -14956,24 +14956,6 @@ module.exports = function( app, $fieldInner ){
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
 
-	$fieldInner
-		.bind('dragover', function(e){
-			e.stopPropagation();
-			e.preventDefault();
-			// console.log(e);
-		})
-		.bind('dragleave', function(e){
-			e.stopPropagation();
-			e.preventDefault();
-			// console.log(e);
-		})
-		.bind('drop', function(e){
-			e.stopPropagation();
-			e.preventDefault();
-			console.log(e);
-		})
-	;
-
 	/**
 	 * タイムラインメッセージを処理する
 	 */
@@ -14987,7 +14969,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 		;
 
 		switch( message.contentType ){
-			case 'application/command':
+			case 'application/x-passiflora-command':
 				message.content = JSON.parse(message.content);
 				var str = '';
 				str += message.owner;
@@ -14998,7 +14980,14 @@ module.exports = function( app, $timelineList, $fieldInner ){
 					.addClass('message-unit--operation')
 					.append( $('<div class="message-unit__operation-message">').text(str) )
 				);
-				this.createWidget( message.content.widgetType, message.content.x, message.content.y );
+				switch( message.content.operation ){
+					case 'createWidget':
+						this.createWidget( message.id, message.content );
+						break;
+					case 'moveWidget':
+						this.moveWidget( message.id, message.content );
+						break;
+				}
 				break;
 			case 'text/html':
 				$timelineList.append( $messageUnit
@@ -15021,13 +15010,16 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	/**
 	 * ウィジェットを配置する
 	 */
-	this.createWidget = function(widgetType, x, y){
+	this.createWidget = function(id, content){
 		$fieldInner.append( $('<div class="widget">')
 			.css({
-				'left': x,
-				'top': y
+				'left': content.x,
+				'top': content.y
 			})
 			.attr({
+				'data-widget-id': id,
+				'data-offset-x': content.x,
+				'data-offset-y': content.y,
 				'draggable': true
 			})
 			.on('dblclick contextmenu', function(e){
@@ -15036,10 +15028,31 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			.bind('dragstart', function(e){
 				e.stopPropagation();
 				var event = e.originalEvent;
+				var $this = $(this);
 				event.dataTransfer.setData("method", 'moveWidget' );
+				event.dataTransfer.setData("widget-id", $this.attr('data-widget-id') );
+				event.dataTransfer.setData("offset-x", $this.attr('data-offset-x') );
+				event.dataTransfer.setData("offset-y", $this.attr('data-offset-y') );
 				console.log(e);
 			})
 		);
+	}
+
+	/**
+	 * ウィジェットを配置する
+	 */
+	this.moveWidget = function(id, content){
+		$targetWidget = $fieldInner.find('[data-widget-id='+content.targetWidgetId+']');
+		$targetWidget
+			.css({
+				'left': content.moveToX,
+				'top': content.moveToY
+			})
+			.attr({
+				'data-offset-x': content.moveToX,
+				'data-offset-y': content.moveToY
+			})
+		;
 	}
 
 	return;
@@ -15232,6 +15245,46 @@ window.app = new (function(){
 				$fieldInner
 					.bind('dblclick', mkWidget)
 					.bind('contextmenu', mkWidget)
+					.bind('dragover', function(e){
+						e.stopPropagation();
+						e.preventDefault();
+						// console.log(e);
+					})
+					.bind('dragleave', function(e){
+						e.stopPropagation();
+						e.preventDefault();
+						// console.log(e);
+					})
+					.bind('drop', function(e){
+						e.stopPropagation();
+						e.preventDefault();
+						// console.log(e);
+						var event = e.originalEvent;
+						var method = event.dataTransfer.getData("method");
+						switch(method){
+							case 'moveWidget':
+								var targetWidgetId = event.dataTransfer.getData("widget-id");
+								var fromX = event.dataTransfer.getData("offset-x");
+								var fromY = event.dataTransfer.getData("offset-y");
+								console.log(targetWidgetId, fromX, fromY);
+								console.log(e.offsetX, e.offsetY);
+								_this.sendMessage(
+									{
+										'contentType': 'application/x-passiflora-command',
+										'content': JSON.stringify({
+											'operation': method,
+											'targetWidgetId': targetWidgetId,
+											'moveToX': e.offsetX,
+											'moveToY': e.offsetY
+										})
+									},
+									function(rtn){
+										console.log('command moveWidget was sent.');
+									}
+								);
+								break;
+						}
+					})
 				;
 
 				$('body').on('click', function(){
@@ -15277,7 +15330,7 @@ window.app = new (function(){
 	this.editProfile = function(callback){
 		callback = callback || function(){};
 		console.log('profile dialog:');
-		var $body = $('<form><input type="text" name="userName" value="{% userName %}" class="form-control" /></form>');
+		var $body = $('<form action="javascript:;" method="post">YourName: <input type="text" name="userName" value="{% userName %}" class="form-control" /></form>');
 		$body.find('[name=userName]').val( userInfo.name );
 		window.main.modal.dialog({
 			'title': 'プロフィール',
@@ -15285,6 +15338,7 @@ window.app = new (function(){
 			'buttons': [
 				$('<button>')
 					.text('OK')
+					.addClass('btn-primary')
 					.click(function(){
 						userInfo.name = $body.find('[name=userName]').val();
 						window.main.modal.close();
@@ -15314,25 +15368,6 @@ window.app = new (function(){
 				callback(rtn);
 			}
 		);
-		return;
-	}
-
-	/**
-	 * タイムラインにメッセージを追加
-	 */
-	this.addMessageToTimeline = function(message){
-
-
-
-		$timelineList.append( $('<div class="message-unit">')
-			.append( $('<div class="message-unit__owner">').text(message.owner) )
-			.append( $('<div class="message-unit__content">').html(message.content) )
-		);
-		var scrTop = $timelineList.scrollTop();
-		var oH = $timelineList.outerHeight();
-		var iH = $timelineList.get(0).scrollHeight;
-		$timelineList.scrollTop(iH-oH);
-		// console.log(scrTop, oH, iH);
 		return;
 	}
 

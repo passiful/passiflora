@@ -31,7 +31,7 @@ module.exports = function( app, $fieldInner ){
 							_this.close();
 							app.sendMessage(
 								{
-									'contentType': 'application/command',
+									'contentType': 'application/x-passiflora-command',
 									'content': JSON.stringify({
 										'operation':'createWidget',
 										'widgetType': widgetName,

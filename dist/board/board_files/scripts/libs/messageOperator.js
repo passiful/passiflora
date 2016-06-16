@@ -5,24 +5,6 @@
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
 
-	$fieldInner
-		.bind('dragover', function(e){
-			e.stopPropagation();
-			e.preventDefault();
-			// console.log(e);
-		})
-		.bind('dragleave', function(e){
-			e.stopPropagation();
-			e.preventDefault();
-			// console.log(e);
-		})
-		.bind('drop', function(e){
-			e.stopPropagation();
-			e.preventDefault();
-			console.log(e);
-		})
-	;
-
 	/**
 	 * タイムラインメッセージを処理する
 	 */
@@ -36,7 +18,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 		;
 
 		switch( message.contentType ){
-			case 'application/command':
+			case 'application/x-passiflora-command':
 				message.content = JSON.parse(message.content);
 				var str = '';
 				str += message.owner;
@@ -47,7 +29,14 @@ module.exports = function( app, $timelineList, $fieldInner ){
 					.addClass('message-unit--operation')
 					.append( $('<div class="message-unit__operation-message">').text(str) )
 				);
-				this.createWidget( message.content.widgetType, message.content.x, message.content.y );
+				switch( message.content.operation ){
+					case 'createWidget':
+						this.createWidget( message.id, message.content );
+						break;
+					case 'moveWidget':
+						this.moveWidget( message.id, message.content );
+						break;
+				}
 				break;
 			case 'text/html':
 				$timelineList.append( $messageUnit
@@ -70,13 +59,16 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	/**
 	 * ウィジェットを配置する
 	 */
-	this.createWidget = function(widgetType, x, y){
+	this.createWidget = function(id, content){
 		$fieldInner.append( $('<div class="widget">')
 			.css({
-				'left': x,
-				'top': y
+				'left': content.x,
+				'top': content.y
 			})
 			.attr({
+				'data-widget-id': id,
+				'data-offset-x': content.x,
+				'data-offset-y': content.y,
 				'draggable': true
 			})
 			.on('dblclick contextmenu', function(e){
@@ -85,10 +77,31 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			.bind('dragstart', function(e){
 				e.stopPropagation();
 				var event = e.originalEvent;
+				var $this = $(this);
 				event.dataTransfer.setData("method", 'moveWidget' );
+				event.dataTransfer.setData("widget-id", $this.attr('data-widget-id') );
+				event.dataTransfer.setData("offset-x", $this.attr('data-offset-x') );
+				event.dataTransfer.setData("offset-y", $this.attr('data-offset-y') );
 				console.log(e);
 			})
 		);
+	}
+
+	/**
+	 * ウィジェットを配置する
+	 */
+	this.moveWidget = function(id, content){
+		$targetWidget = $fieldInner.find('[data-widget-id='+content.targetWidgetId+']');
+		$targetWidget
+			.css({
+				'left': content.moveToX,
+				'top': content.moveToY
+			})
+			.attr({
+				'data-offset-x': content.moveToX,
+				'data-offset-y': content.moveToY
+			})
+		;
 	}
 
 	return;

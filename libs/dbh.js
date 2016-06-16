@@ -70,6 +70,7 @@ module.exports = function(conf, main){
 			dbs[boardId].tbls.timeline.create({
 				'content': message.content,
 				'contentType': message.contentType,
+				'targetWidget': message.targetWidget,
 				'owner': message.owner,
 				'microtime': message.microtime
 			}).then(function(record){

@@ -8,6 +8,9 @@ module.exports = function( app, $widget ){
 		.text('issue tree')
 	);
 
+	this.onmessage = function(content){
+	}
+
 	return;
 }
 

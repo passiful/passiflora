@@ -6,7 +6,9 @@ module.exports = function( app, $widget ){
 
 	this.value = '';
 
-	$widget.append( $('<textarea>')
+	var $textarea = $('<textarea>');
+
+	$widget.append( $textarea
 		.val(this.value)
 		.on('change', function(e){
 			var $this = $(this);
@@ -19,12 +21,17 @@ module.exports = function( app, $widget ){
 					'targetWidget': $widget.attr('data-widget-id')
 				},
 				function(){
+					console.log('stickies change submited.');
 				}
 			);
 		})
 	);
 
 
+	this.onmessage = function(content){
+		this.value = content.val;
+		$textarea.val( this.value );
+	}
 
 	return;
 }

@@ -13,20 +13,20 @@ module.exports = function( app, $fieldInner ){
 	this.open = function(x, y){
 		// alert(x, y);
 		var $ul = $('<ul>');
-		var widgets = {
-			'stickies': 'Stickies',
-			'issuetree': 'Issue Tree'
-		};
+		var widgets = app.widgetList;
+
 		for( var widgetName in widgets ){
 			$ul
 				.append( $('<li>')
 					.append( $('<a>')
-						.text(widgets[widgetName])
+						.text(widgets[widgetName].name)
 						.attr({
-							'href': 'javascript:;'
+							'href': 'javascript:;',
+							'data-widget-name': widgetName
 						})
 						.click(function(e){
-							console.log(widgets[widgetName]);
+							var widgetName = $(this).attr('data-widget-name');
+							console.log(widgets[widgetName].name);
 							e.stopPropagation();
 							_this.close();
 							app.sendMessage(

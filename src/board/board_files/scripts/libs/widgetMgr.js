@@ -3,21 +3,32 @@
  */
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
+	var zIndex = 1000;
+	var widgetIndex = [];
 
 	/**
 	 * ウィジェットを配置する
 	 */
 	this.create = function(id, content){
-		$fieldInner.append( $('<div class="widget">')
+		// console.log(id, content);
+		var $widget = $('<div class="widget">');
+
+		$fieldInner.append( $widget
 			.css({
 				'left': content.x,
-				'top': content.y
+				'top': content.y,
+				'z-index': zIndex ++
 			})
 			.attr({
 				'data-widget-id': id,
 				'data-offset-x': content.x,
 				'data-offset-y': content.y,
 				'draggable': true
+			})
+			.bind('mousedown', function(e){
+				$(this).css({
+					'z-index': zIndex ++
+				});
 			})
 			.on('dblclick contextmenu', function(e){
 				e.stopPropagation();
@@ -33,6 +44,8 @@ module.exports = function( app, $timelineList, $fieldInner ){
 				// console.log(e);
 			})
 		);
+		// console.log(content);
+		widgetIndex[id] = new app.widgetList[content.widgetType].api(app, $widget);
 	}
 
 	/**
@@ -50,6 +63,13 @@ module.exports = function( app, $timelineList, $fieldInner ){
 				'data-offset-y': content.moveToY
 			})
 		;
+	}
+
+	/**
+	 * ウィジェットのメッセージを受け取る
+	 */
+	this.receiveWidgetMessage = function(widgetId, content){
+
 	}
 
 	return;

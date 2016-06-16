@@ -28,7 +28,7 @@ module.exports = (function(){
 				data.contentType = 'text/html';
 			}
 
-			console.log(data);
+			// console.log(data);
 
 			main.dbh.insertMessage(data.boardId, data, function(result){
 				data.id = result.dataValues.id;

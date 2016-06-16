@@ -14884,20 +14884,20 @@ module.exports = function( app, $fieldInner ){
 	this.open = function(x, y){
 		// alert(x, y);
 		var $ul = $('<ul>');
-		var widgets = {
-			'stickies': 'Stickies',
-			'issuetree': 'Issue Tree'
-		};
+		var widgets = app.widgetList;
+
 		for( var widgetName in widgets ){
 			$ul
 				.append( $('<li>')
 					.append( $('<a>')
-						.text(widgets[widgetName])
+						.text(widgets[widgetName].name)
 						.attr({
-							'href': 'javascript:;'
+							'href': 'javascript:;',
+							'data-widget-name': widgetName
 						})
 						.click(function(e){
-							console.log(widgets[widgetName]);
+							var widgetName = $(this).attr('data-widget-name');
+							console.log(widgets[widgetName].name);
 							e.stopPropagation();
 							_this.close();
 							app.sendMessage(
@@ -14973,21 +14973,25 @@ module.exports = function( app, $timelineList, $fieldInner ){
 				message.content = JSON.parse(message.content);
 				switch( message.content.operation ){
 					case 'createWidget':
-						app.widgets.create( message.id, message.content );
+						app.widgetMgr.create( message.id, message.content );
 						var str = '';
 						str += message.owner;
 						str += ' が ';
-						str += message.content.operation;
-						str += ' しました。';
+						str += message.content.widgetType;
+						str += ' を作成しました。';
 						$timelineList.append( $messageUnit
 							.addClass('message-unit--operation')
 							.append( $('<div class="message-unit__operation-message">').text(str) )
 						);
 						break;
 					case 'moveWidget':
-						app.widgets.move( message.id, message.content );
+						app.widgetMgr.move( message.id, message.content );
 						break;
 				}
+				break;
+			case 'application/x-passiflora-widget-message':
+				message.content = JSON.parse(message.content);
+				app.widgetMgr.receiveWidgetMessage( message.targetWidget, message.content );
 				break;
 			case 'text/html':
 				$timelineList.append( $messageUnit
@@ -15064,21 +15068,32 @@ module.exports = function( app, $timelineList, $fieldInner ){
  */
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
+	var zIndex = 1000;
+	var widgetIndex = [];
 
 	/**
 	 * ウィジェットを配置する
 	 */
 	this.create = function(id, content){
-		$fieldInner.append( $('<div class="widget">')
+		// console.log(id, content);
+		var $widget = $('<div class="widget">');
+
+		$fieldInner.append( $widget
 			.css({
 				'left': content.x,
-				'top': content.y
+				'top': content.y,
+				'z-index': zIndex ++
 			})
 			.attr({
 				'data-widget-id': id,
 				'data-offset-x': content.x,
 				'data-offset-y': content.y,
 				'draggable': true
+			})
+			.bind('mousedown', function(e){
+				$(this).css({
+					'z-index': zIndex ++
+				});
 			})
 			.on('dblclick contextmenu', function(e){
 				e.stopPropagation();
@@ -15094,6 +15109,8 @@ module.exports = function( app, $timelineList, $fieldInner ){
 				// console.log(e);
 			})
 		);
+		// console.log(content);
+		widgetIndex[id] = new app.widgetList[content.widgetType].api(app, $widget);
 	}
 
 	/**
@@ -15113,10 +15130,61 @@ module.exports = function( app, $timelineList, $fieldInner ){
 		;
 	}
 
+	/**
+	 * ウィジェットのメッセージを受け取る
+	 */
+	this.receiveWidgetMessage = function(widgetId, content){
+
+	}
+
 	return;
 }
 
 },{}],78:[function(require,module,exports){
+/**
+ * widgets: issuetree.js
+ */
+module.exports = function( app, $widget ){
+
+	$widget.append( $('<div>')
+		.text('issue tree')
+	);
+
+	return;
+}
+
+},{}],79:[function(require,module,exports){
+/**
+ * widgets: stickies.js
+ */
+module.exports = function( app, $widget ){
+
+	this.value = '';
+
+	$widget.append( $('<textarea>')
+		.val(this.value)
+		.on('change', function(e){
+			var $this = $(this);
+			app.sendMessage(
+				{
+					'content': JSON.stringify({
+						'val': $this.val()
+					}),
+					'contentType': 'application/x-passiflora-widget-message',
+					'targetWidget': $widget.attr('data-widget-id')
+				},
+				function(){
+				}
+			);
+		})
+	);
+
+
+
+	return;
+}
+
+},{}],80:[function(require,module,exports){
 window.app = new (function(){
 	// app "board"
 	var _this = this;
@@ -15163,7 +15231,19 @@ window.app = new (function(){
 				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
 				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
-				_this.widgets = new (require('../../board/board_files/scripts/libs/widgets.js'))(_this, $timelineList, $fieldInner);
+				_this.widgetMgr = new (require('../../board/board_files/scripts/libs/widgetMgr.js'))(_this, $timelineList, $fieldInner);
+
+				_this.widgetList = {
+					'stickies': {
+						'name': 'Stickies',
+						'api': require('../../board/board_files/scripts/widgets/stickies/stickies.js')
+					},
+					'issuetree': {
+						'name': 'Issue Tree',
+						'api': require('../../board/board_files/scripts/widgets/issuetree/issuetree.js')
+					}
+				};
+
 
 				rlv();
 			}); })
@@ -15272,18 +15352,20 @@ window.app = new (function(){
 						case 'input': case 'textarea':
 							// alert('enter');
 							var $this = $(e.target);
-							var msg = {
-								'content': $this.val(),
-								'contentType': 'text/markdown'
-							};
-							_this.sendMessage(
-								msg,
-								function(rtn){
-									console.log('Your message was sent.');
-									console.log(rtn);
-									$this.val('').focus();
-								}
-							);
+							if( $this.hasClass('board__main-chat-comment') ){
+								var msg = {
+									'content': $this.val(),
+									'contentType': 'text/markdown'
+								};
+								_this.sendMessage(
+									msg,
+									function(rtn){
+										console.log('Your message was sent.');
+										console.log(rtn);
+										$this.val('').focus();
+									}
+								);
+							}
 							return true; break;
 					}
 					e.preventDefault();
@@ -15432,4 +15514,4 @@ window.app = new (function(){
 
 })();
 
-},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"../../board/board_files/scripts/libs/fieldContextMenu.js":75,"../../board/board_files/scripts/libs/messageOperator.js":76,"../../board/board_files/scripts/libs/widgets.js":77,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[78])
+},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"../../board/board_files/scripts/libs/fieldContextMenu.js":75,"../../board/board_files/scripts/libs/messageOperator.js":76,"../../board/board_files/scripts/libs/widgetMgr.js":77,"../../board/board_files/scripts/widgets/issuetree/issuetree.js":78,"../../board/board_files/scripts/widgets/stickies/stickies.js":79,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[80])

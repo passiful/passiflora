@@ -44,7 +44,19 @@ window.app = new (function(){
 				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
 				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
-				_this.widgets = new (require('../../board/board_files/scripts/libs/widgets.js'))(_this, $timelineList, $fieldInner);
+				_this.widgetMgr = new (require('../../board/board_files/scripts/libs/widgetMgr.js'))(_this, $timelineList, $fieldInner);
+
+				_this.widgetList = {
+					'stickies': {
+						'name': 'Stickies',
+						'api': require('../../board/board_files/scripts/widgets/stickies/stickies.js')
+					},
+					'issuetree': {
+						'name': 'Issue Tree',
+						'api': require('../../board/board_files/scripts/widgets/issuetree/issuetree.js')
+					}
+				};
+
 
 				rlv();
 			}); })
@@ -153,18 +165,20 @@ window.app = new (function(){
 						case 'input': case 'textarea':
 							// alert('enter');
 							var $this = $(e.target);
-							var msg = {
-								'content': $this.val(),
-								'contentType': 'text/markdown'
-							};
-							_this.sendMessage(
-								msg,
-								function(rtn){
-									console.log('Your message was sent.');
-									console.log(rtn);
-									$this.val('').focus();
-								}
-							);
+							if( $this.hasClass('board__main-chat-comment') ){
+								var msg = {
+									'content': $this.val(),
+									'contentType': 'text/markdown'
+								};
+								_this.sendMessage(
+									msg,
+									function(rtn){
+										console.log('Your message was sent.');
+										console.log(rtn);
+										$this.val('').focus();
+									}
+								);
+							}
 							return true; break;
 					}
 					e.preventDefault();

@@ -37,6 +37,7 @@ module.exports = function(conf, main){
 			{
 				'content': { type: Sequelize.STRING },
 				'contentType': { type: Sequelize.STRING },
+				'targetWidget': { type: Sequelize.STRING },
 				'owner': { type: Sequelize.STRING },
 				'microtime': { type: Sequelize.BIGINT }
 			}

@@ -29,15 +29,16 @@ module.exports = (function(){
 			}
 
 			console.log(data);
-			biflora.send('receiveBroadcast', data, function(){
-				console.log('send message');
-			});
-			biflora.sendToRoom('receiveBroadcast', data, data.boardId, function(){
-				console.log('send message to room');
-			});
 
 			main.dbh.insertMessage(data.boardId, data, function(result){
-				callback(data);
+				data.id = result.dataValues.id;
+				biflora.send('receiveBroadcast', data, function(){
+					console.log('send message');
+				});
+				biflora.sendToRoom('receiveBroadcast', data, data.boardId, function(){
+					console.log('send message to room');
+				});
+				callback(true);
 			});
 			return;
 		},

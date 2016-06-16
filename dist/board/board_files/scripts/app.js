@@ -14971,21 +14971,21 @@ module.exports = function( app, $timelineList, $fieldInner ){
 		switch( message.contentType ){
 			case 'application/x-passiflora-command':
 				message.content = JSON.parse(message.content);
-				var str = '';
-				str += message.owner;
-				str += ' が ';
-				str += message.content.operation;
-				str += ' しました。';
-				$timelineList.append( $messageUnit
-					.addClass('message-unit--operation')
-					.append( $('<div class="message-unit__operation-message">').text(str) )
-				);
 				switch( message.content.operation ){
 					case 'createWidget':
-						this.createWidget( message.id, message.content );
+						app.widgets.create( message.id, message.content );
+						var str = '';
+						str += message.owner;
+						str += ' が ';
+						str += message.content.operation;
+						str += ' しました。';
+						$timelineList.append( $messageUnit
+							.addClass('message-unit--operation')
+							.append( $('<div class="message-unit__operation-message">').text(str) )
+						);
 						break;
 					case 'moveWidget':
-						this.moveWidget( message.id, message.content );
+						app.widgets.move( message.id, message.content );
 						break;
 				}
 				break;
@@ -15059,6 +15059,64 @@ module.exports = function( app, $timelineList, $fieldInner ){
 }
 
 },{}],77:[function(require,module,exports){
+/**
+ * widgets.js
+ */
+module.exports = function( app, $timelineList, $fieldInner ){
+	var _this = this;
+
+	/**
+	 * ウィジェットを配置する
+	 */
+	this.create = function(id, content){
+		$fieldInner.append( $('<div class="widget">')
+			.css({
+				'left': content.x,
+				'top': content.y
+			})
+			.attr({
+				'data-widget-id': id,
+				'data-offset-x': content.x,
+				'data-offset-y': content.y,
+				'draggable': true
+			})
+			.on('dblclick contextmenu', function(e){
+				e.stopPropagation();
+			})
+			.bind('dragstart', function(e){
+				e.stopPropagation();
+				var event = e.originalEvent;
+				var $this = $(this);
+				event.dataTransfer.setData("method", 'moveWidget' );
+				event.dataTransfer.setData("widget-id", $this.attr('data-widget-id') );
+				event.dataTransfer.setData("offset-x", $this.attr('data-offset-x') );
+				event.dataTransfer.setData("offset-y", $this.attr('data-offset-y') );
+				// console.log(e);
+			})
+		);
+	}
+
+	/**
+	 * ウィジェットを移動する
+	 */
+	this.move = function(id, content){
+		$targetWidget = $fieldInner.find('[data-widget-id='+content.targetWidgetId+']');
+		$targetWidget
+			.css({
+				'left': content.moveToX,
+				'top': content.moveToY
+			})
+			.attr({
+				'data-offset-x': content.moveToX,
+				'data-offset-y': content.moveToY
+			})
+		;
+	}
+
+	return;
+}
+
+},{}],78:[function(require,module,exports){
 window.app = new (function(){
 	// app "board"
 	var _this = this;
@@ -15105,6 +15163,7 @@ window.app = new (function(){
 				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
 				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
+				_this.widgets = new (require('../../board/board_files/scripts/libs/widgets.js'))(_this, $timelineList, $fieldInner);
 
 				rlv();
 			}); })
@@ -15373,4 +15432,4 @@ window.app = new (function(){
 
 })();
 
-},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"../../board/board_files/scripts/libs/fieldContextMenu.js":75,"../../board/board_files/scripts/libs/messageOperator.js":76,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[77])
+},{"../../board/board_files/scripts/apis/receiveBroadcast.js":74,"../../board/board_files/scripts/libs/fieldContextMenu.js":75,"../../board/board_files/scripts/libs/messageOperator.js":76,"../../board/board_files/scripts/libs/widgets.js":77,"es6-promise":4,"iterate79":6,"jquery":7,"twig":10,"utils79":11}]},{},[78])

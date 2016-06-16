@@ -19,21 +19,21 @@ module.exports = function( app, $timelineList, $fieldInner ){
 		switch( message.contentType ){
 			case 'application/x-passiflora-command':
 				message.content = JSON.parse(message.content);
-				var str = '';
-				str += message.owner;
-				str += ' が ';
-				str += message.content.operation;
-				str += ' しました。';
-				$timelineList.append( $messageUnit
-					.addClass('message-unit--operation')
-					.append( $('<div class="message-unit__operation-message">').text(str) )
-				);
 				switch( message.content.operation ){
 					case 'createWidget':
-						this.createWidget( message.id, message.content );
+						app.widgets.create( message.id, message.content );
+						var str = '';
+						str += message.owner;
+						str += ' が ';
+						str += message.content.operation;
+						str += ' しました。';
+						$timelineList.append( $messageUnit
+							.addClass('message-unit--operation')
+							.append( $('<div class="message-unit__operation-message">').text(str) )
+						);
 						break;
 					case 'moveWidget':
-						this.moveWidget( message.id, message.content );
+						app.widgets.move( message.id, message.content );
 						break;
 				}
 				break;

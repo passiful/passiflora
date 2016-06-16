@@ -1,65 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /**
- * messageOperator.js
+ * widgets.js
  */
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
 
 	/**
-	 * タイムラインメッセージを処理する
-	 */
-	this.exec = function(message){
-		// console.log(message);
-
-		var $messageUnit = $('<div class="message-unit">')
-			.attr({
-				'data-message-id': message.id
-			})
-		;
-
-		switch( message.contentType ){
-			case 'application/x-passiflora-command':
-				message.content = JSON.parse(message.content);
-				switch( message.content.operation ){
-					case 'createWidget':
-						app.widgets.create( message.id, message.content );
-						var str = '';
-						str += message.owner;
-						str += ' が ';
-						str += message.content.operation;
-						str += ' しました。';
-						$timelineList.append( $messageUnit
-							.addClass('message-unit--operation')
-							.append( $('<div class="message-unit__operation-message">').text(str) )
-						);
-						break;
-					case 'moveWidget':
-						app.widgets.move( message.id, message.content );
-						break;
-				}
-				break;
-			case 'text/html':
-				$timelineList.append( $messageUnit
-					.append( $('<div class="message-unit__owner">').text(message.owner) )
-					.append( $('<div class="message-unit__content">').html(message.content) )
-				);
-				break;
-		}
-
-		var scrTop = $timelineList.scrollTop();
-		var oH = $timelineList.outerHeight();
-		var iH = $timelineList.get(0).scrollHeight;
-		$timelineList.scrollTop(iH-oH);
-		// console.log(scrTop, oH, iH);
-
-		return;
-	}
-
-
-	/**
 	 * ウィジェットを配置する
 	 */
-	this.createWidget = function(id, content){
+	this.create = function(id, content){
 		$fieldInner.append( $('<div class="widget">')
 			.css({
 				'left': content.x,
@@ -82,15 +31,15 @@ module.exports = function( app, $timelineList, $fieldInner ){
 				event.dataTransfer.setData("widget-id", $this.attr('data-widget-id') );
 				event.dataTransfer.setData("offset-x", $this.attr('data-offset-x') );
 				event.dataTransfer.setData("offset-y", $this.attr('data-offset-y') );
-				console.log(e);
+				// console.log(e);
 			})
 		);
 	}
 
 	/**
-	 * ウィジェットを配置する
+	 * ウィジェットを移動する
 	 */
-	this.moveWidget = function(id, content){
+	this.move = function(id, content){
 		$targetWidget = $fieldInner.find('[data-widget-id='+content.targetWidgetId+']');
 		$targetWidget
 			.css({

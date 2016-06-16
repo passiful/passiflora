@@ -66,15 +66,15 @@ module.exports = function(conf, main){
 
 		this.initDb(boardId, function(){
 
-			var hdl = dbs[boardId].tbls.timeline.create({
+			dbs[boardId].tbls.timeline.create({
 				'content': message.content,
 				'contentType': message.contentType,
 				'owner': message.owner,
 				'microtime': message.microtime
+			}).then(function(record){
+				// console.log(record);
+				callback(record);
 			});
-			// console.log(hdl);
-
-			callback(true);
 
 		});
 		return;

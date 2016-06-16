@@ -27,7 +27,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						str += ' が ';
 						str += message.content.widgetType;
 						str += ' を作成しました。';
-						$timelineList.append( $messageUnit
+						app.insertTimeline( $messageUnit
 							.addClass('message-unit--operation')
 							.append( $('<div class="message-unit__operation-message">').text(str) )
 						);
@@ -39,21 +39,15 @@ module.exports = function( app, $timelineList, $fieldInner ){
 				break;
 			case 'application/x-passiflora-widget-message':
 				message.content = JSON.parse(message.content);
-				app.widgetMgr.receiveWidgetMessage( message.targetWidget, message.content );
+				app.widgetMgr.receiveWidgetMessage( message );
 				break;
 			case 'text/html':
-				$timelineList.append( $messageUnit
+				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
 					.append( $('<div class="message-unit__content">').html(message.content) )
 				);
 				break;
 		}
-
-		var scrTop = $timelineList.scrollTop();
-		var oH = $timelineList.outerHeight();
-		var iH = $timelineList.get(0).scrollHeight;
-		$timelineList.scrollTop(iH-oH);
-		// console.log(scrTop, oH, iH);
 
 		return;
 	}

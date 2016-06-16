@@ -14979,7 +14979,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						str += ' が ';
 						str += message.content.widgetType;
 						str += ' を作成しました。';
-						$timelineList.append( $messageUnit
+						app.insertTimeline( $messageUnit
 							.addClass('message-unit--operation')
 							.append( $('<div class="message-unit__operation-message">').text(str) )
 						);
@@ -14991,21 +14991,15 @@ module.exports = function( app, $timelineList, $fieldInner ){
 				break;
 			case 'application/x-passiflora-widget-message':
 				message.content = JSON.parse(message.content);
-				app.widgetMgr.receiveWidgetMessage( message.targetWidget, message.content );
+				app.widgetMgr.receiveWidgetMessage( message );
 				break;
 			case 'text/html':
-				$timelineList.append( $messageUnit
+				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
 					.append( $('<div class="message-unit__content">').html(message.content) )
 				);
 				break;
 		}
-
-		var scrTop = $timelineList.scrollTop();
-		var oH = $timelineList.outerHeight();
-		var iH = $timelineList.get(0).scrollHeight;
-		$timelineList.scrollTop(iH-oH);
-		// console.log(scrTop, oH, iH);
 
 		return;
 	}
@@ -15133,9 +15127,9 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	/**
 	 * ウィジェットのメッセージを受け取る
 	 */
-	this.receiveWidgetMessage = function(widgetId, content){
-		// console.log(widgetId, content, widgetIndex);
-		widgetIndex[widgetId].onmessage(content);
+	this.receiveWidgetMessage = function(message){
+		// console.log(message);
+		widgetIndex[message.targetWidget].onmessage(message);
 	}
 
 	return;
@@ -15187,9 +15181,20 @@ module.exports = function( app, $widget ){
 	);
 
 
-	this.onmessage = function(content){
-		this.value = content.val;
+	this.onmessage = function(message){
+		this.value = message.content.val;
 		$textarea.val( this.value );
+
+		var $messageUnit = $('<div class="message-unit">')
+			.attr({
+				'data-message-id': message.id
+			})
+		;
+		app.insertTimeline( $messageUnit
+			.append( $('<div class="message-unit__owner">').text(message.owner) )
+			.append( $('<div class="message-unit__content">').text('stickies の内容を '+message.content.val + ' に書き換えました。') )
+		);
+
 	}
 
 	return;
@@ -15473,6 +15478,21 @@ window.app = new (function(){
 		});
 
 		callback();
+		return;
+	}
+
+	/**
+	 * メインタイムラインにメッセージを表示する
+	 */
+	this.insertTimeline = function( $messageUnit ){
+		$timelineList.append( $messageUnit );
+
+		var scrTop = $timelineList.scrollTop();
+		var oH = $timelineList.outerHeight();
+		var iH = $timelineList.get(0).scrollHeight;
+		$timelineList.scrollTop(iH-oH);
+		// console.log(scrTop, oH, iH);
+
 		return;
 	}
 

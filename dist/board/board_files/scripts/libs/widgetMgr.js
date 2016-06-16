@@ -69,9 +69,9 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	/**
 	 * ウィジェットのメッセージを受け取る
 	 */
-	this.receiveWidgetMessage = function(widgetId, content){
-		// console.log(widgetId, content, widgetIndex);
-		widgetIndex[widgetId].onmessage(content);
+	this.receiveWidgetMessage = function(message){
+		// console.log(message);
+		widgetIndex[message.targetWidget].onmessage(message);
 	}
 
 	return;

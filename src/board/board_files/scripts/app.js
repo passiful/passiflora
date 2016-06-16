@@ -279,6 +279,21 @@ window.app = new (function(){
 	}
 
 	/**
+	 * メインタイムラインにメッセージを表示する
+	 */
+	this.insertTimeline = function( $messageUnit ){
+		$timelineList.append( $messageUnit );
+
+		var scrTop = $timelineList.scrollTop();
+		var oH = $timelineList.outerHeight();
+		var iH = $timelineList.get(0).scrollHeight;
+		$timelineList.scrollTop(iH-oH);
+		// console.log(scrTop, oH, iH);
+
+		return;
+	}
+
+	/**
 	 * プロフィールを編集
 	 */
 	this.editProfile = function(callback){

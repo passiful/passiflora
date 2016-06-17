@@ -25,7 +25,7 @@ module.exports = function( app, $fieldInner ){
 						})
 						.click(function(e){
 							var widgetName = $(this).attr('data-widget-name');
-							console.log(widgets[widgetName].name);
+							// console.log(widgets[widgetName].name);
 							e.stopPropagation();
 							_this.close();
 							app.sendMessage(

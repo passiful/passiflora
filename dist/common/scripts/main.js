@@ -9857,7 +9857,7 @@ window.main = new (function(){
 module.exports = new (function(){
 	var _this = this;
 	var tpl = '<div class="modal fade" tabindex="-1" role="dialog">'+"\n"
-			+ '  <div class="modal-dialog" role="document">'+"\n"
+			+ '  <div class="modal-dialog modal-lg" role="document">'+"\n"
 			+ '    <div class="modal-content">'+"\n"
 			+ '      <div class="modal-header">'+"\n"
 			+ '        <button type="button" class="close" data-dismiss="modal" aria-label="Close">'+"\n"
@@ -9885,6 +9885,14 @@ module.exports = new (function(){
 			$('body')
 				.append($dialog)
 			;
+			$dialog.on('hide.bs.modal', function(e){
+				setTimeout(function(){
+					$dialog.remove();
+					$dialog = undefined;
+					delete($dialog);
+					$('.modal-backdrop').remove();
+				}, 500);
+			});
 
 			opt = opt||{};
 			opt.title = opt.title||'command:';
@@ -9915,7 +9923,7 @@ module.exports = new (function(){
 			});
 
 			$dialog.modal({
-				// 'backdrop': 'static'
+				'backdrop': 'static'
 			});
 
 		});
@@ -9929,15 +9937,8 @@ module.exports = new (function(){
 		callback = callback || function(){};
 		if($dialog){
 			$dialog.modal('hide');
-			setTimeout(function(){
-				$dialog.remove();
-				$dialog = undefined;
-				delete($dialog);
-				$('.modal-backdrop').remove();
-				callback();
-			}, 500);
+			callback();
 			return $dialog;
-
 		}
 		callback();
 		return $dialog;

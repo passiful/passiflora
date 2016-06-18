@@ -6,7 +6,9 @@ module.exports = function( app, $widget ){
 	var $ = require('jquery');
 	this.issue = '';
 
-	this.$widgetBody = $('<div class="issuetree">');
+	this.$widgetBody = $('<div class="issuetree">')
+		.append( $('<div class="issuetree__comment-count">') )
+	;
 	this.$detailBody = $('<div class="issuetree">')
 		.append( $('<div class="issuetree--issue">') )
 		.append( $('<div class="issuetree--answer">') )
@@ -20,9 +22,10 @@ module.exports = function( app, $widget ){
 		.append( $('<div class="issuetree--parent-issue">') )
 		.append( $('<div class="issuetree--sub-issues">') )
 	;
+	this.$detailBodyTimeline = this.$detailBody.find('.issuetree--discussion-timeline--timeline');
 
 	this.$detailBody.find('textarea.issuetree--discussion-timeline--chat-comment').keypress(function(e){
-		console.log(e);
+		// console.log(e);
 		if( e.which == 13 ){
 			// alert('enter');
 			var $this = $(e.target);
@@ -59,7 +62,6 @@ module.exports = function( app, $widget ){
 
 	$widget
 		.append( _this.$widgetBody
-			.text('issue tree')
 			.append( $('<div>')
 				.append( $('<a>')
 					.text('OPEN')
@@ -80,6 +82,9 @@ module.exports = function( app, $widget ){
 							]
 						});
 
+						setTimeout(function(){
+							app.adjustTimelineScrolling( _this.$detailBodyTimeline );
+						}, 1000);
 					})
 				)
 			)
@@ -101,11 +106,20 @@ module.exports = function( app, $widget ){
 			})
 		;
 
-		userMessage = message.content.comment;
+		userMessage = app.markdown( message.content.comment );
+
+		var totalCommentCount = this.$detailBodyTimeline.find('>div').size();
+		this.$widgetBody.find('.issuetree__comment-count').text( (totalCommentCount+1) + '件のコメント' );
+
+		this.$detailBodyTimeline.append( $('<div>')
+			.append( $('<div class="issuetree__owner">').text(message.owner) )
+			.append( $('<div class="issuetree__content">').html(userMessage) )
+		);
+		app.adjustTimelineScrolling( this.$detailBodyTimeline );
 
 		app.insertTimeline( $messageUnit
 			.append( $('<div class="message-unit__owner">').text(message.owner) )
-			.append( $('<div class="message-unit__content">').text(userMessage) )
+			.append( $('<div class="message-unit__content">').html(userMessage) )
 			.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
 				.attr({
 					'href':'javascript:;',

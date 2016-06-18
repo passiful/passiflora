@@ -294,13 +294,41 @@ window.app = new (function(){
 	this.insertTimeline = function( $messageUnit ){
 		$timelineList.append( $messageUnit );
 
-		var scrTop = $timelineList.scrollTop();
-		var oH = $timelineList.outerHeight();
-		var iH = $timelineList.get(0).scrollHeight;
-		$timelineList.scrollTop(iH-oH);
+		this.adjustTimelineScrolling($timelineList);
+
+		return;
+	}
+
+	/**
+	 * タイムラインのスクロール位置をあわせる
+	 */
+	this.adjustTimelineScrolling = function( $timeline ){
+		var scrTop = $timeline.scrollTop();
+		var oH = $timeline.outerHeight();
+		var iH = $timeline.get(0).scrollHeight;
+		$timeline.scrollTop(iH-oH);
 		// console.log(scrTop, oH, iH);
 
 		return;
+	}
+
+	/**
+	 * Markdown 変換する
+	 */
+	this.markdown = function(md){
+		var marked = require('marked');
+		marked.setOptions({
+			renderer: new marked.Renderer(),
+			gfm: true,
+			tables: true,
+			breaks: false,
+			pedantic: false,
+			sanitize: false,
+			smartLists: true,
+			smartypants: false
+		});
+		var html = marked(md);
+		return html;
 	}
 
 	/**

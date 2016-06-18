@@ -18012,7 +18012,9 @@ module.exports = function( app, $widget ){
 	var $ = require('jquery');
 	this.issue = '';
 
-	this.$widgetBody = $('<div class="issuetree">');
+	this.$widgetBody = $('<div class="issuetree">')
+		.append( $('<div class="issuetree__comment-count">') )
+	;
 	this.$detailBody = $('<div class="issuetree">')
 		.append( $('<div class="issuetree--issue">') )
 		.append( $('<div class="issuetree--answer">') )
@@ -18026,9 +18028,10 @@ module.exports = function( app, $widget ){
 		.append( $('<div class="issuetree--parent-issue">') )
 		.append( $('<div class="issuetree--sub-issues">') )
 	;
+	this.$detailBodyTimeline = this.$detailBody.find('.issuetree--discussion-timeline--timeline');
 
 	this.$detailBody.find('textarea.issuetree--discussion-timeline--chat-comment').keypress(function(e){
-		console.log(e);
+		// console.log(e);
 		if( e.which == 13 ){
 			// alert('enter');
 			var $this = $(e.target);
@@ -18065,7 +18068,6 @@ module.exports = function( app, $widget ){
 
 	$widget
 		.append( _this.$widgetBody
-			.text('issue tree')
 			.append( $('<div>')
 				.append( $('<a>')
 					.text('OPEN')
@@ -18086,6 +18088,9 @@ module.exports = function( app, $widget ){
 							]
 						});
 
+						setTimeout(function(){
+							app.adjustTimelineScrolling( _this.$detailBodyTimeline );
+						}, 1000);
 					})
 				)
 			)
@@ -18107,11 +18112,20 @@ module.exports = function( app, $widget ){
 			})
 		;
 
-		userMessage = message.content.comment;
+		userMessage = app.markdown( message.content.comment );
+
+		var totalCommentCount = this.$detailBodyTimeline.find('>div').size();
+		this.$widgetBody.find('.issuetree__comment-count').text( (totalCommentCount+1) + '件のコメント' );
+
+		this.$detailBodyTimeline.append( $('<div>')
+			.append( $('<div class="issuetree__owner">').text(message.owner) )
+			.append( $('<div class="issuetree__content">').html(userMessage) )
+		);
+		app.adjustTimelineScrolling( this.$detailBodyTimeline );
 
 		app.insertTimeline( $messageUnit
 			.append( $('<div class="message-unit__owner">').text(message.owner) )
-			.append( $('<div class="message-unit__content">').text(userMessage) )
+			.append( $('<div class="message-unit__content">').html(userMessage) )
 			.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
 				.attr({
 					'href':'javascript:;',
@@ -18166,20 +18180,8 @@ module.exports = function( app, $widget ){
 	;
 	var mode = null;
 
-	var marked = require('marked');
-	marked.setOptions({
-		renderer: new marked.Renderer(),
-		gfm: true,
-		tables: true,
-		breaks: false,
-		pedantic: false,
-		sanitize: false,
-		smartLists: true,
-		smartypants: false
-	});
-
 	$widget.append( $stickies
-		.html( marked( _this.value ) )
+		.html( app.markdown( _this.value ) )
 	);
 
 	$widget
@@ -18199,7 +18201,7 @@ module.exports = function( app, $widget ){
 		if( _this.value == $textarea.val() ){
 			// 変更なし
 			$textarea.val('').remove();
-			$stickies.html( marked(_this.value) );
+			$stickies.html( app.markdown(_this.value) );
 			return;
 		}
 
@@ -18214,7 +18216,7 @@ module.exports = function( app, $widget ){
 			function(){
 				console.log('stickies change submited.');
 				$textarea.val('').remove();
-				$stickies.html( marked(_this.value) );
+				$stickies.html( app.markdown(_this.value) );
 			}
 		);
 	}
@@ -18238,7 +18240,7 @@ module.exports = function( app, $widget ){
 		// console.log(message);
 		var before = this.value;
 		this.value = message.content.val;
-		$stickies.html( marked( _this.value ) );
+		$stickies.html( app.markdown( _this.value ) );
 
 		var $messageUnit = $('<div class="message-unit">')
 			.attr({
@@ -18274,7 +18276,7 @@ module.exports = function( app, $widget ){
 	return;
 }
 
-},{"marked":8}],83:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 window.app = new (function(){
 	// app "board"
 	var _this = this;
@@ -18571,13 +18573,41 @@ window.app = new (function(){
 	this.insertTimeline = function( $messageUnit ){
 		$timelineList.append( $messageUnit );
 
-		var scrTop = $timelineList.scrollTop();
-		var oH = $timelineList.outerHeight();
-		var iH = $timelineList.get(0).scrollHeight;
-		$timelineList.scrollTop(iH-oH);
+		this.adjustTimelineScrolling($timelineList);
+
+		return;
+	}
+
+	/**
+	 * タイムラインのスクロール位置をあわせる
+	 */
+	this.adjustTimelineScrolling = function( $timeline ){
+		var scrTop = $timeline.scrollTop();
+		var oH = $timeline.outerHeight();
+		var iH = $timeline.get(0).scrollHeight;
+		$timeline.scrollTop(iH-oH);
 		// console.log(scrTop, oH, iH);
 
 		return;
+	}
+
+	/**
+	 * Markdown 変換する
+	 */
+	this.markdown = function(md){
+		var marked = require('marked');
+		marked.setOptions({
+			renderer: new marked.Renderer(),
+			gfm: true,
+			tables: true,
+			breaks: false,
+			pedantic: false,
+			sanitize: false,
+			smartLists: true,
+			smartypants: false
+		});
+		var html = marked(md);
+		return html;
 	}
 
 	/**
@@ -18633,4 +18663,4 @@ window.app = new (function(){
 
 })();
 
-},{"../../board/board_files/scripts/apis/receiveBroadcast.js":76,"../../board/board_files/scripts/libs/fieldContextMenu.js":77,"../../board/board_files/scripts/libs/messageOperator.js":78,"../../board/board_files/scripts/libs/widgetBase.js":79,"../../board/board_files/scripts/libs/widgetMgr.js":80,"../../board/board_files/scripts/widgets/issuetree/issuetree.js":81,"../../board/board_files/scripts/widgets/stickies/stickies.js":82,"es6-promise":4,"iterate79":6,"jquery":7,"twig":11,"utils79":13}]},{},[83])
+},{"../../board/board_files/scripts/apis/receiveBroadcast.js":76,"../../board/board_files/scripts/libs/fieldContextMenu.js":77,"../../board/board_files/scripts/libs/messageOperator.js":78,"../../board/board_files/scripts/libs/widgetBase.js":79,"../../board/board_files/scripts/libs/widgetMgr.js":80,"../../board/board_files/scripts/widgets/issuetree/issuetree.js":81,"../../board/board_files/scripts/widgets/stickies/stickies.js":82,"es6-promise":4,"iterate79":6,"jquery":7,"marked":8,"twig":11,"utils79":13}]},{},[83])

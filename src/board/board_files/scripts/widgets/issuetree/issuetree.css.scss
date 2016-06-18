@@ -1,0 +1,28 @@
+.issuetree{
+	background-color: #fff;
+	.issuetree--discussion-timeline--timeline{
+		height: 300px;
+		overflow: auto;
+
+		&>div{
+			border-bottom: 1px solid #bbb;
+			padding: 0.5em 0;
+
+			&:last-child{
+				border-bottom: none;
+			}
+		}
+	}
+	.issuetree--discussion-timeline--form{
+		textarea{
+			width: 100%;
+		}
+	}
+	.issuetree__owner{
+		font-weight: bold;
+		font-size: small;
+	}
+	.issuetree__comment{
+		font-size: small;
+	}
+}

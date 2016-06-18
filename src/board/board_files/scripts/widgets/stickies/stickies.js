@@ -31,20 +31,8 @@ module.exports = function( app, $widget ){
 	;
 	var mode = null;
 
-	var marked = require('marked');
-	marked.setOptions({
-		renderer: new marked.Renderer(),
-		gfm: true,
-		tables: true,
-		breaks: false,
-		pedantic: false,
-		sanitize: false,
-		smartLists: true,
-		smartypants: false
-	});
-
 	$widget.append( $stickies
-		.html( marked( _this.value ) )
+		.html( app.markdown( _this.value ) )
 	);
 
 	$widget
@@ -64,7 +52,7 @@ module.exports = function( app, $widget ){
 		if( _this.value == $textarea.val() ){
 			// 変更なし
 			$textarea.val('').remove();
-			$stickies.html( marked(_this.value) );
+			$stickies.html( app.markdown(_this.value) );
 			return;
 		}
 
@@ -79,7 +67,7 @@ module.exports = function( app, $widget ){
 			function(){
 				console.log('stickies change submited.');
 				$textarea.val('').remove();
-				$stickies.html( marked(_this.value) );
+				$stickies.html( app.markdown(_this.value) );
 			}
 		);
 	}
@@ -103,7 +91,7 @@ module.exports = function( app, $widget ){
 		// console.log(message);
 		var before = this.value;
 		this.value = message.content.val;
-		$stickies.html( marked( _this.value ) );
+		$stickies.html( app.markdown( _this.value ) );
 
 		var $messageUnit = $('<div class="message-unit">')
 			.attr({

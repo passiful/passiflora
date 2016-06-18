@@ -1,0 +1,17 @@
+.issuetree {
+  background-color: #fff; }
+  .issuetree .issuetree--discussion-timeline--timeline {
+    height: 300px;
+    overflow: auto; }
+    .issuetree .issuetree--discussion-timeline--timeline > div {
+      border-bottom: 1px solid #bbb;
+      padding: 0.5em 0; }
+      .issuetree .issuetree--discussion-timeline--timeline > div:last-child {
+        border-bottom: none; }
+  .issuetree .issuetree--discussion-timeline--form textarea {
+    width: 100%; }
+  .issuetree .issuetree__owner {
+    font-weight: bold;
+    font-size: small; }
+  .issuetree .issuetree__comment {
+    font-size: small; }

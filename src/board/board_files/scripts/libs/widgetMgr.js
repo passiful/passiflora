@@ -3,6 +3,7 @@
  */
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
+	var _ = require('underscore');
 	var zIndex = 1000;
 	var widgetIndex = [];
 
@@ -45,7 +46,10 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			})
 		);
 		// console.log(content);
-		widgetIndex[id] = new app.widgetList[content.widgetType].api(app, $widget);
+		widgetIndex[id] = _.defaults( new app.widgetList[content.widgetType].api(app, $widget), app.widgetBase );
+		widgetIndex[id].id = id;
+		widgetIndex[id].widgetType = content.widgetType;
+		return;
 	}
 
 	/**
@@ -77,7 +81,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	 */
 	this.receiveWidgetMessage = function(message){
 		// console.log(message);
-		widgetIndex[message.targetWidget].onmessage(message);
+		widgetIndex[message.targetWidget].onMessage(message);
 	}
 
 	return;

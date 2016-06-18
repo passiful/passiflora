@@ -45,6 +45,7 @@ window.app = new (function(){
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
 				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
 				_this.widgetMgr = new (require('../../board/board_files/scripts/libs/widgetMgr.js'))(_this, $timelineList, $fieldInner);
+				_this.widgetBase = require('../../board/board_files/scripts/libs/widgetBase.js');
 
 				_this.widgetList = {
 					'stickies': {
@@ -166,7 +167,7 @@ window.app = new (function(){
 							// alert('enter');
 							var $this = $(e.target);
 							if( $this.hasClass('board__main-chat-comment') ){
-								console.log(e);
+								// console.log(e);
 								if( e.shiftKey ){
 									// SHIFTキーを押しながらなら、送信せず改行する
 									return true;

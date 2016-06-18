@@ -1555,7 +1555,6 @@
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
 	var _ = require('underscore');
-	var zIndex = 1000;
 	var widgetIndex = [];
 
 	/**
@@ -1569,7 +1568,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			.css({
 				'left': content.x,
 				'top': content.y,
-				'z-index': zIndex ++
+				'z-index': app.widgetsMaxZIndex ++
 			})
 			.attr({
 				'data-widget-id': id,
@@ -1579,7 +1578,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			})
 			.bind('mousedown', function(e){
 				$(this).css({
-					'z-index': zIndex ++
+					'z-index': app.widgetsMaxZIndex ++
 				});
 			})
 			.on('dblclick contextmenu', function(e){

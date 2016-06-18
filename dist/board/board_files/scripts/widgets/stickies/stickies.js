@@ -84,6 +84,15 @@ module.exports = function( app, $widget ){
 		})
 	;
 
+	app.setBehaviorCharComment(
+		$textarea,
+		{
+			'submit': function(value){
+				apply();
+			}
+		}
+	);
+
 
 	/**
 	 * widget への配信メッセージを受信

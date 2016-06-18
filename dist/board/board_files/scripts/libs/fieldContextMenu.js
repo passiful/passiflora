@@ -52,7 +52,8 @@ module.exports = function( app, $fieldInner ){
 			.css({
 				'position': 'absolute',
 				'top': y-5,
-				'left': x-5
+				'left': x-5,
+				'z-index': app.widgetsMaxZIndex ++
 			})
 			.click(function(e){
 				e.stopPropagation();

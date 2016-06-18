@@ -17762,7 +17762,8 @@ module.exports = function( app, $fieldInner ){
 			.css({
 				'position': 'absolute',
 				'top': y-5,
-				'left': x-5
+				'left': x-5,
+				'z-index': app.widgetsMaxZIndex ++
 			})
 			.click(function(e){
 				e.stopPropagation();
@@ -17920,7 +17921,6 @@ module.exports = function( app, $widget ){
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
 	var _ = require('underscore');
-	var zIndex = 1000;
 	var widgetIndex = [];
 
 	/**
@@ -17934,7 +17934,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			.css({
 				'left': content.x,
 				'top': content.y,
-				'z-index': zIndex ++
+				'z-index': app.widgetsMaxZIndex ++
 			})
 			.attr({
 				'data-widget-id': id,
@@ -17944,7 +17944,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			})
 			.bind('mousedown', function(e){
 				$(this).css({
-					'z-index': zIndex ++
+					'z-index': app.widgetsMaxZIndex ++
 				});
 			})
 			.on('dblclick contextmenu', function(e){
@@ -18016,7 +18016,7 @@ module.exports = function( app, $widget ){
 		.append( $('<div class="issuetree__comment-count">') )
 	;
 	this.$detailBody = $('<div class="issuetree">')
-		.append( $('<div class="issuetree--issue">') )
+		.append( $('<div class="issuetree--issue">').text( this.issue || 'no-set' ) )
 		.append( $('<div class="issuetree--answer">') )
 		.append( $('<div class="issuetree--yourstance">') )
 		.append( $('<div class="issuetree--discussion-timeline">')
@@ -18030,41 +18030,27 @@ module.exports = function( app, $widget ){
 	;
 	this.$detailBodyTimeline = this.$detailBody.find('.issuetree--discussion-timeline--timeline');
 
-	this.$detailBody.find('textarea.issuetree--discussion-timeline--chat-comment').keypress(function(e){
-		// console.log(e);
-		if( e.which == 13 ){
-			// alert('enter');
-			var $this = $(e.target);
-			if( e.shiftKey ){
-				// SHIFTキーを押しながらなら、送信せず改行する
-				return true;
-			}
-			if(!$this.val().length){
-				// 中身が空っぽなら送信しない
-				return false;
-			}
-			var msg = {
-				'content': $this.val(),
-				'contentType': 'text/markdown'
-			};
-			app.sendMessage(
-				{
-					'content': JSON.stringify({
-						'comment': $this.val()
-					}),
-					'contentType': 'application/x-passiflora-widget-message',
-					'targetWidget': _this.id
-				},
-				function(){
-					console.log('issuetree chat-comment submited.');
-					$this.val('');
-				}
-			);
-			return false;
+	app.setBehaviorCharComment(
+		this.$detailBody.find('textarea.issuetree--discussion-timeline--chat-comment'),
+		{
+			'submit': function(value){
+				app.sendMessage(
+					{
+						'content': JSON.stringify({
+							'command': 'comment',
+							'comment': value
+						}),
+						'contentType': 'application/x-passiflora-widget-message',
+						'targetWidget': _this.id
+					},
+					function(){
+						console.log('issuetree chat-comment submited.');
+					}
+				);
 
+			}
 		}
-	});
-
+	);
 
 	$widget
 		.append( _this.$widgetBody
@@ -18106,42 +18092,47 @@ module.exports = function( app, $widget ){
 		// this.value = message.content.val;
 		// $widgetBody.html( marked( _this.value ) );
 
-		var $messageUnit = $('<div class="message-unit">')
-			.attr({
-				'data-message-id': message.id
-			})
-		;
+		switch( message.content.command ){
+			case 'comment':
+				// コメントの投稿
+				var $messageUnit = $('<div class="message-unit">')
+					.attr({
+						'data-message-id': message.id
+					})
+				;
 
-		userMessage = app.markdown( message.content.comment );
+				userMessage = app.markdown( message.content.comment );
 
-		var totalCommentCount = this.$detailBodyTimeline.find('>div').size();
-		this.$widgetBody.find('.issuetree__comment-count').text( (totalCommentCount+1) + '件のコメント' );
+				var totalCommentCount = this.$detailBodyTimeline.find('>div').size();
+				this.$widgetBody.find('.issuetree__comment-count').text( (totalCommentCount+1) + '件のコメント' );
 
-		this.$detailBodyTimeline.append( $('<div>')
-			.append( $('<div class="issuetree__owner">').text(message.owner) )
-			.append( $('<div class="issuetree__content">').html(userMessage) )
-		);
-		app.adjustTimelineScrolling( this.$detailBodyTimeline );
+				this.$detailBodyTimeline.append( $('<div>')
+					.append( $('<div class="issuetree__owner">').text(message.owner) )
+					.append( $('<div class="issuetree__content">').html(userMessage) )
+				);
+				app.adjustTimelineScrolling( this.$detailBodyTimeline );
 
-		app.insertTimeline( $messageUnit
-			.append( $('<div class="message-unit__owner">').text(message.owner) )
-			.append( $('<div class="message-unit__content">').html(userMessage) )
-			.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
-				.attr({
-					'href':'javascript:;',
-					'data-widget-id': message.targetWidget
-				})
-				.text('widget#'+message.targetWidget)
-				.click(function(e){
-					var widgetId = $(this).attr('data-widget-id');
-					window.app.widgetMgr.focus(widgetId);
-					return false;
-				})
-			) )
-		);
+				app.insertTimeline( $messageUnit
+					.append( $('<div class="message-unit__owner">').text(message.owner) )
+					.append( $('<div class="message-unit__content">').html(userMessage) )
+					.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
+						.attr({
+							'href':'javascript:;',
+							'data-widget-id': message.targetWidget
+						})
+						.text('widget#'+message.targetWidget)
+						.click(function(e){
+							var widgetId = $(this).attr('data-widget-id');
+							window.app.widgetMgr.focus(widgetId);
+							return false;
+						})
+					) )
+				);
+				break;
+		}
 
-	}
-
+		return;
+	} // onMessage()
 
 	return;
 }
@@ -18232,6 +18223,15 @@ module.exports = function( app, $widget ){
 		})
 	;
 
+	app.setBehaviorCharComment(
+		$textarea,
+		{
+			'submit': function(value){
+				apply();
+			}
+		}
+	);
+
 
 	/**
 	 * widget への配信メッセージを受信
@@ -18302,6 +18302,8 @@ window.app = new (function(){
 	 */
 	this.init = function(callback){
 		callback = callback || function(){};
+
+		this.widgetsMaxZIndex = 1000;
 
 		new Promise(function(rlv){rlv();})
 			.then(function(){ return new Promise(function(rlv, rjt){
@@ -18440,38 +18442,24 @@ window.app = new (function(){
 					}
 					e.preventDefault();
 				});
-				Keypress.simple_combo("enter", function(e) {
-					switch(e.target.tagName.toLowerCase()){
-						case 'input': case 'textarea':
-							// alert('enter');
-							var $this = $(e.target);
-							if( $this.hasClass('board__main-chat-comment') ){
-								// console.log(e);
-								if( e.shiftKey ){
-									// SHIFTキーを押しながらなら、送信せず改行する
-									return true;
+				app.setBehaviorCharComment(
+					$timelineForm.find('textarea.board__main-chat-comment'),
+					{
+						'submit': function(value){
+							var msg = {
+								'content': value,
+								'contentType': 'text/markdown'
+							};
+							_this.sendMessage(
+								msg,
+								function(rtn){
+									console.log('Your message was sent.');
 								}
-								if(!$this.val().length){
-									// 中身が空っぽなら送信しない
-									return false;
-								}
-								var msg = {
-									'content': $this.val(),
-									'contentType': 'text/markdown'
-								};
-								_this.sendMessage(
-									msg,
-									function(rtn){
-										console.log('Your message was sent.');
-										console.log(rtn);
-										$this.val('').focus();
-									}
-								);
-							}
-							return true; break;
+							);
+
+						}
 					}
-					e.preventDefault();
-				});
+				);
 				// Keypress.simple_combo(cmdKeyName+" x", function(e) {
 				// 	px.message('cmd x');
 				// 	e.preventDefault();
@@ -18566,6 +18554,36 @@ window.app = new (function(){
 		callback();
 		return;
 	}
+
+	/**
+	 * チャットコメントフォームを作成
+	 */
+	this.setBehaviorCharComment = function($textarea, callbacks){
+		callbacks = callbacks || {};
+		callbacks.submit = callbacks.submit || function(){};
+		$textarea = $($textarea);
+		$textarea.keypress(function(e){
+			// console.log(e);
+			if( e.which == 13 ){
+				// alert('enter');
+				var $this = $(e.target);
+				if( e.shiftKey ){
+					// SHIFTキーを押しながらなら、送信せず改行する
+					return true;
+				}
+				if(!$this.val().length){
+					// 中身が空っぽなら送信しない
+					return false;
+				}
+				var fixedValue = $this.val();
+				callbacks.submit( fixedValue );
+				$this.val('').focus();
+				return false;
+			}
+			return;
+		});
+		return $textarea;
+	} // setBehaviorCharComment()
 
 	/**
 	 * メインタイムラインにメッセージを表示する

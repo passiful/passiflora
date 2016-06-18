@@ -24,6 +24,8 @@ window.app = new (function(){
 	this.init = function(callback){
 		callback = callback || function(){};
 
+		this.widgetsMaxZIndex = 1000;
+
 		new Promise(function(rlv){rlv();})
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// BoardID を取得
@@ -161,38 +163,24 @@ window.app = new (function(){
 					}
 					e.preventDefault();
 				});
-				Keypress.simple_combo("enter", function(e) {
-					switch(e.target.tagName.toLowerCase()){
-						case 'input': case 'textarea':
-							// alert('enter');
-							var $this = $(e.target);
-							if( $this.hasClass('board__main-chat-comment') ){
-								// console.log(e);
-								if( e.shiftKey ){
-									// SHIFTキーを押しながらなら、送信せず改行する
-									return true;
+				app.setBehaviorCharComment(
+					$timelineForm.find('textarea.board__main-chat-comment'),
+					{
+						'submit': function(value){
+							var msg = {
+								'content': value,
+								'contentType': 'text/markdown'
+							};
+							_this.sendMessage(
+								msg,
+								function(rtn){
+									console.log('Your message was sent.');
 								}
-								if(!$this.val().length){
-									// 中身が空っぽなら送信しない
-									return false;
-								}
-								var msg = {
-									'content': $this.val(),
-									'contentType': 'text/markdown'
-								};
-								_this.sendMessage(
-									msg,
-									function(rtn){
-										console.log('Your message was sent.');
-										console.log(rtn);
-										$this.val('').focus();
-									}
-								);
-							}
-							return true; break;
+							);
+
+						}
 					}
-					e.preventDefault();
-				});
+				);
 				// Keypress.simple_combo(cmdKeyName+" x", function(e) {
 				// 	px.message('cmd x');
 				// 	e.preventDefault();
@@ -287,6 +275,36 @@ window.app = new (function(){
 		callback();
 		return;
 	}
+
+	/**
+	 * チャットコメントフォームを作成
+	 */
+	this.setBehaviorCharComment = function($textarea, callbacks){
+		callbacks = callbacks || {};
+		callbacks.submit = callbacks.submit || function(){};
+		$textarea = $($textarea);
+		$textarea.keypress(function(e){
+			// console.log(e);
+			if( e.which == 13 ){
+				// alert('enter');
+				var $this = $(e.target);
+				if( e.shiftKey ){
+					// SHIFTキーを押しながらなら、送信せず改行する
+					return true;
+				}
+				if(!$this.val().length){
+					// 中身が空っぽなら送信しない
+					return false;
+				}
+				var fixedValue = $this.val();
+				callbacks.submit( fixedValue );
+				$this.val('').focus();
+				return false;
+			}
+			return;
+		});
+		return $textarea;
+	} // setBehaviorCharComment()
 
 	/**
 	 * メインタイムラインにメッセージを表示する

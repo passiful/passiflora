@@ -9856,109 +9856,68 @@ window.main = new (function(){
  */
 module.exports = new (function(){
 	var _this = this;
+	var tpl = '<div class="modal fade" tabindex="-1" role="dialog">'+"\n"
+			+ '  <div class="modal-dialog" role="document">'+"\n"
+			+ '    <div class="modal-content">'+"\n"
+			+ '      <div class="modal-header">'+"\n"
+			+ '        <button type="button" class="close" data-dismiss="modal" aria-label="Close">'+"\n"
+			+ '          <span aria-hidden="true">&times;</span>'+"\n"
+			+ '        </button>'+"\n"
+			+ '        <h4 class="modal-title"></h4>'+"\n"
+			+ '      </div>'+"\n"
+			+ '      <div class="modal-body"></div>'+"\n"
+			+ '      <div class="modal-footer">'+"\n"
+			// + '        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'+"\n"
+			// + '        <button type="button" class="btn btn-primary">Save changes</button>'+"\n"
+			+ '      </div>'+"\n"
+			+ '    </div><!-- /.modal-content -->'+"\n"
+			+ '  </div><!-- /.modal-dialog -->'+"\n"
+			+ '</div><!-- /.modal -->';
 	var $dialog;
 
 	/**
 	 * ダイアログを表示する
 	 */
 	this.dialog = function(opt){
-		this.close();
+		this.close(function(){
 
-		var tpl = '<div class="modal fade">'+"\n"
-				+ '  <div class="modal-dialog" role="document">'+"\n"
-				+ '    <div class="modal-content">'+"\n"
-				+ '      <div class="modal-header">'+"\n"
-				+ '        <button type="button" class="close" data-dismiss="modal" aria-label="Close">'+"\n"
-				+ '          <span aria-hidden="true">&times;</span>'+"\n"
-				+ '        </button>'+"\n"
-				+ '        <h4 class="modal-title"></h4>'+"\n"
-				+ '      </div>'+"\n"
-				+ '      <div class="modal-body"></div>'+"\n"
-				+ '      <div class="modal-footer">'+"\n"
-				// + '        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'+"\n"
-				// + '        <button type="button" class="btn btn-primary">Save changes</button>'+"\n"
-				+ '      </div>'+"\n"
-				+ '    </div><!-- /.modal-content -->'+"\n"
-				+ '  </div><!-- /.modal-dialog -->'+"\n"
-				+ '</div><!-- /.modal -->';
+			$dialog = $(tpl);
+			$('body')
+				.append($dialog)
+			;
 
-		opt = opt||{};
-		opt.title = opt.title||'command:';
-		opt.body = opt.body||$('<div>');
-		opt.buttons = opt.buttons||[
-			$('<button class="btn btn-primary">').text('OK').click(function(){
-				this.close();
-			})
-		];
+			opt = opt||{};
+			opt.title = opt.title||'command:';
+			opt.body = opt.body||$('<div>');
+			opt.buttons = opt.buttons||[
+				$('<button class="btn btn-primary">').text('OK').click(function(){
+					this.close();
+				})
+			];
 
-		for( var i in opt.buttons ){
-			var $btnElm = $(opt.buttons[i]);
-			$btnElm.each(function(){
-				if(!$(this).hasClass('btn')){
-					$(this).addClass('btn').addClass('btn-secondary');
-				}
+			for( var i in opt.buttons ){
+				var $btnElm = $(opt.buttons[i]);
+				$btnElm.each(function(){
+					if(!$(this).hasClass('btn')){
+						$(this).addClass('btn').addClass('btn-secondary');
+					}
+				});
+				opt.buttons[i] = $btnElm;
+			}
+
+			// var $dialogButtons = $('<div class="modal-footer">').append(opt.buttons);
+
+			$dialog.find('.modal-title').append(opt.title);
+			$dialog.find('.modal-body').append(opt.body);
+			$dialog.find('.modal-footer').append(opt.buttons);
+			$dialog.find('.modal-header button.close').click(function(e){
+				_this.close();
 			});
-			opt.buttons[i] = $btnElm;
-		}
 
-		// var $dialogButtons = $('<div class="modal-footer">').append(opt.buttons);
+			$dialog.modal({
+				// 'backdrop': 'static'
+			});
 
-		$dialog = $(tpl);
-		$dialog.find('.modal-title').append(opt.title);
-		$dialog.find('.modal-body').append(opt.body);
-		$dialog.find('.modal-footer').append(opt.buttons);
-
-		// $dialog = $('<div>')
-		// 	.addClass('contents')
-		// 	.css({
-		// 		'position':'fixed',
-		// 		'left':0, 'top':0,
-		// 		'width': $(window).width(),
-		// 		'height': $(window).height(),
-		// 		'overflow':'hidden',
-		// 		'z-index':10000
-		// 	})
-		// 	.append( $('<div>')
-		// 		.css({
-		// 			'position':'fixed',
-		// 			'left':0, 'top':0,
-		// 			'width':'100%', 'height':'100%',
-		// 			'overflow':'hidden',
-		// 			'background':'#000',
-		// 			'opacity':0.5
-		// 		})
-		// 	)
-		// 	.append( $('<div>')
-		// 		.css({
-		// 			'position':'absolute',
-		// 			'left':0, 'top':0,
-		// 			'padding-top':'4em',
-		// 			'overflow':'auto',
-		// 			'width':"100%",
-		// 			'height':"100%"
-		// 		})
-		// 		.append( $('<div>')
-		// 			.addClass('dialog_box')
-		// 			.css({
-		// 				'width':'80%',
-		// 				'margin':'3em auto'
-		// 			})
-		// 			.append( $('<h1>')
-		// 				.text(opt.title)
-		// 			)
-		// 			.append( $('<div>')
-		// 				.append(opt.body)
-		// 			)
-		// 			.append( $dialogButtons )
-		// 		)
-		// 	)
-		// ;
-
-		$('body')
-			.append($dialog)
-		;
-		$dialog.modal({
-			'backdrop': 'static'
 		});
 		return $dialog;
 	}//dialog()
@@ -9966,14 +9925,21 @@ module.exports = new (function(){
 	/**
 	 * ダイアログを閉じる
 	 */
-	this.close = function(){
-		if( $dialog ){
+	this.close = function(callback){
+		callback = callback || function(){};
+		if($dialog){
 			$dialog.modal('hide');
 			setTimeout(function(){
 				$dialog.remove();
+				$dialog = undefined;
+				delete($dialog);
 				$('.modal-backdrop').remove();
+				callback();
 			}, 500);
+			return $dialog;
+
 		}
+		callback();
 		return $dialog;
 	}//close()
 

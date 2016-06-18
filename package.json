@@ -23,7 +23,7 @@
   "dependencies": {
     "biflora": "file:submodules/node-biflora",
     "body-parser": "^1.15.0",
-    "bootstrap": "^4.0.0-alpha.2",
+    "bootstrap": "^3.3.6",
     "config": "^1.19.0",
     "es6-promise": "^3.2.1",
     "express": "^4.13.3",

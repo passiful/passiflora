@@ -166,6 +166,15 @@ window.app = new (function(){
 							// alert('enter');
 							var $this = $(e.target);
 							if( $this.hasClass('board__main-chat-comment') ){
+								console.log(e);
+								if( e.shiftKey ){
+									// SHIFTキーを押しながらなら、送信せず改行する
+									return true;
+								}
+								if(!$this.val().length){
+									// 中身が空っぽなら送信しない
+									return false;
+								}
 								var msg = {
 									'content': $this.val(),
 									'contentType': 'text/markdown'
@@ -307,6 +316,7 @@ window.app = new (function(){
 			'buttons': [
 				$('<button>')
 					.text('OK')
+					.addClass('btn')
 					.addClass('btn-primary')
 					.click(function(){
 						userInfo.name = $body.find('[name=userName]').val();
@@ -315,6 +325,9 @@ window.app = new (function(){
 					})
 			]
 		});
+		setTimeout(function(){
+			$body.find('input').get(0).focus();
+		}, 1000);
 		return;
 	}
 

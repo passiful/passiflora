@@ -36,6 +36,9 @@ module.exports = function( app, $widget ){
 		)
 	;
 
+	/**
+	 * widget への配信メッセージを受信
+	 */
 	this.onmessage = function(content){
 	}
 

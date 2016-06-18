@@ -67,6 +67,13 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	}
 
 	/**
+	 * ウィジェットにフォーカスする
+	 */
+	this.focus = function(widgetId){
+		alert('TODO: 開発中の機能です。 WidgetID '+widgetId+' の座標に自動スクロールし、フォーカスします。');
+	}
+
+	/**
 	 * ウィジェットのメッセージを受け取る
 	 */
 	this.receiveWidgetMessage = function(message){

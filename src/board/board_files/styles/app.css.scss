@@ -107,6 +107,11 @@ html, body{
 	.message-unit__operation-message{
 		text-align: center;
 	}
+	.message-unit__targetWidget{
+		text-align: right;
+		font-size: 75%;
+		color: #aaa;
+	}
 }
 .widget{
 	position: absolute;

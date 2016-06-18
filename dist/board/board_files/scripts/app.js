@@ -16414,6 +16414,13 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	}
 
 	/**
+	 * ウィジェットにフォーカスする
+	 */
+	this.focus = function(widgetId){
+		alert('TODO: 開発中の機能です。 WidgetID '+widgetId+' の座標に自動スクロールし、フォーカスします。');
+	}
+
+	/**
 	 * ウィジェットのメッセージを受け取る
 	 */
 	this.receiveWidgetMessage = function(message){
@@ -16462,6 +16469,9 @@ module.exports = function( app, $widget ){
 		)
 	;
 
+	/**
+	 * widget への配信メッセージを受信
+	 */
 	this.onmessage = function(content){
 	}
 
@@ -16568,9 +16578,10 @@ module.exports = function( app, $widget ){
 
 
 	/**
-	 * widget へのメッセージを受信
+	 * widget への配信メッセージを受信
 	 */
 	this.onmessage = function(message){
+		// console.log(message);
 		var before = this.value;
 		this.value = message.content.val;
 		$stickies.html( marked( _this.value ) );
@@ -16580,9 +16591,28 @@ module.exports = function( app, $widget ){
 				'data-message-id': message.id
 			})
 		;
+
+		var userMessage = 'stickies の内容を "'+before+'" から "'+message.content.val + '" に書き換えました。';
+		if( !before.length && message.content.val.length ){
+			userMessage = 'stickies に内容 "'+message.content.val + '" をセットしました。';
+		}else if( before.length && !message.content.val.length ){
+			userMessage = 'stickies の内容 "'+before + '" を削除しました。';
+		}
 		app.insertTimeline( $messageUnit
 			.append( $('<div class="message-unit__owner">').text(message.owner) )
-			.append( $('<div class="message-unit__content">').text('stickies の内容を '+before+' から '+message.content.val + ' に書き換えました。') )
+			.append( $('<div class="message-unit__content">').text(userMessage) )
+			.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
+				.attr({
+					'href':'javascript:;',
+					'data-widget-id': message.targetWidget
+				})
+				.text('widget#'+message.targetWidget)
+				.click(function(e){
+					var widgetId = $(this).attr('data-widget-id');
+					window.app.widgetMgr.focus(widgetId);
+					return false;
+				})
+			) )
 		);
 
 	}

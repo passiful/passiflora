@@ -6,20 +6,7 @@ module.exports = function( app, $widget ){
 
 	this.value = 'new Stickies';
 
-	var $stickies = $('<div>')
-		.css({
-			'font-size': 13,
-			'min-width': 80,
-			'min-height': 80,
-			'max-width': 180,
-			'max-height': 180,
-			'width': '100%',
-			'height': '100%',
-			'overflow': 'auto',
-			'padding': '0.5em',
-			'background': '#ffff98'
-		})
-	;
+	var $stickies = $('<div class="stickies">');
 	var $textarea = $('<textarea>')
 		.css({
 			'position': 'absolute',

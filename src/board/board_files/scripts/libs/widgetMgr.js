@@ -12,6 +12,11 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	this.create = function(id, content){
 		// console.log(id, content);
 		var $widget = $('<div class="widget">');
+		content = content || {};
+		content.x = content.x || 0;
+		content.y = content.y || 0;
+		content.widgetType = content.widgetType || 'stickies';
+		content.parent = content.parent || '';
 
 		$fieldInner.append( $widget
 			.css({
@@ -48,6 +53,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 		widgetIndex[id] = _.defaults( new app.widgetList[content.widgetType].api(app, $widget), app.widgetBase );
 		widgetIndex[id].id = id;
 		widgetIndex[id].widgetType = content.widgetType;
+		widgetIndex[id].parent = content.parent;
 		return;
 	}
 
@@ -73,6 +79,19 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	 */
 	this.focus = function(widgetId){
 		alert('TODO: 開発中の機能です。 WidgetID '+widgetId+' の座標に自動スクロールし、フォーカスします。');
+	}
+
+	/**
+	 * ウィジェットの子ウィジェットの一覧を取得する
+	 */
+	this.getChildren = function(parentWidgetId){
+		var rtn = [];
+		for( var idx in widgetIndex ){
+			if( widgetIndex[idx].parent == parentWidgetId ){
+				rtn.push( widgetIndex[idx] );
+			}
+		}
+		return rtn;
 	}
 
 	/**

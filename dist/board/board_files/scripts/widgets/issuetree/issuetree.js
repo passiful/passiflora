@@ -9851,34 +9851,79 @@ module.exports = function( app, $widget ){
 	var $ = require('jquery');
 	var mode = null;
 
-	this.issue = '';
-	this.answer = '';
+	this.issue = '未設定';
+	this.answer = '1. 賛成'+"\n"+'2. 反対';
 	this.vote = {};
 
-	var $widgetBody = $('<div class="issuetree">')
+	var $widgetBody = $('<div class="issuetree issuetree--widget">')
+		.append( $('<div class="issuetree__issue">').html( app.markdown(this.issue) || 'no-set' ) )
 		.append( $('<div class="issuetree__comment-count">') )
 	;
 	var $detailBody = $('<div class="issuetree">')
-		.append( $('<div class="issuetree--block">')
-			.append( $('<div>').text( '[問]' ) )
-			.append( $('<div class="issuetree--issue">').html( app.markdown(this.issue) || 'no-set' ) )
+		.append( $('<div class="issuetree__block">')
+			.append( $('<div class="issuetree__heading">').text( '問' ) )
+			.append( $('<div class="issuetree__issue">').html( app.markdown(this.issue) || 'no-set' ) )
 		)
-		.append( $('<div class="issuetree--block">')
-			.append( $('<div>').text( '[答]' ) )
-			.append( $('<div class="issuetree--answer">').html( app.markdown(this.answer) || 'no-answer' ) )
+		.append( $('<div class="issuetree__block">')
+			.append( $('<div class="issuetree__heading">').text( '答' ) )
+			.append( $('<div class="issuetree__answer">').html( app.markdown(this.answer) || 'no-answer' ) )
 		)
-		.append( $('<div class="issuetree--discussion-timeline">')
-			.append( $('<div class="issuetree--discussion-timeline--timeline">') )
-			.append( $('<div class="issuetree--discussion-timeline--form">')
-				.append( $('<textarea class="form-control issuetree--discussion-timeline--chat-comment">') )
+		.append( $('<div class="issuetree__block">')
+			.append( $('<div class="issuetree__heading">').text( 'ディスカッション' ) )
+			.append( $('<div class="issuetree__discussion-timeline">')
+				.append( $('<div class="issuetree__discussion-timeline--timeline">') )
+				.append( $('<div class="issuetree__discussion-timeline--form">')
+					.append( $('<textarea class="form-control issuetree__discussion-timeline--chat-comment">') )
+				)
 			)
 		)
-		.append( $('<div class="issuetree--parent-issue">') )
-		.append( $('<div class="issuetree--sub-issues">') )
+		.append( $('<div class="issuetree__block">')
+			.append( $('<div class="issuetree__heading">').text( '親課題' ) )
+			.append( $('<div class="issuetree__parent-issue">') )
+		)
+		.append( $('<div class="issuetree__block">')
+			.append( $('<div class="issuetree__heading">').text( '子課題' ) )
+			.append( $('<button class="btn btn-default">')
+				.text('新しい子課題を作成')
+				.click(function(e){
+					app.sendMessage(
+						{
+							'contentType': 'application/x-passiflora-command',
+							'content': JSON.stringify({
+								'operation':'createWidget',
+								'widgetType': _this.widgetType,
+								'x': 0,
+								'y': 0,
+								'parent': _this.id
+							})
+						} ,
+						function(rtn){
+							// console.log(rtn);
+							app.sendMessage(
+								{
+									'content': JSON.stringify({
+										'command': 'update_relations'
+									}),
+									'contentType': 'application/x-passiflora-widget-message',
+									'targetWidget': _this.id
+								},
+								function(){
+									console.log('issuetree: update relations.');
+								}
+							);
+						}
+					);
+				})
+			)
+			.append( $('<div class="issuetree__sub-issues">') )
+		)
 	;
-	var $detailBodyTimeline = $detailBody.find('.issuetree--discussion-timeline--timeline');
+	var $detailBodyTimeline = $detailBody.find('.issuetree__discussion-timeline--timeline');
 
-	function apply( $textarea, targetType ){
+	/**
+	 * テキストエリアでの編集内容を反映する
+	 */
+	function applyTextareaEditContent( $textarea, targetType ){
 		if(mode != 'edit'){return;}
 		mode = null;
 		if( _this[targetType] == $textarea.val() ){
@@ -9903,7 +9948,7 @@ module.exports = function( app, $widget ){
 		$textarea.val('').remove();
 	}
 
-	var $detailBodyIssue = $detailBody.find('.issuetree--issue')
+	var $detailBodyIssue = $detailBody.find('.issuetree__issue')
 		.css({
 			'position': 'relative',
 			'top': 0,
@@ -9928,13 +9973,13 @@ module.exports = function( app, $widget ){
 				$detailBodyIssue_textarea,
 				{
 					'submit': function(value){
-						apply( $detailBodyIssue_textarea, 'issue' );
+						applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
 					}
 				}
 			);
 			$detailBodyIssue_textarea
 				.on('change blur', function(e){
-					apply( $detailBodyIssue_textarea, 'issue' );
+					applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
 				})
 			;
 			$detailBodyIssue_textarea.focus();
@@ -9944,7 +9989,7 @@ module.exports = function( app, $widget ){
 		})
 	;
 
-	var $detailBodyAnswer = $detailBody.find('.issuetree--answer')
+	var $detailBodyAnswer = $detailBody.find('.issuetree__answer')
 		.css({
 			'position': 'relative',
 			'top': 0,
@@ -9969,13 +10014,13 @@ module.exports = function( app, $widget ){
 				$detailBodyAnswer_textarea,
 				{
 					'submit': function(value){
-						apply( $detailBodyAnswer_textarea, 'answer' );
+						applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
 					}
 				}
 			);
 			$detailBodyAnswer_textarea
 				.on('change blur', function(e){
-					apply( $detailBodyAnswer_textarea, 'answer' );
+					applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
 				})
 			;
 			$detailBodyAnswer_textarea.focus();
@@ -9985,11 +10030,11 @@ module.exports = function( app, $widget ){
 		})
 	;
 
-	var $detailBodyParentIssue = $detailBody.find('.issuetree--parent-issue');
-	var $detailBodySubIssues = $detailBody.find('.issuetree--sub-issues');
+	var $detailBodyParentIssue = $detailBody.find('.issuetree__parent-issue');
+	var $detailBodySubIssues = $detailBody.find('.issuetree__sub-issues');
 
 	app.setBehaviorCharComment(
-		$detailBody.find('textarea.issuetree--discussion-timeline--chat-comment'),
+		$detailBody.find('textarea.issuetree__discussion-timeline--chat-comment'),
 		{
 			'submit': function(value){
 				app.sendMessage(
@@ -10010,39 +10055,52 @@ module.exports = function( app, $widget ){
 		}
 	);
 
+	/**
+	 * 詳細画面を開く
+	 */
+	function openDetailWindow(){
+		window.main.modal.dialog({
+			'title': 'issue',
+			'body': $detailBody,
+			'buttons': [
+				$('<button>')
+					.text('OK')
+					.addClass('btn')
+					.addClass('btn-primary')
+					.click(function(){
+						window.main.modal.close();
+					})
+			]
+		});
+
+		updateAnswer();
+		updateRelations();
+
+		setTimeout(function(){
+			app.adjustTimelineScrolling( $detailBodyTimeline );
+		}, 1000);
+	}
+
 	$widget
+		.dblclick(function(){
+			openDetailWindow();
+		})
 		.append( $widgetBody
 			.append( $('<div>')
 				.append( $('<a>')
 					.text('OPEN')
 					.attr({'href':'javascript:;'})
 					.click(function(){
-
-						window.main.modal.dialog({
-							'title': 'issue',
-							'body': $detailBody,
-							'buttons': [
-								$('<button>')
-									.text('OK')
-									.addClass('btn')
-									.addClass('btn-primary')
-									.click(function(){
-										window.main.modal.close();
-									})
-							]
-						});
-
-						updateAnswer();
-
-						setTimeout(function(){
-							app.adjustTimelineScrolling( $detailBodyTimeline );
-						}, 1000);
+						openDetailWindow();
 					})
 				)
 			)
 		)
 	;
 
+	/**
+	 * 答欄を更新する
+	 */
 	function updateAnswer(){
 		$detailBodyAnswer.html( app.markdown(_this.answer) || 'no-answer' );
 		$detailBodyAnswer.find('ol>li').each(function(){
@@ -10064,6 +10122,9 @@ module.exports = function( app, $widget ){
 				.unbind('click')
 				.bind('click', function(e){
 					var $this = $(this);
+					if( $this.attr('data-passiflora-vote-option') == _this.vote[app.getUserInfo().id] ){
+						return false;
+					}
 					app.sendMessage(
 						{
 							'content': JSON.stringify({
@@ -10077,6 +10138,7 @@ module.exports = function( app, $widget ){
 							console.log('issuetree vote submited.');
 						}
 					);
+					return false;
 				})
 			;
 			var $voteUserList = $('<ul class="issuetree__voteuser">')
@@ -10087,7 +10149,7 @@ module.exports = function( app, $widget ){
 					$voteUserList.append( $li
 						.text(userName)
 					);
-					console.log( userName, app.getUserInfo().id );
+					// console.log( userName, app.getUserInfo().id );
 					if( userName == app.getUserInfo().id ){
 						$li.addClass('issuetree__voteuser--me');
 					}
@@ -10097,6 +10159,37 @@ module.exports = function( app, $widget ){
 				$this.append( $voteUserList );
 			}
 		});
+	}
+
+	/**
+	 * 親子関係欄を更新する
+	 */
+	function updateRelations(){
+		// var $detailBodyParentIssue = $detailBody.find('.issuetree__parent-issue');
+		// var $detailBodySubIssues = $detailBody.find('.issuetree__sub-issues');
+		$detailBodyParentIssue.html('---');
+		if( _this.parent ){
+			$detailBodyParentIssue.html('').append( $('<div>')
+				.text( 'widget#'+_this.parent )
+			);
+		}
+
+		var children =  app.widgetMgr.getChildren( _this.id );
+		$detailBodySubIssues.html('---');
+		if( children.length ){
+			$detailBodySubIssues.html('');
+			var $ul = $('<ul>');
+			for( var idx in children ){
+				var $li = $('<li>')
+				.text( 'widget#'+children[idx].id )
+				;
+				$ul.append( $li );
+			}
+			$detailBodySubIssues.append( $ul );
+
+		}
+
+		return;
 	}
 
 	/**
@@ -10152,6 +10245,7 @@ module.exports = function( app, $widget ){
 				// 問の更新
 				_this.issue = message.content.val;
 				$detailBodyIssue.html( app.markdown(_this.issue) || 'no-set' );
+				$widget.find('.issuetree__issue').html( app.markdown(_this.issue) || 'no-set' );
 
 				// 詳細画面のディスカッションに追加
 				$detailBodyTimeline.append( $('<div>')
@@ -10236,6 +10330,11 @@ module.exports = function( app, $widget ){
 						})
 					) )
 				);
+				break;
+
+			case 'update_relations':
+				// 親子関係の表示を更新する
+				updateRelations();
 				break;
 
 		}

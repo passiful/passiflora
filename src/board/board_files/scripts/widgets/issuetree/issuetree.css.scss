@@ -1,22 +1,38 @@
 .issuetree{
 	background-color: #fff;
-	.issuetree--discussion-timeline--timeline{
+
+	.issuetree__block{
+		padding:5px 0;
+		margin:0.5em 0;
+	}
+	.issuetree__heading{
+		font-weight: bold;
+		border-left: 3px solid #999;
+		padding: 0 1em;
+	}
+
+	.issuetree__discussion-timeline--timeline{
 		height: 300px;
 		overflow: auto;
 
 		&>div{
 			border-bottom: 1px solid #bbb;
 			padding: 0.5em 0;
+			font-size: 13px;
 
 			&:last-child{
 				border-bottom: none;
 			}
 		}
 	}
-	.issuetree--discussion-timeline--form{
+	.issuetree__discussion-timeline--form{
 		textarea{
 			width: 100%;
 		}
+	}
+	.issuetree__issue{
+		font-weight: bold;
+		font-size: 24px;
 	}
 	.issuetree__owner{
 		font-weight: bold;
@@ -43,4 +59,16 @@
 			}
 		}
 	}
+
+	&--widget{
+		border: 1px solid #ddd;
+		padding: 5px;
+		font-size: 11px;
+		width: 120px;
+		.issuetree__issue{
+			font-size: 11px;
+			font-weight: bold;
+		}
+	}
+
 }

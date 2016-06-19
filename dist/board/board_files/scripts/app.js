@@ -18049,7 +18049,7 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 				'href':'javascript:;',
 				'data-widget-id': targetWidget
 			})
-			.text('widget#'+targetWidget)
+			.text('#widget.'+targetWidget)
 			.click(function(e){
 				var widgetId = $(this).attr('data-widget-id');
 				_this.focus(widgetId);
@@ -18124,8 +18124,8 @@ module.exports = function( app, $widget ){
 									'content': JSON.stringify({
 										'operation':'createWidget',
 										'widgetType': _this.widgetType,
-										'x': 0,
-										'y': 0,
+										'x': app.$field.scrollLeft() + $widget.offset().left + $widget.outerWidth() + 10,
+										'y': app.$field.scrollTop() + $widget.offset().top + 10,
 										'parent': _this.id
 									})
 								} ,
@@ -18705,6 +18705,9 @@ window.app = new (function(){
 				$timelineForm = $('.board__timeline .board__timeline_form');
 				$field = $('.board__field');
 				$fieldInner = $('.board__field .board__field-inner');
+
+				_this.$field = $field;
+				_this.$fieldInner = $fieldInner;
 
 				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);

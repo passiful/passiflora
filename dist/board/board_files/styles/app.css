@@ -7,13 +7,30 @@ html, body {
   left: 0;
   top: 0; }
 
+.board-head {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  color: #000;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 3px; }
+  .board-head * {
+    font-size: 13px;
+    margin: 0; }
+  .board-head h1 {
+    font-size: 16px;
+    font-weight: bold; }
+
 .board {
   height: 100%;
   width: 100%;
   position: absolute;
   left: 0;
   top: 0;
-  overflow: hidden; }
+  overflow: hidden;
+  z-index: 500; }
   .board__field {
     position: absolute;
     top: 0;

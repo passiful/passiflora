@@ -1677,7 +1677,7 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 				'href':'javascript:;',
 				'data-widget-id': targetWidget
 			})
-			.text('widget#'+targetWidget)
+			.text('#widget.'+targetWidget)
 			.click(function(e){
 				var widgetId = $(this).attr('data-widget-id');
 				_this.focus(widgetId);

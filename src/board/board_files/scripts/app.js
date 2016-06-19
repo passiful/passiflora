@@ -44,6 +44,9 @@ window.app = new (function(){
 				$field = $('.board__field');
 				$fieldInner = $('.board__field .board__field-inner');
 
+				_this.$field = $field;
+				_this.$fieldInner = $fieldInner;
+
 				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
 				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);

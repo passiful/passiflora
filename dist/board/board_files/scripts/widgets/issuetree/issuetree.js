@@ -9896,8 +9896,8 @@ module.exports = function( app, $widget ){
 									'content': JSON.stringify({
 										'operation':'createWidget',
 										'widgetType': _this.widgetType,
-										'x': 0,
-										'y': 0,
+										'x': app.$field.scrollLeft() + $widget.offset().left + $widget.outerWidth() + 10,
+										'y': app.$field.scrollTop() + $widget.offset().top + 10,
 										'parent': _this.id
 									})
 								} ,

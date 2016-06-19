@@ -15,3 +15,18 @@
     font-size: small; }
   .issuetree .issuetree__comment {
     font-size: small; }
+  .issuetree .issuetree__voteuser {
+    padding: 0;
+    margin: 0; }
+    .issuetree .issuetree__voteuser li {
+      list-style-type: none;
+      display: inline-block;
+      padding: 0.2em 1em;
+      margin: 1px;
+      background-color: #666;
+      color: #eee;
+      font-size: 11px;
+      font-weight: normal;
+      border-radius: 0.5em; }
+      .issuetree .issuetree__voteuser li.issuetree__voteuser--me {
+        background-color: #999; }

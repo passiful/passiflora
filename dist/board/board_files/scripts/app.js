@@ -18020,8 +18020,14 @@ module.exports = function( app, $widget ){
 		.append( $('<div class="issuetree__comment-count">') )
 	;
 	var $detailBody = $('<div class="issuetree">')
-		.append( $('<div class="issuetree--issue">').html( app.markdown(this.issue) || 'no-set' ) )
-		.append( $('<div class="issuetree--answer">').html( app.markdown(this.answer) || 'no-answer' ) )
+		.append( $('<div class="issuetree--block">')
+			.append( $('<div>').text( '[問]' ) )
+			.append( $('<div class="issuetree--issue">').html( app.markdown(this.issue) || 'no-set' ) )
+		)
+		.append( $('<div class="issuetree--block">')
+			.append( $('<div>').text( '[答]' ) )
+			.append( $('<div class="issuetree--answer">').html( app.markdown(this.answer) || 'no-answer' ) )
+		)
 		.append( $('<div class="issuetree--discussion-timeline">')
 			.append( $('<div class="issuetree--discussion-timeline--timeline">') )
 			.append( $('<div class="issuetree--discussion-timeline--form">')
@@ -18187,6 +18193,8 @@ module.exports = function( app, $widget ){
 							]
 						});
 
+						updateAnswer();
+
 						setTimeout(function(){
 							app.adjustTimelineScrolling( $detailBodyTimeline );
 						}, 1000);
@@ -18201,7 +18209,7 @@ module.exports = function( app, $widget ){
 		$detailBodyAnswer.find('ol>li').each(function(){
 			var $this = $(this);
 			var optionValue = $this.html()+'';
-			var myAnswer = _this.vote[app.getUserInfo().name];
+			var myAnswer = _this.vote[app.getUserInfo().id];
 			$this
 				.attr({
 					'data-passiflora-vote-option': optionValue
@@ -18232,13 +18240,18 @@ module.exports = function( app, $widget ){
 					);
 				})
 			;
-			var $voteUserList = $('<ul>')
+			var $voteUserList = $('<ul class="issuetree__voteuser">')
 			for( var userName in _this.vote ){
-				console.log(optionValue);
+				// console.log(optionValue);
 				if( _this.vote[userName] == optionValue ){
-					$voteUserList.append( $('<li>')
+					var $li = $('<li>');
+					$voteUserList.append( $li
 						.text(userName)
 					);
+					console.log( userName, app.getUserInfo().id );
+					if( userName == app.getUserInfo().id ){
+						$li.addClass('issuetree__voteuser--me');
+					}
 				}
 			}
 			if( $voteUserList.find('>li').size() ){
@@ -18545,6 +18558,7 @@ window.app = new (function(){
 	var biflora,
 		Keypress,
 		userInfo = {
+			'id': 'new Commer',
 			'name': 'new Commer'
 		};
 	var $timeline,
@@ -18899,7 +18913,7 @@ window.app = new (function(){
 		callback = callback || function(){};
 		console.log('profile dialog:');
 		var $body = $('<form action="javascript:;" method="post">YourName: <input type="text" name="userName" value="{% userName %}" class="form-control" /></form>');
-		$body.find('[name=userName]').val( userInfo.name );
+		$body.find('[name=userName]').val( userInfo.id );
 		window.main.modal.dialog({
 			'title': 'プロフィール',
 			'body': $body,
@@ -18909,7 +18923,9 @@ window.app = new (function(){
 					.addClass('btn')
 					.addClass('btn-primary')
 					.click(function(){
-						userInfo.name = $body.find('[name=userName]').val();
+						var name = JSON.parse(JSON.stringify($body.find('[name=userName]').val()));
+						userInfo.id = name;
+						userInfo.name = name;
 						window.main.modal.close();
 						callback();
 					})
@@ -18931,7 +18947,7 @@ window.app = new (function(){
 			return;
 		}
 		msg.boardId = boardId;
-		msg.owner = userInfo.name;
+		msg.owner = userInfo.id;
 
 		biflora.send(
 			'message',

@@ -9,6 +9,7 @@ window.app = new (function(){
 	var biflora,
 		Keypress,
 		userInfo = {
+			'id': 'new Commer',
 			'name': 'new Commer'
 		};
 	var $timeline,
@@ -363,7 +364,7 @@ window.app = new (function(){
 		callback = callback || function(){};
 		console.log('profile dialog:');
 		var $body = $('<form action="javascript:;" method="post">YourName: <input type="text" name="userName" value="{% userName %}" class="form-control" /></form>');
-		$body.find('[name=userName]').val( userInfo.name );
+		$body.find('[name=userName]').val( userInfo.id );
 		window.main.modal.dialog({
 			'title': 'プロフィール',
 			'body': $body,
@@ -373,7 +374,9 @@ window.app = new (function(){
 					.addClass('btn')
 					.addClass('btn-primary')
 					.click(function(){
-						userInfo.name = $body.find('[name=userName]').val();
+						var name = JSON.parse(JSON.stringify($body.find('[name=userName]').val()));
+						userInfo.id = name;
+						userInfo.name = name;
 						window.main.modal.close();
 						callback();
 					})
@@ -395,7 +398,7 @@ window.app = new (function(){
 			return;
 		}
 		msg.boardId = boardId;
-		msg.owner = userInfo.name;
+		msg.owner = userInfo.id;
 
 		biflora.send(
 			'message',

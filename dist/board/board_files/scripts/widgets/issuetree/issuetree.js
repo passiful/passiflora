@@ -9868,54 +9868,60 @@ module.exports = function( app, $widget ){
 			.append( $('<div class="issuetree__heading">').text( '答' ) )
 			.append( $('<div class="issuetree__answer">').html( app.markdown(this.answer) || 'no-answer' ) )
 		)
-		.append( $('<div class="issuetree__block">')
-			.append( $('<div class="issuetree__heading">').text( 'ディスカッション' ) )
-			.append( $('<div class="issuetree__discussion-timeline">')
-				.append( $('<div class="issuetree__discussion-timeline--timeline">') )
-				.append( $('<div class="issuetree__discussion-timeline--form">')
-					.append( $('<textarea class="form-control issuetree__discussion-timeline--chat-comment">') )
+		.append( $('<div class="row">')
+			.append( $('<div class="col-md-8">')
+				.append( $('<div class="issuetree__block">')
+					.append( $('<div class="issuetree__heading">').text( 'ディスカッション' ) )
+					.append( $('<div class="issuetree__discussion-timeline">')
+						.append( $('<div class="issuetree__discussion-timeline--timeline">') )
+						.append( $('<div class="issuetree__discussion-timeline--form">')
+							.append( $('<textarea class="form-control issuetree__discussion-timeline--chat-comment">') )
+						)
+					)
 				)
 			)
-		)
-		.append( $('<div class="issuetree__block">')
-			.append( $('<div class="issuetree__heading">').text( '親課題' ) )
-			.append( $('<div class="issuetree__parent-issue">') )
-		)
-		.append( $('<div class="issuetree__block">')
-			.append( $('<div class="issuetree__heading">').text( '子課題' ) )
-			.append( $('<button class="btn btn-default">')
-				.text('新しい子課題を作成')
-				.click(function(e){
-					app.sendMessage(
-						{
-							'contentType': 'application/x-passiflora-command',
-							'content': JSON.stringify({
-								'operation':'createWidget',
-								'widgetType': _this.widgetType,
-								'x': 0,
-								'y': 0,
-								'parent': _this.id
-							})
-						} ,
-						function(rtn){
-							// console.log(rtn);
+			.append( $('<div class="col-md-4">')
+				.append( $('<div class="issuetree__block">')
+					.append( $('<div class="issuetree__heading">').text( '親課題' ) )
+					.append( $('<div class="issuetree__parent-issue">') )
+				)
+				.append( $('<div class="issuetree__block">')
+					.append( $('<div class="issuetree__heading">').text( '子課題' ) )
+					.append( $('<button class="btn btn-default">')
+						.text('新しい子課題を作成')
+						.click(function(e){
 							app.sendMessage(
 								{
+									'contentType': 'application/x-passiflora-command',
 									'content': JSON.stringify({
-										'command': 'update_relations'
-									}),
-									'contentType': 'application/x-passiflora-widget-message',
-									'targetWidget': _this.id
-								},
-								function(){
-									console.log('issuetree: update relations.');
+										'operation':'createWidget',
+										'widgetType': _this.widgetType,
+										'x': 0,
+										'y': 0,
+										'parent': _this.id
+									})
+								} ,
+								function(rtn){
+									// console.log(rtn);
+									app.sendMessage(
+										{
+											'content': JSON.stringify({
+												'command': 'update_relations'
+											}),
+											'contentType': 'application/x-passiflora-widget-message',
+											'targetWidget': _this.id
+										},
+										function(){
+											console.log('issuetree: update relations.');
+										}
+									);
 								}
 							);
-						}
-					);
-				})
+						})
+					)
+					.append( $('<div class="issuetree__sub-issues">') )
+				)
 			)
-			.append( $('<div class="issuetree__sub-issues">') )
 		)
 	;
 	var $detailBodyTimeline = $detailBody.find('.issuetree__discussion-timeline--timeline');
@@ -10064,9 +10070,9 @@ module.exports = function( app, $widget ){
 			'body': $detailBody,
 			'buttons': [
 				$('<button>')
-					.text('OK')
+					.text('閉じる')
 					.addClass('btn')
-					.addClass('btn-primary')
+					.addClass('btn-default')
 					.click(function(){
 						window.main.modal.close();
 					})
@@ -10078,7 +10084,7 @@ module.exports = function( app, $widget ){
 
 		setTimeout(function(){
 			app.adjustTimelineScrolling( $detailBodyTimeline );
-		}, 1000);
+		}, 200);
 	}
 
 	$widget
@@ -10170,7 +10176,8 @@ module.exports = function( app, $widget ){
 		$detailBodyParentIssue.html('---');
 		if( _this.parent ){
 			$detailBodyParentIssue.html('').append( $('<div>')
-				.text( 'widget#'+_this.parent )
+				.append( $('<div>').text(app.widgetMgr.get(_this.parent).issue) )
+				.append( $('<div>').append( app.widgetMgr.mkLinkToWidget( _this.parent ) ) )
 			);
 		}
 
@@ -10181,7 +10188,8 @@ module.exports = function( app, $widget ){
 			var $ul = $('<ul>');
 			for( var idx in children ){
 				var $li = $('<li>')
-				.text( 'widget#'+children[idx].id )
+					.append( $('<div>').text(children[idx].issue) )
+					.append( $('<div>').append( app.widgetMgr.mkLinkToWidget( children[idx].id ) ) )
 				;
 				$ul.append( $li );
 			}
@@ -10226,18 +10234,7 @@ module.exports = function( app, $widget ){
 				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
 					.append( $('<div class="message-unit__content">').html(userMessage) )
-					.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
-						.attr({
-							'href':'javascript:;',
-							'data-widget-id': message.targetWidget
-						})
-						.text('widget#'+message.targetWidget)
-						.click(function(e){
-							var widgetId = $(this).attr('data-widget-id');
-							window.app.widgetMgr.focus(widgetId);
-							return false;
-						})
-					) )
+					.append( $('<div class="message-unit__targetWidget">').append( app.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
 
@@ -10257,18 +10254,7 @@ module.exports = function( app, $widget ){
 				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
 					.append( $('<div class="message-unit__content">').html('問を "' + _this.issue + '" に変更しました。') )
-					.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
-						.attr({
-							'href':'javascript:;',
-							'data-widget-id': message.targetWidget
-						})
-						.text('widget#'+message.targetWidget)
-						.click(function(e){
-							var widgetId = $(this).attr('data-widget-id');
-							window.app.widgetMgr.focus(widgetId);
-							return false;
-						})
-					) )
+					.append( $('<div class="message-unit__targetWidget">').append( app.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
 
@@ -10287,18 +10273,7 @@ module.exports = function( app, $widget ){
 				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
 					.append( $('<div class="message-unit__content">').html('答を "' + _this.answer + '" に変更しました。') )
-					.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
-						.attr({
-							'href':'javascript:;',
-							'data-widget-id': message.targetWidget
-						})
-						.text('widget#'+message.targetWidget)
-						.click(function(e){
-							var widgetId = $(this).attr('data-widget-id');
-							window.app.widgetMgr.focus(widgetId);
-							return false;
-						})
-					) )
+					.append( $('<div class="message-unit__targetWidget">').append( app.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
 
@@ -10317,18 +10292,7 @@ module.exports = function( app, $widget ){
 				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
 					.append( $('<div class="message-unit__content">').text(message.owner + ' が、 "' + message.content.option + '" に投票しました。') )
-					.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
-						.attr({
-							'href':'javascript:;',
-							'data-widget-id': message.targetWidget
-						})
-						.text('widget#'+message.targetWidget)
-						.click(function(e){
-							var widgetId = $(this).attr('data-widget-id');
-							window.app.widgetMgr.focus(widgetId);
-							return false;
-						})
-					) )
+					.append( $('<div class="message-unit__targetWidget">').append( app.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
 
@@ -10341,6 +10305,13 @@ module.exports = function( app, $widget ){
 
 		return;
 	} // onMessage()
+
+	/**
+	 * widget へフォーカスした時の反応
+	 */
+	this.focus = function(){
+		openDetailWindow();
+	}
 
 	return;
 }

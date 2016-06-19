@@ -104,18 +104,7 @@ module.exports = function( app, $widget ){
 		app.insertTimeline( $messageUnit
 			.append( $('<div class="message-unit__owner">').text(message.owner) )
 			.append( $('<div class="message-unit__content">').text(userMessage) )
-			.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
-				.attr({
-					'href':'javascript:;',
-					'data-widget-id': message.targetWidget
-				})
-				.text('widget#'+message.targetWidget)
-				.click(function(e){
-					var widgetId = $(this).attr('data-widget-id');
-					window.app.widgetMgr.focus(widgetId);
-					return false;
-				})
-			) )
+			.append( $('<div class="message-unit__targetWidget">').append( app.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 		);
 
 	}

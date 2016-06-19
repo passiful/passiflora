@@ -9887,11 +9887,14 @@ module.exports = new (function(){
 			;
 			$dialog.on('hide.bs.modal', function(e){
 				setTimeout(function(){
-					$dialog.remove();
-					$dialog = undefined;
-					delete($dialog);
+					try {
+						$dialog.remove();
+						$dialog = undefined;
+						delete($dialog);
+					} catch (e) {
+					}
 					$('.modal-backdrop').remove();
-				}, 500);
+				}, 100);
 			});
 
 			opt = opt||{};
@@ -9937,7 +9940,9 @@ module.exports = new (function(){
 		callback = callback || function(){};
 		if($dialog){
 			$dialog.modal('hide');
-			callback();
+			setTimeout(function(){
+				callback();
+			}, 110);
 			return $dialog;
 		}
 		callback();
@@ -9948,15 +9953,15 @@ module.exports = new (function(){
 	/**
 	 * イベントリスナー
 	 */
-	$(window).on( 'resize', function(e){
-		if( typeof($dialog) !== typeof( $('<div>') ) ){return;}
-		$dialog
-			.css({
-				'width': $(window).width(),
-				'height': $(window).height()
-			})
-		;
-	} );
+	// $(window).on( 'resize', function(e){
+	// 	if( typeof($dialog) !== typeof( $('<div>') ) ){return;}
+	// 	$dialog
+	// 		.css({
+	// 			'width': $(window).width(),
+	// 			'height': $(window).height()
+	// 		})
+	// 	;
+	// } );
 
 })();
 

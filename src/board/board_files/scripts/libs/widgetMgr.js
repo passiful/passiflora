@@ -1,7 +1,7 @@
 /**
  * widgets.js
  */
-module.exports = function( app, $timelineList, $fieldInner ){
+module.exports = function( app, $timelineList, $field, $fieldInner ){
 	var _this = this;
 	var _ = require('underscore');
 	var widgetIndex = [];
@@ -54,6 +54,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 		widgetIndex[id].id = id;
 		widgetIndex[id].widgetType = content.widgetType;
 		widgetIndex[id].parent = content.parent;
+		widgetIndex[id].$ = $widget;
 		return;
 	}
 
@@ -78,7 +79,22 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	 * ウィジェットにフォーカスする
 	 */
 	this.focus = function(widgetId){
-		alert('TODO: 開発中の機能です。 WidgetID '+widgetId+' の座標に自動スクロールし、フォーカスします。');
+		var widget = this.get(widgetId);
+		// console.log( widget.$.offset() );
+
+		// var offset = widget.$.offset();
+		// $field.scroll( offset );
+		// console.log( $field );
+		// $field.eq(0).scrollTo(widget.$, 'normal');
+		$field
+			.animate({ 'scrollTop': $field.scrollTop() + widget.$.offset().top - ($field.innerHeight()/2) + (widget.$.outerHeight()/2) })
+			.animate({ 'scrollLeft': $field.scrollLeft() + widget.$.offset().left - ($field.innerWidth()/2) + (widget.$.outerWidth()/2) })
+		;
+
+		window.main.modal.close(function(){
+			widget.focus();
+		});
+		return;
 	}
 
 	/**
@@ -92,6 +108,32 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			}
 		}
 		return rtn;
+	}
+
+	/**
+	 * ウィジェットを取得する
+	 */
+	this.get = function(widgetId){
+		return widgetIndex[widgetId];
+	}
+
+	/**
+	 * ウィジェットへのリンクを生成する
+	 */
+	this.mkLinkToWidget = function( targetWidget ){
+		var $rtn = $('<a>')
+			.attr({
+				'href':'javascript:;',
+				'data-widget-id': targetWidget
+			})
+			.text('widget#'+targetWidget)
+			.click(function(e){
+				var widgetId = $(this).attr('data-widget-id');
+				_this.focus(widgetId);
+				return false;
+			})
+		;
+		return $rtn;
 	}
 
 	/**

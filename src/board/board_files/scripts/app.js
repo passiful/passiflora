@@ -47,7 +47,7 @@ window.app = new (function(){
 				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
 				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
-				_this.widgetMgr = new (require('../../board/board_files/scripts/libs/widgetMgr.js'))(_this, $timelineList, $fieldInner);
+				_this.widgetMgr = new (require('../../board/board_files/scripts/libs/widgetMgr.js'))(_this, $timelineList, $field, $fieldInner);
 				_this.widgetBase = require('../../board/board_files/scripts/libs/widgetBase.js');
 
 				_this.widgetList = {

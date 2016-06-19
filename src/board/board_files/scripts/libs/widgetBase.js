@@ -12,5 +12,11 @@ module.exports = function( app, $widget ){
 	this.onMessage = function(message){
 	}
 
+	/**
+	 * widget へフォーカスした時の反応
+	 */
+	this.focus = function(){
+	}
+
 	return;
 }

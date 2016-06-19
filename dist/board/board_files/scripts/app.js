@@ -17969,7 +17969,7 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 				event.dataTransfer.setData("widget-id", $this.attr('data-widget-id') );
 				event.dataTransfer.setData("offset-x", e.offsetX );
 				event.dataTransfer.setData("offset-y", e.offsetY );
-				console.log(e);
+				// console.log(e);
 			})
 		);
 		// console.log(content);
@@ -19005,6 +19005,8 @@ window.app = new (function(){
 	 * Markdown 変換する
 	 */
 	this.markdown = function(md){
+		// md = md.replace(/(\r\n|\r|\n)/g, '<br />');
+
 		var marked = require('marked');
 		marked.setOptions({
 			renderer: new marked.Renderer(),
@@ -19017,7 +19019,9 @@ window.app = new (function(){
 			smartypants: false
 		});
 		var html = marked(md);
-		return html;
+		var $div = $('<div>').html(html);
+		$div.find('a').attr({'target': '_blank'});
+		return $div.html();
 	}
 
 	/**

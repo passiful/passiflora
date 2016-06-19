@@ -46,7 +46,7 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 				event.dataTransfer.setData("widget-id", $this.attr('data-widget-id') );
 				event.dataTransfer.setData("offset-x", e.offsetX );
 				event.dataTransfer.setData("offset-y", e.offsetY );
-				console.log(e);
+				// console.log(e);
 			})
 		);
 		// console.log(content);

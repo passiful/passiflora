@@ -350,6 +350,13 @@ window.app = new (function(){
 	}
 
 	/**
+	 * ログインユーザー情報を取得
+	 */
+	this.getUserInfo = function(){
+		return userInfo;
+	}
+
+	/**
 	 * プロフィールを編集
 	 */
 	this.editProfile = function(callback){

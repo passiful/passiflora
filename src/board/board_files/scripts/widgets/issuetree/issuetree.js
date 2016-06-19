@@ -8,6 +8,7 @@ module.exports = function( app, $widget ){
 
 	this.issue = '';
 	this.answer = '';
+	this.vote = {};
 
 	var $widgetBody = $('<div class="issuetree">')
 		.append( $('<div class="issuetree__comment-count">') )
@@ -189,6 +190,57 @@ module.exports = function( app, $widget ){
 		)
 	;
 
+	function updateAnswer(){
+		$detailBodyAnswer.html( app.markdown(_this.answer) || 'no-answer' );
+		$detailBodyAnswer.find('ol>li').each(function(){
+			var $this = $(this);
+			var optionValue = $this.html()+'';
+			var myAnswer = _this.vote[app.getUserInfo().name];
+			$this
+				.attr({
+					'data-passiflora-vote-option': optionValue
+				})
+				.css({
+					'border': '1px solid #ddd',
+					'padding': '0.5em 1em',
+					'font-weight': ( optionValue==myAnswer ? 'bold' : 'normal' ),
+					'background-color': ( optionValue==myAnswer ? '#f0f0f0' : '#f9f9f9' ),
+					'list-style-position': 'inside',
+					'cursor': 'pointer'
+				})
+				.unbind('click')
+				.bind('click', function(e){
+					var $this = $(this);
+					app.sendMessage(
+						{
+							'content': JSON.stringify({
+								'command': 'vote',
+								'option': $this.attr('data-passiflora-vote-option')
+							}),
+							'contentType': 'application/x-passiflora-widget-message',
+							'targetWidget': _this.id
+						},
+						function(){
+							console.log('issuetree vote submited.');
+						}
+					);
+				})
+			;
+			var $voteUserList = $('<ul>')
+			for( var userName in _this.vote ){
+				console.log(optionValue);
+				if( _this.vote[userName] == optionValue ){
+					$voteUserList.append( $('<li>')
+						.text(userName)
+					);
+				}
+			}
+			if( $voteUserList.find('>li').size() ){
+				$this.append( $voteUserList );
+			}
+		});
+	}
+
 	/**
 	 * widget への配信メッセージを受信
 	 */
@@ -271,7 +323,7 @@ module.exports = function( app, $widget ){
 			case 'update_answer':
 				// 答の更新
 				_this.answer = message.content.val;
-				$detailBodyAnswer.html( app.markdown(_this.answer) || 'no-answer' );
+				updateAnswer();
 
 				// 詳細画面のディスカッションに追加
 				$detailBodyTimeline.append( $('<div>')
@@ -297,6 +349,37 @@ module.exports = function( app, $widget ){
 					) )
 				);
 				break;
+
+			case 'vote':
+				// 投票更新
+				_this.vote[message.owner] = message.content.option;
+				updateAnswer();
+
+				// 詳細画面のディスカッションに追加
+				$detailBodyTimeline.append( $('<div>')
+					.append( $('<div class="issuetree__content">').text(message.owner + ' が、 "' + message.content.option + '" に投票しました。') )
+				);
+				app.adjustTimelineScrolling( $detailBodyTimeline );
+
+				// メインチャットに追加
+				app.insertTimeline( $messageUnit
+					.append( $('<div class="message-unit__owner">').text(message.owner) )
+					.append( $('<div class="message-unit__content">').text(message.owner + ' が、 "' + message.content.option + '" に投票しました。') )
+					.append( $('<div class="message-unit__targetWidget">').append( $('<a>')
+						.attr({
+							'href':'javascript:;',
+							'data-widget-id': message.targetWidget
+						})
+						.text('widget#'+message.targetWidget)
+						.click(function(e){
+							var widgetId = $(this).attr('data-widget-id');
+							window.app.widgetMgr.focus(widgetId);
+							return false;
+						})
+					) )
+				);
+				break;
+
 		}
 
 		return;

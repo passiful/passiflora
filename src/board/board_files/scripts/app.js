@@ -220,18 +220,23 @@ window.app = new (function(){
 						switch(method){
 							case 'moveWidget':
 								var targetWidgetId = event.dataTransfer.getData("widget-id");
-								var fromX = event.dataTransfer.getData("offset-x");
-								var fromY = event.dataTransfer.getData("offset-y");
-								console.log(targetWidgetId, fromX, fromY);
-								console.log(e.offsetX, e.offsetY);
+								var fromOffsetX = event.dataTransfer.getData("offset-x");
+								var fromOffsetY = event.dataTransfer.getData("offset-y");
+								// console.log(targetWidgetId, fromX, fromY);
+								// console.log(e.offsetX, e.offsetY);
+								// console.log(e);
+								var toX = $field.offset().left + $field.scrollLeft() + e.pageX - fromOffsetX;
+								if( toX < 0 ){ toX = 0; }
+								var toY = $field.offset().top + $field.scrollTop() + e.pageY - fromOffsetY;
+								if( toY < 0 ){ toY = 0; }
 								_this.sendMessage(
 									{
 										'contentType': 'application/x-passiflora-command',
 										'content': JSON.stringify({
 											'operation': method,
 											'targetWidgetId': targetWidgetId,
-											'moveToX': e.offsetX,
-											'moveToY': e.offsetY
+											'moveToX': toX,
+											'moveToY': toY
 										})
 									},
 									function(rtn){

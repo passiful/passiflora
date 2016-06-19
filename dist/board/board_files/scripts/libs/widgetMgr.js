@@ -1595,9 +1595,9 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 				var $this = $(this);
 				event.dataTransfer.setData("method", 'moveWidget' );
 				event.dataTransfer.setData("widget-id", $this.attr('data-widget-id') );
-				event.dataTransfer.setData("offset-x", $this.attr('data-offset-x') );
-				event.dataTransfer.setData("offset-y", $this.attr('data-offset-y') );
-				// console.log(e);
+				event.dataTransfer.setData("offset-x", e.offsetX );
+				event.dataTransfer.setData("offset-y", e.offsetY );
+				console.log(e);
 			})
 		);
 		// console.log(content);

@@ -10125,28 +10125,43 @@ module.exports = function( app, $widget ){
 					'list-style-position': 'inside',
 					'cursor': 'pointer'
 				})
-				.unbind('click')
-				.bind('click', function(e){
-					var $this = $(this);
-					if( $this.attr('data-passiflora-vote-option') == _this.vote[app.getUserInfo().id] ){
-						return false;
-					}
-					app.sendMessage(
-						{
-							'content': JSON.stringify({
-								'command': 'vote',
-								'option': $this.attr('data-passiflora-vote-option')
-							}),
-							'contentType': 'application/x-passiflora-widget-message',
-							'targetWidget': _this.id
-						},
-						function(){
-							console.log('issuetree vote submited.');
-						}
-					);
-					return false;
-				})
 			;
+
+			if( myAnswer != optionValue ){
+				$this.append( $('<div>')
+					.css({
+						'text-align': 'right'
+					})
+					.append( $('<button class="btn btn-default">')
+						.text('vote')
+						.attr({
+							'data-passiflora-vote-option': optionValue
+						})
+						.unbind('click')
+						.bind('click', function(e){
+							var $this = $(this);
+							if( $this.attr('data-passiflora-vote-option') == _this.vote[app.getUserInfo().id] ){
+								return false;
+							}
+							app.sendMessage(
+								{
+									'content': JSON.stringify({
+										'command': 'vote',
+										'option': $this.attr('data-passiflora-vote-option')
+									}),
+									'contentType': 'application/x-passiflora-widget-message',
+									'targetWidget': _this.id
+								},
+								function(){
+									console.log('issuetree vote submited.');
+								}
+							);
+							return false;
+						})
+					)
+				);
+			}
+
 			var $voteUserList = $('<ul class="issuetree__voteuser">')
 			for( var userName in _this.vote ){
 				// console.log(optionValue);

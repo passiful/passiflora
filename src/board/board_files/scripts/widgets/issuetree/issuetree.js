@@ -10,8 +10,9 @@ module.exports = function( app, $widget ){
 	this.answer = '1. 賛成'+"\n"+'2. 反対';
 	this.vote = {};
 
-	var $widgetBody = $('<div class="issuetree issuetree--widget">')
+	var $widgetBody = $('<div class="issuetree issuetree--widget issuetree--status-no-active">')
 		.append( $('<div class="issuetree__issue markdown">').html( app.markdown(this.issue) || 'no-set' ) )
+		.append( $('<div class="issuetree__answer">').text('投票なし') )
 		.append( $('<div class="issuetree__comment-count">') )
 	;
 	var $detailBody = $('<div class="issuetree">')
@@ -263,10 +264,15 @@ module.exports = function( app, $widget ){
 	 * 答欄を更新する
 	 */
 	function updateAnswer(){
+		var optionValueList = {};
 		$detailBodyAnswer.html( app.markdown(_this.answer) || 'no-answer' );
 		$detailBodyAnswer.find('ol>li').each(function(){
 			var $this = $(this);
 			var optionValue = $this.html()+'';
+			optionValueList[optionValue] = {
+				'value': optionValue,
+				'voteUsers': []
+			};
 			var myAnswer = _this.vote[app.getUserInfo().id];
 			$this
 				.attr({
@@ -329,12 +335,76 @@ module.exports = function( app, $widget ){
 					if( userName == app.getUserInfo().id ){
 						$li.addClass('issuetree__voteuser--me');
 					}
+					optionValueList[optionValue].voteUsers.push( app.getUserInfo().id );
 				}
 			}
 			if( $voteUserList.find('>li').size() ){
 				$this.append( $voteUserList );
 			}
 		});
+
+		var $widgetAnser = $widget.find('.issuetree__answer');
+		var maxAnswer = null;
+		var maxVoteCount = 0;
+		var maxAnswerCount = 0;
+		var otherVoteCount = 0;
+		for( var idx in optionValueList ){
+			if(maxAnswer === null){
+				maxAnswer = optionValueList[idx];
+				maxVoteCount = optionValueList[idx].voteUsers.length;
+				continue;
+			}
+			if(optionValueList[idx].voteUsers.length > maxAnswer.voteUsers.length){
+				maxAnswer = optionValueList[idx];
+				maxVoteCount = optionValueList[idx].voteUsers.length;
+				continue;
+			}
+		}
+
+		if( maxVoteCount > 0 ){
+			var $answerList = $('<ul>');
+			for( var idx in optionValueList ){
+				if(optionValueList[idx].voteUsers.length == maxVoteCount){
+					$answerList.append( $('<li>')
+						.text( optionValueList[idx].value + ' : ' + optionValueList[idx].voteUsers.length + '票' )
+					);
+					maxAnswerCount ++;
+				}else{
+					otherVoteCount += optionValueList[idx].voteUsers.length;
+				}
+			}
+			if( otherVoteCount ){
+				$answerList.append( $('<li>')
+				.text( 'その他 : ' + otherVoteCount + '票' )
+			);
+			}
+
+			$widgetAnser
+				.html('')
+				.append( $answerList )
+			;
+		}else{
+			$widgetAnser.html('投票なし');
+		}
+
+		$widgetBody
+			.removeClass('issuetree--status-active')
+			.removeClass('issuetree--status-no-active')
+			.removeClass('issuetree--status-fixed')
+		;
+		if( maxAnswerCount > 1 || otherVoteCount ){
+			$widgetBody
+				.addClass('issuetree--status-active')
+			;
+		}else if( !maxVoteCount && !otherVoteCount ){
+			$widgetBody
+				.addClass('issuetree--status-no-active')
+			;
+		}else if( maxVoteCount && !otherVoteCount ){
+			$widgetBody
+				.addClass('issuetree--status-fixed')
+			;
+		}
 	}
 
 	/**

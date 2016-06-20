@@ -1,6 +1,16 @@
 .issuetree{
 	background-color: #fff;
 
+	&.issuetree--status-active{
+		border-left: 7px solid #fe9;
+	}
+	&.issuetree--status-fixed{
+		border-left: 7px solid #6e9;
+	}
+	&.issuetree--status-no-active{
+		border-left: 7px solid #666;
+	}
+
 	.issuetree__block{
 		padding:5px 0;
 		margin:0.5em 0;

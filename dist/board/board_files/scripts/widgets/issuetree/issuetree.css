@@ -1,5 +1,11 @@
 .issuetree {
   background-color: #fff; }
+  .issuetree.issuetree--status-active {
+    border-left: 7px solid #fe9; }
+  .issuetree.issuetree--status-fixed {
+    border-left: 7px solid #6e9; }
+  .issuetree.issuetree--status-no-active {
+    border-left: 7px solid #666; }
   .issuetree .issuetree__block {
     padding: 5px 0;
     margin: 0.5em 0; }

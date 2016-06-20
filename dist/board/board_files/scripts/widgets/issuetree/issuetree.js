@@ -9856,17 +9856,17 @@ module.exports = function( app, $widget ){
 	this.vote = {};
 
 	var $widgetBody = $('<div class="issuetree issuetree--widget">')
-		.append( $('<div class="issuetree__issue">').html( app.markdown(this.issue) || 'no-set' ) )
+		.append( $('<div class="issuetree__issue markdown">').html( app.markdown(this.issue) || 'no-set' ) )
 		.append( $('<div class="issuetree__comment-count">') )
 	;
 	var $detailBody = $('<div class="issuetree">')
 		.append( $('<div class="issuetree__block">')
 			.append( $('<div class="issuetree__heading">').text( '問' ) )
-			.append( $('<div class="issuetree__issue">').html( app.markdown(this.issue) || 'no-set' ) )
+			.append( $('<div class="issuetree__issue markdown">').html( app.markdown(this.issue) || 'no-set' ) )
 		)
 		.append( $('<div class="issuetree__block">')
 			.append( $('<div class="issuetree__heading">').text( '答' ) )
-			.append( $('<div class="issuetree__answer">').html( app.markdown(this.answer) || 'no-answer' ) )
+			.append( $('<div class="issuetree__answer markdown">').html( app.markdown(this.answer) || 'no-answer' ) )
 		)
 		.append( $('<div class="row">')
 			.append( $('<div class="col-md-8">')
@@ -10226,14 +10226,14 @@ module.exports = function( app, $widget ){
 				// 詳細画面のディスカッションに追加
 				$detailBodyTimeline.append( $('<div>')
 					.append( $('<div class="issuetree__owner">').text(message.owner) )
-					.append( $('<div class="issuetree__content">').html(userMessage) )
+					.append( $('<div class="issuetree__content markdown">').html(userMessage) )
 				);
 				app.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
-					.append( $('<div class="message-unit__content">').html(userMessage) )
+					.append( $('<div class="message-unit__content markdown">').html(userMessage) )
 					.append( $('<div class="message-unit__targetWidget">').append( app.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;

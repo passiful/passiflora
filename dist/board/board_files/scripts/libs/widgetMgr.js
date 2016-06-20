@@ -1606,6 +1606,8 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 		widgetIndex[id].widgetType = content.widgetType;
 		widgetIndex[id].parent = content.parent;
 		widgetIndex[id].$ = $widget;
+
+		app.updateRelations();
 		return;
 	}
 
@@ -1624,6 +1626,7 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 				'data-offset-y': content.moveToY
 			})
 		;
+		app.updateRelations();
 	}
 
 	/**
@@ -1666,6 +1669,13 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 	 */
 	this.get = function(widgetId){
 		return widgetIndex[widgetId];
+	}
+
+	/**
+	 * ウィジェットを一覧ごと取得する
+	 */
+	this.getAll = function(){
+		return widgetIndex;
 	}
 
 	/**

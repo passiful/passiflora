@@ -17836,7 +17836,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			case 'text/html':
 				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
-					.append( $('<div class="message-unit__content">').html(message.content) )
+					.append( $('<div class="message-unit__content markdown">').html(message.content) )
 				);
 				break;
 		}
@@ -17978,6 +17978,8 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 		widgetIndex[id].widgetType = content.widgetType;
 		widgetIndex[id].parent = content.parent;
 		widgetIndex[id].$ = $widget;
+
+		app.updateRelations();
 		return;
 	}
 
@@ -17996,6 +17998,7 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 				'data-offset-y': content.moveToY
 			})
 		;
+		app.updateRelations();
 	}
 
 	/**
@@ -18038,6 +18041,13 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 	 */
 	this.get = function(widgetId){
 		return widgetIndex[widgetId];
+	}
+
+	/**
+	 * ウィジェットを一覧ごと取得する
+	 */
+	this.getAll = function(){
+		return widgetIndex;
 	}
 
 	/**
@@ -18084,17 +18094,17 @@ module.exports = function( app, $widget ){
 	this.vote = {};
 
 	var $widgetBody = $('<div class="issuetree issuetree--widget">')
-		.append( $('<div class="issuetree__issue">').html( app.markdown(this.issue) || 'no-set' ) )
+		.append( $('<div class="issuetree__issue markdown">').html( app.markdown(this.issue) || 'no-set' ) )
 		.append( $('<div class="issuetree__comment-count">') )
 	;
 	var $detailBody = $('<div class="issuetree">')
 		.append( $('<div class="issuetree__block">')
 			.append( $('<div class="issuetree__heading">').text( '問' ) )
-			.append( $('<div class="issuetree__issue">').html( app.markdown(this.issue) || 'no-set' ) )
+			.append( $('<div class="issuetree__issue markdown">').html( app.markdown(this.issue) || 'no-set' ) )
 		)
 		.append( $('<div class="issuetree__block">')
 			.append( $('<div class="issuetree__heading">').text( '答' ) )
-			.append( $('<div class="issuetree__answer">').html( app.markdown(this.answer) || 'no-answer' ) )
+			.append( $('<div class="issuetree__answer markdown">').html( app.markdown(this.answer) || 'no-answer' ) )
 		)
 		.append( $('<div class="row">')
 			.append( $('<div class="col-md-8">')
@@ -18454,14 +18464,14 @@ module.exports = function( app, $widget ){
 				// 詳細画面のディスカッションに追加
 				$detailBodyTimeline.append( $('<div>')
 					.append( $('<div class="issuetree__owner">').text(message.owner) )
-					.append( $('<div class="issuetree__content">').html(userMessage) )
+					.append( $('<div class="issuetree__content markdown">').html(userMessage) )
 				);
 				app.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
-					.append( $('<div class="message-unit__content">').html(userMessage) )
+					.append( $('<div class="message-unit__content markdown">').html(userMessage) )
 					.append( $('<div class="message-unit__targetWidget">').append( app.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -18678,6 +18688,7 @@ window.app = new (function(){
 		$timelineList,
 		$timelineForm,
 		$field,
+		$fieldRelations,
 		$fieldInner;
 	var boardId;
 
@@ -18704,10 +18715,12 @@ window.app = new (function(){
 				$timelineList = $('.board__timeline .board__timeline_list');
 				$timelineForm = $('.board__timeline .board__timeline_form');
 				$field = $('.board__field');
+				$fieldRelations = $('.board__field .board__field-relations');
 				$fieldInner = $('.board__field .board__field-inner');
 
 				_this.$field = $field;
 				_this.$fieldInner = $fieldInner;
+				$fieldRelations.append( $('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 10000 10000">') );
 
 				// functions Setup
 				_this.fieldContextMenu = new (require('../../board/board_files/scripts/libs/fieldContextMenu.js'))(_this, $fieldInner);
@@ -18943,6 +18956,8 @@ window.app = new (function(){
 			'height': $timeline.outerHeight() - $timelineForm.outerHeight()
 		});
 
+		_this.updateRelations();
+
 		callback();
 		return;
 	}
@@ -19059,6 +19074,36 @@ window.app = new (function(){
 		setTimeout(function(){
 			$body.find('input').get(0).focus();
 		}, 1000);
+		return;
+	}
+
+	/**
+	 * 親子関係の表現を更新する
+	 */
+	this.updateRelations = function( callback ){
+		callback = callback || function(){};
+		// <path stroke="black" stroke-width="2" fill="none" d="M120,170 180,170 150,230z" />
+
+		function getCenterOfGravity($elm){
+			var toX = $field.offset().left + $field.scrollLeft() + $elm.offset().left + $elm.outerWidth()/2;
+			if( toX < 0 ){ toX = 0; }
+			var toY = $field.offset().top + $field.scrollTop() + $elm.offset().top + $elm.outerHeight()/2;
+			if( toY < 0 ){ toY = 0; }
+			return {'x':toX, 'y':toY};
+		}
+
+		var $svg = $fieldRelations.find('>svg');
+		$svg.html('');
+		var widgets = this.widgetMgr.getAll();
+		for( var idx in widgets ){
+			if( !widgets[idx].parent ){ continue; }
+			var d = '';
+			var me = getCenterOfGravity(widgets[idx].$);
+			var parent = getCenterOfGravity(_this.widgetMgr.get(widgets[idx].parent).$);
+			$svg.get(0).innerHTML += '<path stroke="#333" stroke-width="3" fill="none" d="M'+me.x+','+me.y+' L'+parent.x+','+parent.y+'" style="opacity: 0.2;" />';
+		}
+
+		callback();
 		return;
 	}
 

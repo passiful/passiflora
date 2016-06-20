@@ -40,6 +40,15 @@ html, body{
 		width: 70%;
 		height: 100%;
 		overflow: auto;
+		.board__field-relations{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 10000px;
+			height: 10000px;
+			overflow: hidden;
+			z-index: 1000;
+		}
 		.board__field-inner{
 			position: absolute;
 			top: 0;
@@ -47,6 +56,7 @@ html, body{
 			width: 10000px;
 			height: 10000px;
 			overflow: hidden;
+			z-index: 2000;
 		}
 	}
 	&__timeline{
@@ -139,6 +149,11 @@ html, body{
 	min-width: 5px;
 	min-height: 5px;
 	background-color: #eee;
+}
+.markdown{
+	*{
+		font-size: 100%;
+	}
 }
 
 @import "../scripts/widgets/issuetree/issuetree.css.scss";

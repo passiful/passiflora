@@ -44,7 +44,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			case 'text/html':
 				app.insertTimeline( $messageUnit
 					.append( $('<div class="message-unit__owner">').text(message.owner) )
-					.append( $('<div class="message-unit__content">').html(message.content) )
+					.append( $('<div class="message-unit__content markdown">').html(message.content) )
 				);
 				break;
 		}

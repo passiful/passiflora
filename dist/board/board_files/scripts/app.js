@@ -17808,6 +17808,11 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			})
 		;
 
+		if( !message.content ){
+			console.error('content がセットされていないレコードです。', message);
+			return;
+		}
+
 		switch( message.contentType ){
 			case 'application/x-passiflora-command':
 				message.content = JSON.parse(message.content);
@@ -17826,6 +17831,30 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						break;
 					case 'moveWidget':
 						app.widgetMgr.move( message.id, message.content );
+						break;
+					case 'userLogin':
+						app.userMgr.login( message.connectionId, message.content.userInfo, function(err, userInfo){
+							var str = '';
+							str += message.content.userInfo.name;
+							str += ' がログインしました。';
+							app.insertTimeline( $messageUnit
+								.addClass('message-unit--operation')
+								.append( $('<div class="message-unit__operation-message">').text(str) )
+							);
+						} );
+						break;
+					case 'userLogout':
+						// message.content = JSON.parse(message.content);
+						console.log('user Logout.');
+						app.userMgr.logout( message.connectionId, function(err, userInfo){
+							var str = '';
+							str += userInfo.name;
+							str += ' がログアウトしました。';
+							app.insertTimeline( $messageUnit
+								.addClass('message-unit--operation')
+								.append( $('<div class="message-unit__operation-message">').text(str) )
+							);
+						} );
 						break;
 				}
 				break;
@@ -17898,6 +17927,54 @@ module.exports = function( app, $timelineList, $fieldInner ){
 
 },{}],79:[function(require,module,exports){
 /**
+ * userMgr.js
+ */
+module.exports = function( app, $timelineList, $field, $fieldInner ){
+	var _this = this;
+	var userList = {};
+
+
+	/**
+	 * ユーザー情報を登録する
+	 */
+	this.login = function(connectionId, userInfo, callback){
+		callback = callback || function(err, userInfo){};
+		userList[connectionId] = userInfo;
+		callback(null, userList[connectionId]);
+		return;
+	}
+
+	/**
+	 * ユーザー情報を削除する
+	 */
+	this.logout = function(connectionId, callback){
+		callback = callback || function(err, userInfo){};
+		var rtn = userList[connectionId];
+		userList[connectionId] = undefined;
+		delete(userList[connectionId]);
+		callback(null, rtn);
+		return;
+	}
+
+	/**
+	 * ユーザー情報を取得する
+	 */
+	this.get = function(connectionId){
+		return userList[connectionId];
+	}
+
+	/**
+	 * ユーザー情報を一覧ごと取得する
+	 */
+	this.getAll = function(){
+		return userList;
+	}
+
+	return;
+}
+
+},{}],80:[function(require,module,exports){
+/**
  * widgets: base class
  */
 module.exports = function( app, $widget ){
@@ -17920,9 +17997,9 @@ module.exports = function( app, $widget ){
 	return;
 }
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 /**
- * widgets.js
+ * widgetMgr.js
  */
 module.exports = function( app, $timelineList, $field, $fieldInner ){
 	var _this = this;
@@ -18080,7 +18157,7 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 	return;
 }
 
-},{"underscore":12}],81:[function(require,module,exports){
+},{"underscore":12}],82:[function(require,module,exports){
 /**
  * widgets: issuetree.js
  */
@@ -18639,7 +18716,7 @@ module.exports = function( app, $widget ){
 	return;
 }
 
-},{"jquery":7}],82:[function(require,module,exports){
+},{"jquery":7}],83:[function(require,module,exports){
 /**
  * widgets: stickies.js
  */
@@ -18754,7 +18831,7 @@ module.exports = function( app, $widget ){
 	return;
 }
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 window.app = new (function(){
 	// app "board"
 	var _this = this;
@@ -18812,6 +18889,7 @@ window.app = new (function(){
 				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
 				_this.widgetMgr = new (require('../../board/board_files/scripts/libs/widgetMgr.js'))(_this, $timelineList, $field, $fieldInner);
 				_this.widgetBase = require('../../board/board_files/scripts/libs/widgetBase.js');
+				_this.userMgr = new (require('../../board/board_files/scripts/libs/userMgr.js'))(_this, $timelineList, $field, $fieldInner);
 
 				_this.widgetList = {
 					'stickies': {
@@ -19151,7 +19229,18 @@ window.app = new (function(){
 						var name = JSON.parse(JSON.stringify($body.find('[name=userName]').val()));
 						userInfo.id = name;
 						userInfo.name = name;
-						window.main.modal.close();
+						_this.sendMessage(
+							{
+								'content': JSON.stringify({
+									'userInfo': userInfo,
+									'operation': 'userLogin'
+								}),
+								'contentType': 'application/x-passiflora-command'
+							},
+							function(rtn){
+								window.main.modal.close();
+							}
+						);
 						callback();
 					})
 			]
@@ -19216,4 +19305,4 @@ window.app = new (function(){
 
 })();
 
-},{"../../board/board_files/scripts/apis/receiveBroadcast.js":76,"../../board/board_files/scripts/libs/fieldContextMenu.js":77,"../../board/board_files/scripts/libs/messageOperator.js":78,"../../board/board_files/scripts/libs/widgetBase.js":79,"../../board/board_files/scripts/libs/widgetMgr.js":80,"../../board/board_files/scripts/widgets/issuetree/issuetree.js":81,"../../board/board_files/scripts/widgets/stickies/stickies.js":82,"es6-promise":4,"iterate79":6,"jquery":7,"marked":8,"twig":11,"utils79":13}]},{},[83])
+},{"../../board/board_files/scripts/apis/receiveBroadcast.js":76,"../../board/board_files/scripts/libs/fieldContextMenu.js":77,"../../board/board_files/scripts/libs/messageOperator.js":78,"../../board/board_files/scripts/libs/userMgr.js":79,"../../board/board_files/scripts/libs/widgetBase.js":80,"../../board/board_files/scripts/libs/widgetMgr.js":81,"../../board/board_files/scripts/widgets/issuetree/issuetree.js":82,"../../board/board_files/scripts/widgets/stickies/stickies.js":83,"es6-promise":4,"iterate79":6,"jquery":7,"marked":8,"twig":11,"utils79":13}]},{},[84])

@@ -1,5 +1,5 @@
 /**
- * widgets.js
+ * widgetMgr.js
  */
 module.exports = function( app, $timelineList, $field, $fieldInner ){
 	var _this = this;

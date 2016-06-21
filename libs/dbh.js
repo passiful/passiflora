@@ -39,6 +39,7 @@ module.exports = function(conf, main){
 				'contentType': { type: Sequelize.STRING },
 				'targetWidget': { type: Sequelize.STRING },
 				'owner': { type: Sequelize.STRING },
+				'connectionId': { type: Sequelize.STRING },
 				'microtime': { type: Sequelize.BIGINT }
 			}
 		);
@@ -72,6 +73,7 @@ module.exports = function(conf, main){
 				'contentType': message.contentType,
 				'targetWidget': message.targetWidget,
 				'owner': message.owner,
+				'connectionId': message.connectionId,
 				'microtime': message.microtime
 			}).then(function(record){
 				// console.log(record);

@@ -55,6 +55,7 @@ window.app = new (function(){
 				_this.messageOperator = new (require('../../board/board_files/scripts/libs/messageOperator.js'))(_this, $timelineList, $fieldInner);
 				_this.widgetMgr = new (require('../../board/board_files/scripts/libs/widgetMgr.js'))(_this, $timelineList, $field, $fieldInner);
 				_this.widgetBase = require('../../board/board_files/scripts/libs/widgetBase.js');
+				_this.userMgr = new (require('../../board/board_files/scripts/libs/userMgr.js'))(_this, $timelineList, $field, $fieldInner);
 
 				_this.widgetList = {
 					'stickies': {
@@ -394,7 +395,18 @@ window.app = new (function(){
 						var name = JSON.parse(JSON.stringify($body.find('[name=userName]').val()));
 						userInfo.id = name;
 						userInfo.name = name;
-						window.main.modal.close();
+						_this.sendMessage(
+							{
+								'content': JSON.stringify({
+									'userInfo': userInfo,
+									'operation': 'userLogin'
+								}),
+								'contentType': 'application/x-passiflora-command'
+							},
+							function(rtn){
+								window.main.modal.close();
+							}
+						);
 						callback();
 					})
 			]

@@ -16,6 +16,11 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			})
 		;
 
+		if( !message.content ){
+			console.error('content がセットされていないレコードです。', message);
+			return;
+		}
+
 		switch( message.contentType ){
 			case 'application/x-passiflora-command':
 				message.content = JSON.parse(message.content);
@@ -34,6 +39,30 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						break;
 					case 'moveWidget':
 						app.widgetMgr.move( message.id, message.content );
+						break;
+					case 'userLogin':
+						app.userMgr.login( message.connectionId, message.content.userInfo, function(err, userInfo){
+							var str = '';
+							str += message.content.userInfo.name;
+							str += ' がログインしました。';
+							app.insertTimeline( $messageUnit
+								.addClass('message-unit--operation')
+								.append( $('<div class="message-unit__operation-message">').text(str) )
+							);
+						} );
+						break;
+					case 'userLogout':
+						// message.content = JSON.parse(message.content);
+						console.log('user Logout.');
+						app.userMgr.logout( message.connectionId, function(err, userInfo){
+							var str = '';
+							str += userInfo.name;
+							str += ' がログアウトしました。';
+							app.insertTimeline( $messageUnit
+								.addClass('message-unit--operation')
+								.append( $('<div class="message-unit__operation-message">').text(str) )
+							);
+						} );
 						break;
 				}
 				break;

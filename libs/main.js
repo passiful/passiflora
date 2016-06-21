@@ -28,7 +28,7 @@ var main = new (require('./bifloraMain.js'))(conf);
 // middleware - session & request
 app.use( require('body-parser')() );
 var mdlWareSession = session({
-	secret: "pickles2webtool",
+	secret: "passiflora",
 	cookie: {
 		httpOnly: false
 	}

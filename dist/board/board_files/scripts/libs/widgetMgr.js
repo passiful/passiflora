@@ -1550,7 +1550,7 @@
 
 },{}],2:[function(require,module,exports){
 /**
- * widgets.js
+ * widgetMgr.js
  */
 module.exports = function( app, $timelineList, $field, $fieldInner ){
 	var _this = this;

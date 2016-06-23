@@ -28,6 +28,7 @@
     "es6-promise": "^3.2.1",
     "express": "^4.13.3",
     "express-session": "^1.13.0",
+    "fs-extra": "^0.30.0",
     "iterate79": "0.0.1",
     "jquery": "^2.2.2",
     "marked": "^0.3.5",

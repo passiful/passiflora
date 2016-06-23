@@ -95,8 +95,7 @@ window.app = new (function(){
 				// (biflora 送信テスト)
 				biflora.send(
 					'ping',
-					{
-					} ,
+					{} ,
 					function(rtn){
 						console.log(rtn);
 						rlv();

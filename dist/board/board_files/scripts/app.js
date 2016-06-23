@@ -17795,12 +17795,13 @@ module.exports = function( app, $fieldInner ){
  */
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
+	var newestMessageNumber = 0;
+	var messageQueue = {};
 
 	/**
 	 * タイムラインメッセージを処理する
 	 */
-	this.exec = function(message){
-		// console.log(message);
+	function execute(message){
 
 		var $messageUnit = $('<div class="message-unit">')
 			.attr({
@@ -17868,6 +17869,32 @@ module.exports = function( app, $timelineList, $fieldInner ){
 					.append( $('<div class="message-unit__content markdown">').html(message.content) )
 				);
 				break;
+		}
+	}
+
+	/**
+	 * タイムラインメッセージを受け付ける
+	 */
+	this.exec = function(message){
+		// console.log(message);
+		messageQueue[message.id] = message;
+
+		while( 1 ){
+			if( !messageQueue[newestMessageNumber+1] ){
+				// 次のメッセージがなければストップ
+				break;
+			}
+			newestMessageNumber ++;
+			// console.log(newestMessageNumber);
+
+			// 次のメッセージを処理
+			execute(messageQueue[newestMessageNumber]);
+
+			// 処理済みのメッセージを破棄
+			messageQueue[newestMessageNumber] = undefined;
+			delete( messageQueue[newestMessageNumber] );
+
+			break;
 		}
 
 		return;
@@ -18929,8 +18956,7 @@ window.app = new (function(){
 				// (biflora 送信テスト)
 				biflora.send(
 					'ping',
-					{
-					} ,
+					{} ,
 					function(rtn){
 						console.log(rtn);
 						rlv();

@@ -9876,6 +9876,12 @@ module.exports = function( app, $widget ){
 					.append( $('<div class="issuetree__discussion-timeline">')
 						.append( $('<div class="issuetree__discussion-timeline--timeline">') )
 						.append( $('<div class="issuetree__discussion-timeline--form">')
+							.append( $('<div class="issuetree__discussion-timeline--stance">')
+								.append( $('<span>')
+									.text('あなたの現在の立場 : ')
+								)
+								.append( $('<select>') )
+							)
 							.append( $('<textarea class="form-control issuetree__discussion-timeline--chat-comment">') )
 						)
 					)
@@ -9926,6 +9932,7 @@ module.exports = function( app, $widget ){
 		)
 	;
 	var $detailBodyTimeline = $detailBody.find('.issuetree__discussion-timeline--timeline');
+	var $yourStanceSelector = $detailBody.find('.issuetree__discussion-timeline--stance select');
 
 	/**
 	 * テキストエリアでの編集内容を反映する
@@ -10044,20 +10051,33 @@ module.exports = function( app, $widget ){
 		$detailBody.find('textarea.issuetree__discussion-timeline--chat-comment'),
 		{
 			'submit': function(value){
-				app.sendMessage(
-					{
-						'content': JSON.stringify({
-							'command': 'comment',
-							'comment': value
-						}),
-						'contentType': 'application/x-passiflora-widget-message',
-						'targetWidget': _this.id
-					},
-					function(){
-						console.log('issuetree chat-comment submited.');
-					}
-				);
+				function sendComment(value, callback){
+					callback = callback || function(){};
+					app.sendMessage(
+						{
+							'content': JSON.stringify({
+								'command': 'comment',
+								'comment': value
+							}),
+							'contentType': 'application/x-passiflora-widget-message',
+							'targetWidget': _this.id
+						},
+						function(){
+							console.log('issuetree chat-comment submited.');
+							callback();
+						}
+					);
+				}
 
+				var myAnswer = _this.vote[app.getUserInfo().id];
+				var newAnswer = $yourStanceSelector.val();
+				if( newAnswer != myAnswer ){
+					sendVoteMessage(newAnswer, function(){
+						sendComment(value);
+					});
+				}else{
+					sendComment(value);
+				}
 			}
 		}
 	);
@@ -10110,6 +10130,7 @@ module.exports = function( app, $widget ){
 	 */
 	function updateAnswer(){
 		var optionValueList = {};
+		var myAnswer = _this.vote[app.getUserInfo().id];
 		$detailBodyAnswer.html( app.markdown(_this.answer) || 'no-answer' );
 		$detailBodyAnswer.find('ol>li').each(function(){
 			var $this = $(this);
@@ -10118,7 +10139,6 @@ module.exports = function( app, $widget ){
 				'value': optionValue,
 				'voteUsers': []
 			};
-			var myAnswer = _this.vote[app.getUserInfo().id];
 			$this
 				.attr({
 					'data-passiflora-vote-option': optionValue
@@ -10149,19 +10169,7 @@ module.exports = function( app, $widget ){
 							if( $this.attr('data-passiflora-vote-option') == _this.vote[app.getUserInfo().id] ){
 								return false;
 							}
-							app.sendMessage(
-								{
-									'content': JSON.stringify({
-										'command': 'vote',
-										'option': $this.attr('data-passiflora-vote-option')
-									}),
-									'contentType': 'application/x-passiflora-widget-message',
-									'targetWidget': _this.id
-								},
-								function(){
-									console.log('issuetree vote submited.');
-								}
-							);
+							sendVoteMessage($this.attr('data-passiflora-vote-option'));
 							return false;
 						})
 					)
@@ -10250,6 +10258,47 @@ module.exports = function( app, $widget ){
 				.addClass('issuetree--status-fixed')
 			;
 		}
+
+		$yourStanceSelector.html('');
+		for( var idx in optionValueList ){
+			var $option = $('<option>');
+			$option
+				.text(idx)
+				.attr({
+					'value': idx
+				})
+			;
+			if( idx == myAnswer ){
+				$option.attr({
+					'selected': true
+				});
+			}
+			$yourStanceSelector.append($option);
+		}
+		// console.log(optionValueList);
+		// console.log(optionValueList);
+		// $yourStanceSelector
+	}
+
+	/**
+	 * 投票操作のメッセージを送信する
+	 */
+	function sendVoteMessage(vote, callback){
+		callback = callback || function(){};
+		app.sendMessage(
+			{
+				'content': JSON.stringify({
+					'command': 'vote',
+					'option': vote
+				}),
+				'contentType': 'application/x-passiflora-widget-message',
+				'targetWidget': _this.id
+			},
+			function(){
+				console.log('issuetree vote submited.');
+				callback();
+			}
+		);
 	}
 
 	/**

@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tomk79/passiflora.git"
+    "url": "git+https://github.com/passiful/passiflora.git"
   },
   "author": "Tomoya Koyanagi",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tomk79/passiflora/issues"
+    "url": "https://github.com/passiful/passiflora/issues"
   },
-  "homepage": "https://github.com/tomk79/passiflora#readme",
+  "homepage": "https://github.com/passiful/passiflora#readme",
   "dependencies": {
     "biflora": "file:submodules/node-biflora",
     "body-parser": "^1.15.0",

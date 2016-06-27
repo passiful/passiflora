@@ -206,13 +206,14 @@ module.exports = function( app, $widget ){
 		$detailBody.find('textarea.issuetree__discussion-timeline--chat-comment'),
 		{
 			'submit': function(value){
-				function sendComment(value, callback){
+				function sendComment(value, stance, callback){
 					callback = callback || function(){};
 					app.sendMessage(
 						{
 							'content': JSON.stringify({
 								'command': 'comment',
-								'comment': value
+								'comment': value,
+								'stance': stance
 							}),
 							'contentType': 'application/x-passiflora-widget-message',
 							'targetWidget': _this.id
@@ -226,12 +227,12 @@ module.exports = function( app, $widget ){
 
 				var myAnswer = _this.vote[app.getUserInfo().id];
 				var newAnswer = $yourStanceSelector.val();
-				if( newAnswer != myAnswer ){
+				if( newAnswer.length && newAnswer != myAnswer ){
 					sendVoteMessage(newAnswer, function(){
-						sendComment(value);
+						sendComment(value, newAnswer);
 					});
 				}else{
-					sendComment(value);
+					sendComment(value, (myAnswer || ''));
 				}
 			}
 		}
@@ -415,6 +416,9 @@ module.exports = function( app, $widget ){
 		}
 
 		$yourStanceSelector.html('');
+		if( !myAnswer ){
+			$yourStanceSelector.append( '<option value="">選択してください</option>' );
+		}
 		for( var idx in optionValueList ){
 			var $option = $('<option>');
 			$option

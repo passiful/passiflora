@@ -18271,13 +18271,19 @@ module.exports = function( app, $widget ){
 		.append( $('<div class="issuetree__comment-count">') )
 	;
 	var $detailBody = $('<div class="issuetree">')
-		.append( $('<div class="issuetree__block">')
-			.append( $('<div class="issuetree__heading">').text( '問' ) )
-			.append( $('<div class="issuetree__issue markdown">').html( app.markdown(this.issue) || 'no-set' ) )
-		)
-		.append( $('<div class="issuetree__block">')
-			.append( $('<div class="issuetree__heading">').text( '答' ) )
-			.append( $('<div class="issuetree__answer markdown">').html( app.markdown(this.answer) || 'no-answer' ) )
+		.append( $('<div class="row">')
+			.append( $('<div class="col-sm-6">')
+				.append( $('<div class="issuetree__block">')
+					.append( $('<div class="issuetree__heading">').text( '問' ) )
+					.append( $('<div class="issuetree__issue markdown">').html( app.markdown(this.issue) || 'no-set' ) )
+				)
+			)
+			.append( $('<div class="col-sm-6">')
+				.append( $('<div class="issuetree__block">')
+					.append( $('<div class="issuetree__heading">').text( '答' ) )
+					.append( $('<div class="issuetree__answer markdown">').html( app.markdown(this.answer) || 'no-answer' ) )
+				)
+			)
 		)
 		.append( $('<div class="row">')
 			.append( $('<div class="col-md-8">')
@@ -18674,6 +18680,7 @@ module.exports = function( app, $widget ){
 		if( !myAnswer ){
 			$yourStanceSelector.append( '<option value="">選択してください</option>' );
 		}
+		var selected = false;
 		for( var idx in optionValueList ){
 			var $option = $('<option>');
 			$option
@@ -18683,11 +18690,21 @@ module.exports = function( app, $widget ){
 				})
 			;
 			if( idx == myAnswer ){
+				selected = true;
 				$option.attr({
 					'selected': true
 				});
 			}
 			$yourStanceSelector.append($option);
+		}
+		if( myAnswer && !selected ){
+			// すでに立場を表明済みだが、選択した選択肢がなくなっている場合
+			$yourStanceSelector.append( $('<option>')
+				.attr({
+					'selected': true
+				})
+				.text(myAnswer)
+			);
 		}
 		// console.log(optionValueList);
 		// console.log(optionValueList);

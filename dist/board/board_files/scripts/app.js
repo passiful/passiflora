@@ -17878,6 +17878,11 @@ module.exports = function( app, $timelineList, $fieldInner ){
 					case 'userLogout':
 						// message.content = JSON.parse(message.content);
 						app.userMgr.logout( message.connectionId, function(err, userInfo){
+							if(userInfo === undefined){
+								console.error( 'userLogout: userInfo が undefined です。' );
+								return;
+							}
+							// console.log(userInfo);
 							// console.log('user "'+userInfo.name+'" Logout.');
 							var str = '';
 							str += userInfo.name;

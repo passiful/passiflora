@@ -207,6 +207,8 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						// TODO: サーバーに問い合わせ、欠けた情報を取得する必要がある。
 						// ここを通る場合、受信に失敗したメッセージがあって連番が抜けている可能性が高い。
 						console.error(messageQueueLength + ' 件の未処理のメッセージが残っています。');
+						console.error(messageQueue);
+						console.error(newestMessageNumber);
 					}
 					// console.log(messageQueue);
 					isQueueProgress = false;

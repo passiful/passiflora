@@ -22,9 +22,6 @@ if( conf.originParsed.protocol == 'https' ){
 }
 console.log('port number is '+conf.originParsed.port);
 
-// create main object
-var main = new (require('./bifloraMain.js'))(conf);
-
 // middleware - session & request
 app.use( require('body-parser')() );
 var mdlWareSession = session({
@@ -36,15 +33,21 @@ var mdlWareSession = session({
 app.use( mdlWareSession );
 
 app.use( function(req, res, next){
-	req.main = main;
+	req.main = {};
+	req.main.board = new (require('./board.js'))(conf, req.main);
 	next();
 } );
 
 // middleware - biflora resources
 var biflora = require('biflora');
 app.use( biflora.clientLibs() );
-biflora.setupWebSocket(server, require('./apis/bifloraApi.js'), main);
-
+biflora.setupWebSocket(
+    server,
+    require('incense').getBifloraApi() ,
+    require('incense').getBifloraMain({
+        'dataDir': conf.dataDir
+    })
+);
 // middleware
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );
 app.get( '/board/:boardId/', require( __dirname+'/pages/board.js' )(conf) );

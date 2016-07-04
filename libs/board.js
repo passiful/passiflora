@@ -35,11 +35,8 @@ module.exports = function(conf, main){
 				// info.json 生成
 				fs.writeFileSync(require('path').resolve(newDirPath, 'info.json'), JSON.stringify(boardInfo, null, 1));
 
-				main.dbh.initDb(newBoardId, function(dbInfo){
-					// 返却
-					// console.log(dbInfo);
-					callback(newBoardId);
-				});
+				callback(newBoardId);
+
 				break;
 
 			} catch (e) {

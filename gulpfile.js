@@ -28,6 +28,9 @@ gulp.task("replace-package-dist", function() {
 	gulp.src(["node_modules/bootstrap/dist/**/*"])
 		.pipe(gulp.dest( './dist/common/bootstrap/dist/' ))
 	;
+	gulp.src(["node_modules/incense/dist/**/*"])
+		.pipe(gulp.dest( './dist/common/incense/dist/' ))
+	;
 });
 
 // src 中の *.css.scss を処理

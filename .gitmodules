@@ -4,3 +4,6 @@
 [submodule "submodules/node-biflora"]
 	path = submodules/node-biflora
 	url = https://github.com/passiful/node-biflora.git
+[submodule "submodules/node-incense"]
+	path = submodules/node-incense
+	url = https://github.com/passiful/node-incense.git

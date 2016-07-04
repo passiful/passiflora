@@ -7,7 +7,7 @@
     "dev": "gulp watch;",
     "preview": "gulp preview;",
     "ssl-key-gen": "openssl genrsa -aes128 -out config/ssl/server.key 2048; openssl req -new -key config/ssl/server.key -sha256 -out config/ssl/server.csr; openssl x509 -in config/ssl/server.csr -days 365 -req -signkey config/ssl/server.key -sha256 -out config/ssl/server.crt;",
-    "submodules-update": "rm -rfv node_modules/utils79; rm -rfv node_modules/biflora; npm install; gulp;",
+    "submodules-update": "rm -rfv node_modules/utils79; rm -rfv node_modules/biflora; rm -rfv node_modules/incense; npm install; gulp;",
     "test": "gulp; mocha --ui tdd ./tests/"
   },
   "repository": {
@@ -29,6 +29,7 @@
     "express": "^4.13.3",
     "express-session": "^1.13.0",
     "fs-extra": "^0.30.0",
+    "incense": "file:submodules/node-incense",
     "iterate79": "0.0.1",
     "jquery": "^2.2.2",
     "marked": "^0.3.5",

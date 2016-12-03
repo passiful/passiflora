@@ -19094,15 +19094,22 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 	 * ユーザー情報を削除する
 	 */
 	this.logout = function(connectionId, callback){
-		callback = callback || function(err, userInfo){};
-		var rtn = userConnectionList[connectionId];
+		callback = callback || function(err, {}){};
+		try {
+			var rtn = userConnectionList[connectionId];
 
-		userList[rtn.id] = undefined;
-		delete( userList[rtn.id] );
-		userConnectionList[connectionId] = undefined;
-		delete( userConnectionList[connectionId] );
+			userList[rtn.id] = undefined;
+			delete( userList[rtn.id] );
+			userConnectionList[connectionId] = undefined;
+			delete( userConnectionList[connectionId] );
 
-		callback( null, rtn );
+			callback( null, rtn );
+			return;
+		} catch (e) {
+			console.error('[ERROR] failed to logout: '+connectionId, rtn);
+			callback('[ERROR] failed to logout: '+connectionId, rtn);
+			return;
+		}
 		return;
 	}
 
@@ -19124,7 +19131,16 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 	 * ユーザー情報を取得する
 	 */
 	this.get = function(id){
-		return userList[id];
+		var rtn = userList[id];
+		if( !rtn ){
+			// userが見つからない場合
+			console.error( 'User NOT found: ' + id );
+			rtn = {
+				"id": id,
+				"name": "("+id+")"
+			};
+		}
+		return rtn;
 	}
 
 	/**

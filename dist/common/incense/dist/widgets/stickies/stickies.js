@@ -9834,31 +9834,40 @@ module.exports = function( incense, $widget ){
 			'height': '100%'
 		})
 	;
-	var mode = null;
+	_this.mode = null;
 
 	$widget.append( $stickies
 		.html( incense.markdown( _this.value ) )
 	);
 
 	$widget
-		.dblclick(function(e){
-			mode = 'edit';
-			$widget.append( $textarea.val( _this.value ) );
-			$textarea.focus();
+		.on('dblclick', function(e){
+			incense.locker.lock(_this.id, 'main', function(res){
+				// console.log(res);
+				if(!res){
+					console.log('failed to open editor; this widget was locked. This is edited by other member.');
+					return;
+				}
+				_this.mode = 'edit';
+				$widget.append( $textarea.val( _this.value ) );
+				$textarea.focus();
+			});
 		})
-		.click(function(e){
+		.on('click', function(e){
 			e.stopPropagation();
 		})
 	;
 
 	function apply(){
-		if(mode != 'edit'){return;}
-		mode = null;
-console.log(12345678);
+		if( _this.mode !== 'edit' ){
+			return;
+		}
+		_this.mode = null;
 		if( _this.value == $textarea.val() ){
 			// 変更なし
 			$textarea.val('').remove();
 			$stickies.html( incense.markdown(_this.value) );
+			incense.locker.unlock();
 			return;
 		}
 
@@ -9874,6 +9883,8 @@ console.log(12345678);
 				console.log('stickies change submited.');
 				$textarea.val('').remove();
 				$stickies.html( incense.markdown(_this.value) );
+				incense.locker.unlock();
+				return;
 			}
 		);
 	}

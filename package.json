@@ -25,6 +25,7 @@
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",
     "config": "^1.19.0",
+    "ejs": "^2.5.5",
     "es6-promise": "^3.2.1",
     "express": "^4.13.3",
     "express-session": "^1.13.0",

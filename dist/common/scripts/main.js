@@ -9815,14 +9815,6 @@ return jQuery;
 }));
 
 },{}],2:[function(require,module,exports){
-window.main = new (function(){
-	window.$ = window.jQuery = require('jquery');
-
-	this.modal = require('./main.modal.js');
-
-})();
-
-},{"./main.modal.js":3,"jquery":1}],3:[function(require,module,exports){
 /**
  * main.modal.js
  */
@@ -9937,4 +9929,12 @@ module.exports = new (function(){
 
 })();
 
-},{}]},{},[2])
+},{}],3:[function(require,module,exports){
+window.main = new (function(){
+	window.$ = window.jQuery = require('jquery');
+
+	this.modal = require('./common/scripts/main.modal.js');
+
+})();
+
+},{"./common/scripts/main.modal.js":2,"jquery":1}]},{},[3])

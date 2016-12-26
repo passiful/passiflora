@@ -5,5 +5,10 @@
 	"sslOption":{
 		"key": "./config/ssl/server.key",
 		"cert": "./config/ssl/server.crt"
+	},
+	"auth":{
+		"facebook":{
+			"appId": "1382279231791250"
+		}
 	}
 }

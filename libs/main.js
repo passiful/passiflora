@@ -13,7 +13,6 @@ var sslOption = {
 
 var express = require('express'),
 	app = express();
-var session = require('express-session');
 var server;
 if( conf.originParsed.protocol == 'https' ){
 	server = require('https').Server(sslOption, app);
@@ -24,13 +23,12 @@ console.log('port number is '+conf.originParsed.port);
 
 // middleware - session & request
 app.use( require('body-parser')() );
-var mdlWareSession = session({
+app.use( require('express-session')({
 	secret: "passiflora",
 	cookie: {
 		httpOnly: false
 	}
-});
-app.use( mdlWareSession );
+}) );
 
 app.use( function(req, res, next){
 	req.main = {};
@@ -48,6 +46,18 @@ biflora.setupWebSocket(
         'dataDir': conf.dataDir
     })
 );
+
+// ログイン処理系
+app.use( require('./preprocess/userInfo.js')() );
+
+app.use( '/apis/login', require('./apis/login.js')() );
+app.use( '/apis/logout', require('./apis/logout.js')() );
+app.use( '/logout.html', require('./../src/logout.html.js')() );
+app.use( '/apis/getLoginUserInfo', require('./apis/getLoginUserInfo.js')() );
+
+app.use( '/board/*', require('./preprocess/loginCheck.js')() );
+app.use( '/apis/*', require('./preprocess/loginCheck.js')() );
+
 // middleware
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );
 app.get( '/board/:boardId/', require( __dirname+'/pages/board.js' )(conf) );

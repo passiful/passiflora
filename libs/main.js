@@ -21,9 +21,12 @@ if( conf.originParsed.protocol == 'https' ){
 }
 console.log('port number is '+conf.originParsed.port);
 
+var expressSession = require('express-session') // セッション管理
+
+
 // middleware - session & request
 app.use( require('body-parser')() );
-app.use( require('express-session')({
+app.use( expressSession({
 	secret: "passiflora",
 	cookie: {
 		httpOnly: false
@@ -43,7 +46,17 @@ biflora.setupWebSocket(
 	server,
 	require('incense').getBifloraApi() ,
 	require('incense').getBifloraMain({
-		'dataDir': conf.dataDir
+		'dataDir': conf.dataDir ,
+		'getUserInfo': function( socket, clientDefaultUserInfo, callback ){
+			// provide user info.
+			// eg: {'id': 'user_id', 'name': 'User Name'}
+			// console.log('★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★==');
+			// console.log(clientDefaultUserInfo);
+			// console.log('★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★--');
+			var sessionId = require('cookie').parse( socket.request.headers.cookie )['connect.sid'];
+			callback(clientDefaultUserInfo);
+			return;
+		}
 	})
 );
 
@@ -57,6 +70,7 @@ app.use( '/apis/getLoginUserInfo', require('./apis/getLoginUserInfo.js')() );
 
 app.use( '/board/*', require('./preprocess/loginCheck.js')() );
 app.use( '/apis/*', require('./preprocess/loginCheck.js')() );
+app.use( '/create/*', require('./preprocess/loginCheck.js')() );
 
 // middleware
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );

@@ -1392,8 +1392,6 @@ module.exports = function(){
 
 			try {
 				var data = {
-					// "px2": px2,
-					// "conf": px2.conf(),
 					"req": req
 				};
 				var template = ejs.compile(templateSrc.toString(), {"filename": __dirname + '/index.html'});

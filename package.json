@@ -25,6 +25,8 @@
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",
     "config": "^1.19.0",
+    "connect": "^3.5.0",
+    "connect-redis": "^3.2.0",
     "ejs": "^2.5.5",
     "es6-promise": "^3.2.1",
     "express": "^4.13.3",

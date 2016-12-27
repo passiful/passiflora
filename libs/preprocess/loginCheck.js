@@ -2,6 +2,7 @@
  * loginCheck.js
  */
 module.exports = function(){
+	var fs = require('fs');
 
 	return function(req, res, next){
 		// console.log(req);
@@ -14,9 +15,10 @@ module.exports = function(){
 
 		if( !userInfo ){
 			res.status(403);
-			res.set('Content-Type', 'text/html')
+			res.set('Content-Type', 'text/html');
+			var html = fs.readFileSync( __dirname + '/loginCheck_files/template.html' );
 			res
-				.send('Forbidden.<br />back to <a href="/">home</a>')
+				.send(html)
 				.end()
 			;
 			return;

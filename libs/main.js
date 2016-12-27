@@ -40,11 +40,11 @@ app.use( function(req, res, next){
 var biflora = require('biflora');
 app.use( biflora.clientLibs() );
 biflora.setupWebSocket(
-    server,
-    require('incense').getBifloraApi() ,
-    require('incense').getBifloraMain({
-        'dataDir': conf.dataDir
-    })
+	server,
+	require('incense').getBifloraApi() ,
+	require('incense').getBifloraMain({
+		'dataDir': conf.dataDir
+	})
 );
 
 // ログイン処理系

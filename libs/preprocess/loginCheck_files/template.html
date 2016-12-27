@@ -10,10 +10,46 @@
 {% include '../common/includes/header.inc' %}
 
 <div class="contents">
+	<p>Forbidden.<br />back to <a href="/">home</a></p>
 	<p><a href="javascript:loginWithFacebook();">Facebookアカウントでログイン</a></p>
+
+	<form action="javascript:;" method="post" onsubmit="login(this); return false;">
+		ID: <input type="text" name="user_id" value="" /><br />
+		Name: <input type="text" name="user_name" value="" /><br />
+		<button>ログイン</button>
+	</form>
 </div>
 
-
+<script>
+function login(form){
+	var $form = $(form);
+	var userId = $form.find('[name=user_id]').val();
+	var userName = $form.find('[name=user_name]').val();
+	if( !userId || !userName ){
+		alert('入力してください。');
+		return;
+	}
+	$.ajax({
+		'url': '/apis/login',
+		'data':{
+			"userId": userId,
+			"userName": userName
+		},
+		'dataType': 'text',
+		'type': 'post',
+		'error': function(XMLHttpRequest, textStatus, errorThrown){
+			// console.log(XMLHttpRequest, textStatus, errorThrown);
+			alert("NG");
+		},
+		'success': function(data, dataType){
+			// console.log(data, dataType);
+			window.location.href = window.location.href+'';
+		},
+		'complete': function(XMLHttpRequest, textStatus){
+		}
+	});
+}
+</script>
 
 
 <script>
@@ -46,6 +82,7 @@ function displayUser(user) {
 
 
 {% include '../common/includes/footer.inc' %}
+<script type="text/javascript" src="/common/scripts/main.js"></script>
 {% include '../common/includes/foot.inc' %}
 <script type="text/javascript" src="index_files/scripts/contents.js"></script>
 	</body>

@@ -12,7 +12,12 @@ module.exports = function(){
 		req.userInfo = false;
 
 		if(req.method.toLowerCase() == 'post'){
-			if( typeof(req.body.id) == typeof('') && typeof(req.body.pw) == typeof('') ){
+			var userInfo = false;
+			if( typeof(req.body.userId) == typeof('') && typeof(req.body.userName) == typeof('') ){
+				userInfo = {
+					'userId': req.body.userId,
+					'userName': req.body.userName
+				}
 				req.userInfo = req.session.userInfo = userInfo;
 				if( userInfo === false ){
 					res.status(403);

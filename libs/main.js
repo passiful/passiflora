@@ -13,6 +13,9 @@ var sslOption = {
 
 var express = require('express'),
 	app = express();
+var expressSession = require('express-session') // セッション管理
+var Session = expressSession.Session;
+var sessionStore = new expressSession.MemoryStore();
 var server;
 if( conf.originParsed.protocol == 'https' ){
 	server = require('https').Server(sslOption, app);
@@ -21,13 +24,14 @@ if( conf.originParsed.protocol == 'https' ){
 }
 console.log('port number is '+conf.originParsed.port);
 
-var expressSession = require('express-session') // セッション管理
-
 
 // middleware - session & request
 app.use( require('body-parser')() );
 app.use( expressSession({
 	secret: "passiflora",
+    resave: true,
+    saveUninitialized: true,
+	store: sessionStore,
 	cookie: {
 		httpOnly: false
 	}
@@ -42,6 +46,29 @@ app.use( function(req, res, next){
 // middleware - biflora resources
 var biflora = require('biflora');
 app.use( biflora.clientLibs() );
+var io = require('socket.io')(server);
+
+// session shareing
+io.use( function(socket, next){
+
+	// getting sessionId from cookie
+	var sessionId = require('cookie').parse( socket.request.headers.cookie )['connect.sid'];
+	sessionId = sessionId.replace(/^s\:([\s\S]+?)\.[\s\S]*$/, '$1');
+
+	// getting session contents
+	sessionStore.get( sessionId, function(err, sessionData){
+		if( !err ){
+			if( !socket.session ){
+				// initialize session
+				socket.session = new Session({sessionID: sessionId, sessionStore: sessionStore}, sessionData);
+			}
+		}else{
+			console.error('************ FAILED to session handshake.');
+		}
+		next();
+	});
+});
+
 biflora.setupWebSocket(
 	server,
 	require('incense').getBifloraApi() ,
@@ -50,14 +77,24 @@ biflora.setupWebSocket(
 		'getUserInfo': function( socket, clientDefaultUserInfo, callback ){
 			// provide user info.
 			// eg: {'id': 'user_id', 'name': 'User Name'}
-			// console.log('★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★==');
-			// console.log(clientDefaultUserInfo);
-			// console.log('★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★--');
-			var sessionId = require('cookie').parse( socket.request.headers.cookie )['connect.sid'];
+			try {
+				if( socket.session.userInfo.userId ){
+					clientDefaultUserInfo.id = socket.session.userInfo.userId;
+				}
+				if( socket.session.userInfo.userName ){
+					clientDefaultUserInfo.name = socket.session.userInfo.userName;
+				}
+			} catch (e) {
+			}
+
 			callback(clientDefaultUserInfo);
 			return;
 		}
-	})
+	}),
+	{
+		'namespace': '/',
+		'socketIo': io
+	}
 );
 
 // ログイン処理系

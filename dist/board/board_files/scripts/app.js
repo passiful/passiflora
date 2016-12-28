@@ -11060,12 +11060,6 @@ window.app = new (function(){
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
-				// プロフィールを入力する
-				_this.editProfile(function(){
-					rlv();
-				});
-			}); })
-			.then(function(){ return new Promise(function(rlv, rjt){
 				window.incense = new Incense();
 				incense.init(
 					{
@@ -11085,38 +11079,6 @@ window.app = new (function(){
 			}); })
 		;
 
-		return;
-	}
-
-
-	/**
-	 * プロフィールを編集
-	 */
-	this.editProfile = function(callback){
-		callback = callback || function(){};
-		console.log('profile dialog:');
-		var $body = $('<form action="javascript:;" method="post">YourName: <input type="text" name="userName" value="{% userName %}" class="form-control" /></form>');
-		$body.find('[name=userName]').val( userInfo.id );
-		window.main.modal.dialog({
-			'title': 'プロフィール',
-			'body': $body,
-			'buttons': [
-				$('<button>')
-					.text('OK')
-					.addClass('btn')
-					.addClass('btn-primary')
-					.click(function(){
-						var name = JSON.parse(JSON.stringify($body.find('[name=userName]').val()));
-						userInfo.id = name;
-						userInfo.name = name;
-						window.main.modal.close();
-						callback();
-					})
-			]
-		});
-		setTimeout(function(){
-			$body.find('input').get(0).focus();
-		}, 1000);
 		return;
 	}
 

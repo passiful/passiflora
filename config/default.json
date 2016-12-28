@@ -1,10 +1,11 @@
 {
 	"appName": "PASSIFLORA",
 	"dataDir": "./data/",
-	"origin": "http://127.0.0.1:8080",
+	"origin": "https://127.0.0.1:8080",
 	"sslOption":{
 		"key": "./config/ssl/server.key",
-		"cert": "./config/ssl/server.crt"
+		"cert": "./config/ssl/server.crt",
+		"passphrase": "passiflora"
 	},
 	"auth":{
 		"facebook":{

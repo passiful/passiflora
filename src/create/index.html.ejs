@@ -2,12 +2,12 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Create New Board | {{conf.appName}}</title>
-{% include '../common/includes/head.inc' %}
+		<title>Create New Board | <%= conf.appName %></title>
+<%- include('../common/includes/head.inc') %>
 		<link rel="stylesheet" href="index_files/styles/contents.css" type="text/css" />
 	</head>
 	<body>
-		<p><a href="/">{{conf.appName}}</a></p>
+		<p><a href="/"><%= conf.appName %></a></p>
 		<h1>Create New Board</h1>
 		<form action="javascript:;" class="cont_create_board" method="get">
 			<div>BOARD THEME:
@@ -16,7 +16,7 @@
 			</div>
 		</form>
 		<div class="result"></div>
-{% include '../common/includes/foot.inc' %}
+<%- include('../common/includes/foot.inc') %>
 
 <script type="text/javascript" src="index_files/scripts/contents.js"></script>
 	</body>

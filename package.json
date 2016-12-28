@@ -52,6 +52,7 @@
     "gulp-autoprefixer": "^2.3.1",
     "gulp-browserify": "^0.5.1",
     "gulp-concat": "^2.6.0",
+    "gulp-ejs": "^2.3.0",
     "gulp-plumber": "^1.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.0.1",

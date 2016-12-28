@@ -11,11 +11,13 @@ var concat = require('gulp-concat');//ファイルの結合ツール
 var plumber = require("gulp-plumber");//コンパイルエラーが起きても watch を抜けないようになる
 var rename = require("gulp-rename");//ファイル名の置き換えを行う
 var twig = require("gulp-twig");//Twigテンプレートエンジン
+var ejs = require("gulp-ejs");//EJSテンプレートエンジン
 var browserify = require("gulp-browserify");//NodeJSのコードをブラウザ向けコードに変換
 var packageJson = require(__dirname+'/package.json');
 var _tasks = [
 	'.html',
 	'.html.twig',
+	'.html.ejs',
 	'.css',
 	'.css.scss',
 	'.js',
@@ -80,6 +82,19 @@ gulp.task(".html.twig", function() {
 				packageJson: packageJson ,
 				conf: conf
 			}
+		}))
+		.pipe(rename({extname: ''}))
+		.pipe(gulp.dest( './dist/' ))
+	;
+});
+
+// *.html.ejs を処理
+gulp.task(".html.ejs", function() {
+	gulp.src(["src/**/*.html.ejs","!src/**/*.ignore*","!src/**/*.ignore*/*"])
+		.pipe(plumber())
+		.pipe(ejs({
+			packageJson: packageJson,
+			conf: conf
 		}))
 		.pipe(rename({extname: ''}))
 		.pipe(gulp.dest( './dist/' ))

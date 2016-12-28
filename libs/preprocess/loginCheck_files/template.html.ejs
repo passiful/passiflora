@@ -2,12 +2,11 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>{{conf.appName}}</title>
-{% include '../common/includes/head.inc' %}
-		<link rel="stylesheet" href="index_files/styles/contents.css" type="text/css" />
+		<title><%= conf.appName %></title>
+<%- include('../../../src/common/includes/head.inc') %>
 	</head>
 	<body>
-{% include '../common/includes/header.inc' %}
+<%- include('../../../src/common/includes/header.inc') %>
 
 <div class="contents">
 	<p>Forbidden.<br />back to <a href="/">home</a></p>
@@ -16,7 +15,7 @@
 	<form action="javascript:;" method="post" onsubmit="login(this); return false;">
 		ID: <input type="text" name="user_id" value="" /><br />
 		Name: <input type="text" name="user_name" value="" /><br />
-		<button>ログイン</button>
+		<button class="btn btn-primary">ログイン</button>
 	</form>
 </div>
 
@@ -81,9 +80,8 @@ function displayUser(user) {
 
 
 
-{% include '../common/includes/footer.inc' %}
-<script type="text/javascript" src="/common/scripts/main.js"></script>
-{% include '../common/includes/foot.inc' %}
-<script type="text/javascript" src="index_files/scripts/contents.js"></script>
+<%- include('../../../src/common/includes/footer.inc') %>
+
+<%- include('../../../src/common/includes/foot.inc') %>
 	</body>
 </html>

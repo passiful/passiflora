@@ -103,12 +103,12 @@ app.use( require('./preprocess/userInfo.js')() );
 
 app.use( '/apis/login', require('./apis/login.js')() );
 app.use( '/apis/logout', require('./apis/logout.js')() );
-app.use( '/logout.html', require('./../src/logout.html.js')() );
+app.use( '/logout.html', require('./../src/logout.html.js')(conf) );
 app.use( '/apis/getLoginUserInfo', require('./apis/getLoginUserInfo.js')() );
 
-app.use( '/board/*', require('./preprocess/loginCheck.js')() );
-app.use( '/apis/*', require('./preprocess/loginCheck.js')() );
-app.use( '/create/*', require('./preprocess/loginCheck.js')() );
+app.use( '/board/*', require('./preprocess/loginCheck.js')(conf) );
+app.use( '/apis/*', require('./preprocess/loginCheck.js')(conf) );
+app.use( '/create/*', require('./preprocess/loginCheck.js')(conf) );
 
 // middleware
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );

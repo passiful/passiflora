@@ -1,8 +1,9 @@
 /**
  * loginCheck.js
  */
-module.exports = function(){
+module.exports = function(conf){
 	var fs = require('fs');
+	var ejs = require('ejs');
 
 	return function(req, res, next){
 		// console.log(req);
@@ -16,7 +17,22 @@ module.exports = function(){
 		if( !userInfo ){
 			res.status(403);
 			res.set('Content-Type', 'text/html');
-			var html = fs.readFileSync( __dirname + '/loginCheck_files/template.html' );
+
+			var templateSrc = fs.readFileSync(__dirname + '/loginCheck_files/template.html.ejs');
+			var html = '';
+
+			try {
+				var data = {
+					"conf": conf,
+					"req": req
+				};
+				var template = ejs.compile(templateSrc.toString(), {"filename": __dirname + '/loginCheck_files/template.html.ejs'});
+				html = template(data);
+			} catch (e) {
+				console.log( 'TemplateEngine Rendering ERROR.' );
+				html = '<div class="error">TemplateEngine Rendering ERROR.</div>';
+			}
+
 			res
 				.send(html)
 				.end()

@@ -9,5 +9,5 @@
 <link rel="stylesheet" href="/common/styles/common.css" type="text/css" />
 
 <script>
-var facebookAppId = "{{conf.auth.facebook.appId}}";
+var facebookAppId = "<%= conf.auth.facebook.appId %>";
 </script>

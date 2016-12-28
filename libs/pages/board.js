@@ -7,6 +7,7 @@ module.exports = function(conf){
 	var fsX = require('fs-extra');
 	var utils79 = require('utils79');
 	var twig = require('twig');
+	var ejs = require('ejs');
 	var Promise = require('es6-promise').Promise;
 
 
@@ -27,13 +28,6 @@ module.exports = function(conf){
 			return;
 		}).then(function(){
 			return new Promise(function(rlv, rjc){
-				var realpathTemplate = require('path').resolve(__dirname, '../../src/board/board.html.twig');
-				html = fs.readFileSync( realpathTemplate ).toString('utf8');
-				rlv();
-				return;
-			})
-		}).then(function(){
-			return new Promise(function(rlv, rjc){
 				req.main.board.getBoardInfo( req.params.boardId, function( _boardInfo ){
 					if( _boardInfo === false ){
 						rjc();
@@ -48,19 +42,24 @@ module.exports = function(conf){
 			})
 		}).then(function(){
 			return new Promise(function(rlv, rjc){
+
+				var templateSrc = fs.readFileSync(__dirname + '/board_files/template.html.ejs');
+
 				try {
-					html = new twig.twig({
-						'data': html
-					}).render({
+					var data = {
+						"conf": conf,
+						"req": req,
 						'boardId': req.params.boardId,
 						'boardInfo': boardInfo
-					});
+					};
+					var template = ejs.compile(templateSrc.toString(), {"filename": __dirname + '/board_files/template.html.ejs'});
+					html = template(data);
 				} catch (e) {
 					console.log( 'TemplateEngine Rendering ERROR.' );
-					html = '<div class="error">TemplateEngine Rendering ERROR.</div>'
+					html = '<div class="error">TemplateEngine Rendering ERROR.</div>';
 				}
-				rlv();
 
+				rlv();
 				return;
 			})
 		}).then(function(){
@@ -79,7 +78,6 @@ module.exports = function(conf){
 			res.set('Content-Type', 'text/html')
 
 			res.send('rejected...').end();
-			callback();
 		});
 
 		return;

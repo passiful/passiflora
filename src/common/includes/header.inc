@@ -1,2 +1,2 @@
-<p>{{conf.appName}}</p>
+<p><%= conf.appName %></p>
 <hr />

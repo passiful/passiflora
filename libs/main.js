@@ -6,6 +6,29 @@ var path = require('path');
 var conf = require('./confo.js');
 console.log(conf);
 
+var biflora = require('biflora');
+
+var Incense = require('incense');
+var incense = Incense.getBifloraMain({
+	'dataDir': conf.dataDir ,
+	'getUserInfo': function( socket, clientDefaultUserInfo, callback ){
+		// provide user info.
+		// eg: {'id': 'user_id', 'name': 'User Name'}
+		try {
+			if( socket.session.userInfo.userId ){
+				clientDefaultUserInfo.id = socket.session.userInfo.userId;
+			}
+			if( socket.session.userInfo.userName ){
+				clientDefaultUserInfo.name = socket.session.userInfo.userName;
+			}
+		} catch (e) {
+		}
+
+		callback(clientDefaultUserInfo);
+		return;
+	}
+});
+
 var sslOption = {
 	key: fs.readFileSync(conf.sslOption.key),
 	cert: fs.readFileSync(conf.sslOption.cert),
@@ -40,12 +63,11 @@ app.use( expressSession({
 
 app.use( function(req, res, next){
 	req.main = {};
-	req.main.board = new (require('./board.js'))(conf, req.main);
+	req.main.board = new (require('./board.js'))(conf, incense, req.main);
 	next();
 } );
 
 // middleware - biflora resources
-var biflora = require('biflora');
 app.use( biflora.clientLibs() );
 var io = require('socket.io')(server);
 
@@ -72,26 +94,8 @@ io.use( function(socket, next){
 
 biflora.setupWebSocket(
 	server,
-	require('incense').getBifloraApi() ,
-	require('incense').getBifloraMain({
-		'dataDir': conf.dataDir ,
-		'getUserInfo': function( socket, clientDefaultUserInfo, callback ){
-			// provide user info.
-			// eg: {'id': 'user_id', 'name': 'User Name'}
-			try {
-				if( socket.session.userInfo.userId ){
-					clientDefaultUserInfo.id = socket.session.userInfo.userId;
-				}
-				if( socket.session.userInfo.userName ){
-					clientDefaultUserInfo.name = socket.session.userInfo.userName;
-				}
-			} catch (e) {
-			}
-
-			callback(clientDefaultUserInfo);
-			return;
-		}
-	}),
+	Incense.getBifloraApi() ,
+	incense,
 	{
 		'namespace': '/',
 		'socketIo': io

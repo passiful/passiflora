@@ -7,22 +7,34 @@
 		<link rel="stylesheet" href="index_files/styles/contents.css" type="text/css" />
 	</head>
 	<body>
-		<h1><%= conf.appName %></h1>
-		<form action="javascript:;" method="get" class="gotoBoard">
-			<div>BOARD ID:
-				<input type="text" name="board_id" />
-				<button type="submit" class="btn btn-primary">go</button>
-			</div>
-		</form>
-		or
-		<form action="/create/" method="get">
-			<div>
-				<button type="submit" class="btn btn-default">create new board</button>
-			</div>
-		</form>
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12">
+					<h1><%= conf.appName %></h1>
+					<form action="javascript:;" method="get" class="gotoBoard form-inline">
+						<div class="form-group">
+							<label for="board_id">BOARD ID</label>
+							<input type="text" name="board_id" id="board_id" class="form-control" />
+						</div>
+						<button type="submit" class="btn btn-primary">go</button>
+					</form>
+					or
+					<form action="/create/" method="get">
+						<div>
+							<button type="submit" class="btn btn-default">create new board</button>
+						</div>
+					</form>
 
-		<div>
-			<p><a href="/logout.html">logout</a></p>
+
+					<% if( req.session.userInfo ){ %>
+					<hr />
+
+					<div>
+						<p><a href="/logout.html" class="btn btn-default">logout</a></p>
+					</div>
+					<% } %>
+				</div>
+			</div>
 		</div>
 
 <%- include('common/includes/foot.inc') %>

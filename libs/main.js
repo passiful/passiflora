@@ -14,6 +14,7 @@ var incense = Incense.getBifloraMain({
 	'getUserInfo': function( socket, clientDefaultUserInfo, callback ){
 		// provide user info.
 		// eg: {'id': 'user_id', 'name': 'User Name'}
+		// console.log(socket.session);
 		try {
 			if( socket.session.userInfo.userId ){
 				clientDefaultUserInfo.id = socket.session.userInfo.userId;
@@ -23,6 +24,7 @@ var incense = Incense.getBifloraMain({
 			}
 		} catch (e) {
 		}
+		// console.log(clientDefaultUserInfo);
 
 		callback(clientDefaultUserInfo);
 		return;

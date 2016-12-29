@@ -9,7 +9,7 @@ module.exports = function(conf){
 
 		req.userInfo = undefined;
 		req.session.destroy(function(err) {
-			var templateSrc = fs.readFileSync(__dirname + '/logout_files/templates.ignore/index.html.ejs');
+			var templateSrc = fs.readFileSync(__dirname + '/../../dist/logout.html');
 			var html = '';
 
 			try {
@@ -17,7 +17,7 @@ module.exports = function(conf){
 					"conf": conf,
 					"req": req
 				};
-				var template = ejs.compile(templateSrc.toString(), {"filename": __dirname + '/logout_files/templates.ignore/index.html.ejs'});
+				var template = ejs.compile(templateSrc.toString(), {"filename": __dirname + '/../../dist/logout.html'});
 				html = template(data);
 			} catch (e) {
 				console.log( 'TemplateEngine Rendering ERROR.' );

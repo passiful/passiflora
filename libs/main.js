@@ -3,6 +3,8 @@
  */
 var fs = require('fs');
 var path = require('path');
+var utils79 = require('utils79');
+var ejs = require('ejs');
 var conf = require('./confo.js');
 console.log(conf);
 
@@ -50,13 +52,15 @@ if( conf.originParsed.protocol == 'https' ){
 }
 console.log('port number is '+conf.originParsed.port);
 
+// set the view engine to ejs
+app.set('view engine', 'ejs');
 
 // middleware - session & request
 app.use( require('body-parser')() );
 app.use( expressSession({
 	secret: "passiflora",
-    resave: true,
-    saveUninitialized: true,
+	resave: true,
+	saveUninitialized: true,
 	store: sessionStore,
 	cookie: {
 		httpOnly: false
@@ -109,16 +113,58 @@ app.use( require('./preprocess/userInfo.js')() );
 
 app.use( '/apis/login', require('./apis/login.js')() );
 app.use( '/apis/logout', require('./apis/logout.js')() );
-app.use( '/logout.html', require('./../src/logout.html.js')(conf) );
+app.use( '/logout.html', require('./pages/logout.js')(conf) );
 app.use( '/apis/getLoginUserInfo', require('./apis/getLoginUserInfo.js')() );
 
 app.use( '/board/*', require('./preprocess/loginCheck.js')(conf) );
 app.use( '/apis/*', require('./preprocess/loginCheck.js')(conf) );
 app.use( '/create/*', require('./preprocess/loginCheck.js')(conf) );
 
-// middleware
+// middleware - application
 app.use( '/apis/create', require( __dirname+'/apis/create.js' )(conf) );
 app.get( '/board/:boardId/', require( __dirname+'/pages/board.js' )(conf) );
+
+// middleware - EJSテンプレートを利用して出力
+app.get(['*.html$','*/$'], function(req, res, next) {
+	// console.log(req);
+	// console.log(req.originalUrl);
+	// console.log(req._parsedOriginalUrl.pathname);
+	var request_path = req._parsedOriginalUrl.pathname;
+	if( request_path.match(/\/$/) ){
+		request_path += 'index.html';
+	}
+
+	var request_file_realpath = __dirname + '/../dist'+request_path;
+
+	// console.log(request_file_realpath);
+	if( !utils79.is_file( request_file_realpath ) ){
+		// ファイルが存在しない場合、次の static の処理に任せる。
+		next();
+		return;
+	}
+
+	var templateSrc = fs.readFileSync(request_file_realpath);
+	var html = '';
+
+	try {
+		var data = {
+			"conf": conf,
+			"req": req
+		};
+		// console.log(templateSrc.toString());
+		var template = ejs.compile(templateSrc.toString(), {"filename": request_file_realpath});
+		html = template(data);
+	} catch (e) {
+		console.log( 'TemplateEngine Rendering ERROR.' );
+		html = '<div class="error">TemplateEngine Rendering ERROR.</div>';
+	}
+
+	res.set('Content-Type', 'text/html');
+	res.status(200);
+	res.send(html).end();
+	return;
+});
+
 app.use( express.static( __dirname+'/../dist/' ) );
 
 // {conf.originParsed.port}番ポートでLISTEN状態にする

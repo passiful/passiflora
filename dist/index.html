@@ -3,24 +3,11 @@
 	<head>
 		<meta charset="utf-8">
 		<title>PASSIFLORA</title>
-<!-- Required meta tags always come first -->
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-<meta http-equiv="x-ua-compatible" content="ie=edge" />
-
-<!-- Bootstrap 4 CSS -->
-<link rel="stylesheet" href="/common/bootstrap/dist/css/bootstrap.min.css" />
-
-<!-- project common -->
-<link rel="stylesheet" href="/common/styles/common.css" type="text/css" />
-
-<script>
-var facebookAppId = "1382279231791250";
-</script>
-
+<%- include('common/includes/head.inc') %>
 		<link rel="stylesheet" href="index_files/styles/contents.css" type="text/css" />
 	</head>
 	<body>
-		<h1>PASSIFLORA</h1>
+		<h1><%= conf.appName %></h1>
 		<form action="javascript:;" method="get" class="gotoBoard">
 			<div>BOARD ID:
 				<input type="text" name="board_id" />
@@ -38,15 +25,7 @@ var facebookAppId = "1382279231791250";
 			<p><a href="/logout.html">logout</a></p>
 		</div>
 
-<!-- Tether -->
-<script src="/common/tether/dist/js/tether.js"></script>
-
-<!-- project common -->
-<script type="text/javascript" src="/common/scripts/main.js"></script>
-
-<!-- Bootstrap 4 JS. -->
-<script src="/common/bootstrap/dist/js/bootstrap.min.js"></script>
-
+<%- include('common/includes/foot.inc') %>
 
 <script type="text/javascript" src="index_files/scripts/contents.js"></script>
 	</body>

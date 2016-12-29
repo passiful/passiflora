@@ -3,10 +3,10 @@
 	<head>
 		<meta charset="utf-8">
 		<title><%= conf.appName %></title>
-<%- include('../../../src/common/includes/head.inc') %>
+<%- include('../../../dist/common/includes/head.inc') %>
 	</head>
 	<body>
-<%- include('../../../src/common/includes/header.inc') %>
+<%- include('../../../dist/common/includes/header.inc') %>
 
 <div class="contents">
 	<p>Forbidden.<br />back to <a href="/">home</a></p>
@@ -80,8 +80,8 @@ function displayUser(user) {
 if(window.location.hash.length){loginWithFacebook();}
 </script>
 
-<%- include('../../../src/common/includes/footer.inc') %>
+<%- include('../../../dist/common/includes/footer.inc') %>
 
-<%- include('../../../src/common/includes/foot.inc') %>
+<%- include('../../../dist/common/includes/foot.inc') %>
 	</body>
 </html>

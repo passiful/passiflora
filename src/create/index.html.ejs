@@ -7,15 +7,20 @@
 		<link rel="stylesheet" href="index_files/styles/contents.css" type="text/css" />
 	</head>
 	<body>
-		<p><a href="/"><%%= conf.appName %></a></p>
+<%%- include('../common/includes/header.inc') %>
+
 		<h1>Create New Board</h1>
-		<form action="javascript:;" class="cont_create_board" method="get">
-			<div>BOARD THEME:
-				<input type="text" name="board_theme" />
-				<button type="submit" class="btn btn-primary">create</button>
+		<form action="javascript:;" class="cont_create_board form-inline" method="get">
+			<div class="form-group">
+				<label for="board_theme">BOARD THEME</label>
+				<input type="text" name="board_theme" id="board_theme" class="form-control" />
 			</div>
+			<button type="submit" class="btn btn-primary">create</button>
 		</form>
 		<div class="result"></div>
+
+<%%- include('../common/includes/footer.inc') %>
+
 <%%- include('../common/includes/foot.inc') %>
 
 <script type="text/javascript" src="index_files/scripts/contents.js"></script>

@@ -8,16 +8,16 @@
 	<body>
 <%- include('../../../dist/common/includes/header.inc') %>
 
-<div class="contents">
-	<p>Forbidden.<br />back to <a href="/">home</a></p>
-	<p><a href="javascript:loginWithFacebook();">Facebookアカウントでログイン</a></p>
+<h1>Please LOGIN</h1>
 
-	<form action="javascript:;" method="post" onsubmit="login(this); return false;">
-		ID: <input type="text" name="user_id" value="" /><br />
-		Name: <input type="text" name="user_name" value="" /><br />
-		<button class="btn btn-primary">ログイン</button>
-	</form>
-</div>
+<p><a href="javascript:loginWithFacebook();">Facebookアカウントでログイン</a></p>
+
+<form action="javascript:;" method="post" onsubmit="login(this); return false;">
+	ID: <input type="text" name="user_id" value="" /><br />
+	Name: <input type="text" name="user_name" value="" /><br />
+	<button class="btn btn-primary">ログイン</button>
+</form>
+
 
 <script>
 function login(form){

@@ -46,7 +46,8 @@
         width: 10000px;
         height: 10000px;
         overflow: hidden;
-        z-index: 1000; }
+        z-index: 1000;
+        background: #fff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA3hpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDplNzY5NWM5Ni01YjM1LTRjODYtYmNkNy03YThiYTAwYzMzMWMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RjQ4QUU5MDgxOTVGMTFFNUFDOEI5NzdDOTQ0M0MzNkQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RjQ4QUU5MDcxOTVGMTFFNUFDOEI5NzdDOTQ0M0MzNkQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUgKE1hY2ludG9zaCkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoxNzUyY2E5Ni0wZTQ5LTRmMjctYTI3ZS04ZjIyOWUyZTJkMzciIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6ZTc2OTVjOTYtNWIzNS00Yzg2LWJjZDctN2E4YmEwMGMzMzFjIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+QPZRfAAAAA9QTFRF8Pn/3vL/z+z/+Pz/////85293AAAAAV0Uk5T/////wD7tg5TAAACHUlEQVR42uzdMQ7EIAwEQNvk/29OlR4jQSiG6pqIy8grrdwknu+MyV/ZfiLaT9SBOxbeI2DBggULFixYsGDtwRrdk+0n+nfUgTsW3sNkiSEsWLBgwYIFC5YGr8GLISxYsGDBggULFiwNXoMXQ1iwYMGCBQsWLA1egzdZYggLFixYsGDBgvU/Vt546sp/lSZLDGHBggULFixYsOzg7eDFEBYsWLBgwYIFC5YGr8GLISxYsGDBggULlgavwZssMYQFCxYsWLBgwdLgNXgxhAULFixYsGDBgtXBap+M/acO3LHyHiZLDGHBggULFixYsOzg7eDFEBYsWLBgwYIFC5YGr8GLISxYsGDBggULlgavwZssMYQFCxYsWLBgwdLgNXgxhAULFixYsGDBgtXAKmf6mCwxhAULFixYsGDBsoO3gxdDWLBgwYIFCxYsWBq8Bi+GsGDBggULFixYGrwGb7LEEBYsWLBgwYIFS4PX4MUQFixYsGDBggULlm+y+iarGMKCBQsWLFiwYNnB28GbLDGEBQsWLFiwYMHS4DV4MYQFCxYsWLBgwYKlwWvwYggLFixYsGDBgqXBa/AmSwxhwYIFCxYsWLD+x8obT135r9JkiSEsWLBgwYIFC5YdvB28GMKCBQsWLFiwYMHS4DV4MYQFCxYsWLBgwdLgNXiTJYawYMGCBQsWLFgavAYvhrBgwYIFCxYsWLB8k3XPe7wCDACMoBtSQcGYgQAAAABJRU5ErkJggg=="); }
   .incense.incense__timeline {
     position: absolute;
     top: 0;
@@ -116,19 +117,35 @@
       padding: 10px 0 0 0;
       border-top: 1px solid #ddd; }
   .incense .incense__message-unit {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
     font-size: 13px;
     padding: 0.5em;
     margin: 0 0 1px 0;
-    border-bottom: 1px solid #eee;
     background-color: #fff; }
     .incense .incense__message-unit:hover {
       background-color: #ffe; }
-    .incense .incense__message-unit.incense__message-unit--operation {
-      background-color: #eeeef9;
-      color: #77b;
-      font-size: 70%; }
     .incense .incense__message-unit:last-child {
       border: none; }
+    .incense .incense__message-unit .incense__message-unit__owner-icon {
+      display: block;
+      width: 30px;
+      height: 30px;
+      overflow: hidden;
+      background-color: #ddd;
+      margin-right: 10px;
+      border-radius: 50%; }
+      .incense .incense__message-unit .incense__message-unit__owner-icon img {
+        width: 100%;
+        height: 100%; }
+    .incense .incense__message-unit .incense__message-unit__message-body {
+      display: block;
+      width: calc(100% - 40px); }
     .incense .incense__message-unit .incense__message-unit__owner {
       font-weight: bold; }
       .incense .incense__message-unit .incense__message-unit__owner-id {
@@ -143,8 +160,9 @@
       margin-left: 0;
       margin-right: 24px;
       background-color: #f9f9f9;
+      border: 1px solid #eeeeee;
       text-align: left;
-      padding: 12px;
+      padding: 0.4em 1.5em;
       border-radius: 10px;
       word-wrap: break-word; }
       .incense .incense__message-unit .incense__message-unit__content p {
@@ -153,18 +171,31 @@
         margin-top: 0; }
       .incense .incense__message-unit .incense__message-unit__content > :last-child {
         margin-bottom: 0; }
-    .incense .incense__message-unit .incense__message-unit__operation-message {
-      text-align: center; }
-    .incense .incense__message-unit .incense__message-unit__targetWidget {
-      text-align: right;
-      font-size: 75%;
-      color: #aaa; }
-    .incense .incense__message-unit--myitem .incense__message-unit__owner {
-      text-align: right; }
-    .incense .incense__message-unit--myitem .incense__message-unit__content {
-      margin-left: 24px;
-      margin-right: 0;
-      background-color: #ccf0cc; }
+    .incense .incense__message-unit--myitem {
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: reverse;
+          -ms-flex-direction: row-reverse;
+              flex-direction: row-reverse; }
+      .incense .incense__message-unit--myitem .incense__message-unit__owner-icon {
+        margin-right: 0px;
+        margin-left: 10px; }
+      .incense .incense__message-unit--myitem .incense__message-unit__owner {
+        text-align: right; }
+      .incense .incense__message-unit--myitem .incense__message-unit__content {
+        margin-left: 24px;
+        margin-right: 0;
+        background-color: #d5ffd5;
+        border: 1px solid #a7efa7; }
+  .incense .incense__message-unit__operation {
+    background-color: #eeeef9;
+    color: #77b;
+    font-size: 70%;
+    text-align: center;
+    padding: 0.4em 1em; }
+  .incense .incense__message-unit__targetWidget {
+    text-align: right;
+    font-size: 75%;
+    color: #aaa; }
   .incense .incense-widget {
     position: absolute;
     left: 0;
@@ -176,25 +207,25 @@
     font-size: 100%; }
   .incense .issuetree {
     background-color: #fff; }
-    .incense .issuetree.issuetree--status-active {
-      border-left: 7px solid #fe9; }
-    .incense .issuetree.issuetree--status-fixed {
-      border-left: 7px solid #6e9; }
-    .incense .issuetree.issuetree--status-no-active {
-      border-left: 7px solid #666; }
     .incense .issuetree .issuetree__block {
       padding: 5px 0;
       margin: 0.5em 0; }
     .incense .issuetree .issuetree__heading {
       font-weight: bold;
-      border-left: 3px solid #999;
+      border-left: 3px solid #3399ff;
       padding: 0 1em; }
+      .incense .issuetree .issuetree__heading .issuetree__edit-button {
+        margin-left: 1em;
+        font-size: 80%;
+        font-weight: normal; }
+    .incense .issuetree.issuetree--status-active .issuetree__heading {
+      border-left-color: #fe9; }
+    .incense .issuetree.issuetree--status-fixed .issuetree__heading {
+      border-left-color: #6e9; }
     .incense .issuetree .issuetree__discussion-timeline--timeline {
       height: 300px;
       overflow: auto; }
       .incense .issuetree .issuetree__discussion-timeline--timeline > div {
-        border-bottom: 1px solid #bbb;
-        padding: 0.5em 0;
         font-size: 13px; }
         .incense .issuetree .issuetree__discussion-timeline--timeline > div:last-child {
           border-bottom: none; }
@@ -203,38 +234,6 @@
     .incense .issuetree .issuetree__issue {
       font-weight: bold;
       font-size: 24px; }
-    .incense .issuetree .issuetree__owner {
-      font-weight: bold;
-      font-size: small; }
-      .incense .issuetree .issuetree__owner-id {
-        margin-left: 1em;
-        color: #999;
-        font-size: 80%;
-        font-weight: normal; }
-        .incense .issuetree .issuetree__owner-id:before {
-          content: "@"; }
-    .incense .issuetree .issuetree__content {
-      font-size: normal;
-      font-weight: normal;
-      margin-left: 0;
-      margin-right: 24px;
-      background-color: #f9f9f9;
-      text-align: left;
-      padding: 12px;
-      border-radius: 10px;
-      word-wrap: break-word; }
-      .incense .issuetree .issuetree__content p {
-        white-space: pre-wrap; }
-      .incense .issuetree .issuetree__content > :first-child {
-        margin-top: 0; }
-      .incense .issuetree .issuetree__content > :last-child {
-        margin-bottom: 0; }
-    .incense .issuetree .issuetree--myitem .issuetree__owner {
-      text-align: right; }
-    .incense .issuetree .issuetree--myitem .issuetree__content {
-      margin-left: 24px;
-      margin-right: 0;
-      background-color: #ccf0cc; }
     .incense .issuetree .issuetree__voteuser {
       padding: 0;
       margin: 0; }
@@ -251,9 +250,6 @@
         .incense .issuetree .issuetree__voteuser li.issuetree__voteuser--me {
           background-color: #999; }
     .incense .issuetree .issuetree__parent-issue {
-      border: 1px solid #999;
-      padding: 1em;
-      border-radius: 0.5em;
       margin: 0.5em 0; }
     .incense .issuetree .issuetree__sub-issues {
       margin: 0.5em 0; }
@@ -262,18 +258,38 @@
         .incense .issuetree .issuetree__sub-issues ul li {
           display: block;
           list-style-type: none;
-          border: 1px solid #999;
-          padding: 1em;
-          border-radius: 0.5em;
-          margin: 0.5em 0; }
+          padding: 0;
+          margin: 0; }
+    .incense .issuetree .issuetree__issue-unit {
+      display: block;
+      border: 1px solid #eee;
+      background-color: #f9f9f9;
+      color: #006;
+      font-size: 80%;
+      padding: 1em;
+      border-radius: 3px;
+      margin: 5px 0; }
+      .incense .issuetree .issuetree__issue-unit--widget-id {
+        text-align: right;
+        font-size: 80%; }
+      .incense .issuetree .issuetree__issue-unit:hover {
+        text-decoration: none;
+        background-color: #f0f0f0; }
     .incense .issuetree--widget {
       border: 1px solid #ddd;
+      border-left: 7px solid #3399ff;
       padding: 5px;
       font-size: 11px;
       width: 240px; }
       .incense .issuetree--widget .issuetree__issue {
         font-size: 11px;
         font-weight: bold; }
+      .incense .issuetree--widget.issuetree--status-active {
+        border-left: 7px solid #fe9; }
+      .incense .issuetree--widget.issuetree--status-fixed {
+        border-left: 7px solid #6e9; }
+      .incense .issuetree--widget.issuetree--status-no-active {
+        border-left: 7px solid #3399ff; }
   .incense .stickies {
     font-size: 11px;
     min-width: 80px;

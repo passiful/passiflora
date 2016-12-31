@@ -1,24 +1,24 @@
 .issuetree {
   background-color: #fff; }
-  .issuetree.issuetree--status-active {
-    border-left: 7px solid #fe9; }
-  .issuetree.issuetree--status-fixed {
-    border-left: 7px solid #6e9; }
-  .issuetree.issuetree--status-no-active {
-    border-left: 7px solid #666; }
   .issuetree .issuetree__block {
     padding: 5px 0;
     margin: 0.5em 0; }
   .issuetree .issuetree__heading {
     font-weight: bold;
-    border-left: 3px solid #999;
+    border-left: 3px solid #3399ff;
     padding: 0 1em; }
+    .issuetree .issuetree__heading .issuetree__edit-button {
+      margin-left: 1em;
+      font-size: 80%;
+      font-weight: normal; }
+  .issuetree.issuetree--status-active .issuetree__heading {
+    border-left-color: #fe9; }
+  .issuetree.issuetree--status-fixed .issuetree__heading {
+    border-left-color: #6e9; }
   .issuetree .issuetree__discussion-timeline--timeline {
     height: 300px;
     overflow: auto; }
     .issuetree .issuetree__discussion-timeline--timeline > div {
-      border-bottom: 1px solid #bbb;
-      padding: 0.5em 0;
       font-size: 13px; }
       .issuetree .issuetree__discussion-timeline--timeline > div:last-child {
         border-bottom: none; }
@@ -27,38 +27,6 @@
   .issuetree .issuetree__issue {
     font-weight: bold;
     font-size: 24px; }
-  .issuetree .issuetree__owner {
-    font-weight: bold;
-    font-size: small; }
-    .issuetree .issuetree__owner-id {
-      margin-left: 1em;
-      color: #999;
-      font-size: 80%;
-      font-weight: normal; }
-      .issuetree .issuetree__owner-id:before {
-        content: "@"; }
-  .issuetree .issuetree__content {
-    font-size: normal;
-    font-weight: normal;
-    margin-left: 0;
-    margin-right: 24px;
-    background-color: #f9f9f9;
-    text-align: left;
-    padding: 12px;
-    border-radius: 10px;
-    word-wrap: break-word; }
-    .issuetree .issuetree__content p {
-      white-space: pre-wrap; }
-    .issuetree .issuetree__content > :first-child {
-      margin-top: 0; }
-    .issuetree .issuetree__content > :last-child {
-      margin-bottom: 0; }
-  .issuetree .issuetree--myitem .issuetree__owner {
-    text-align: right; }
-  .issuetree .issuetree--myitem .issuetree__content {
-    margin-left: 24px;
-    margin-right: 0;
-    background-color: #ccf0cc; }
   .issuetree .issuetree__voteuser {
     padding: 0;
     margin: 0; }
@@ -75,9 +43,6 @@
       .issuetree .issuetree__voteuser li.issuetree__voteuser--me {
         background-color: #999; }
   .issuetree .issuetree__parent-issue {
-    border: 1px solid #999;
-    padding: 1em;
-    border-radius: 0.5em;
     margin: 0.5em 0; }
   .issuetree .issuetree__sub-issues {
     margin: 0.5em 0; }
@@ -86,15 +51,35 @@
       .issuetree .issuetree__sub-issues ul li {
         display: block;
         list-style-type: none;
-        border: 1px solid #999;
-        padding: 1em;
-        border-radius: 0.5em;
-        margin: 0.5em 0; }
+        padding: 0;
+        margin: 0; }
+  .issuetree .issuetree__issue-unit {
+    display: block;
+    border: 1px solid #eee;
+    background-color: #f9f9f9;
+    color: #006;
+    font-size: 80%;
+    padding: 1em;
+    border-radius: 3px;
+    margin: 5px 0; }
+    .issuetree .issuetree__issue-unit--widget-id {
+      text-align: right;
+      font-size: 80%; }
+    .issuetree .issuetree__issue-unit:hover {
+      text-decoration: none;
+      background-color: #f0f0f0; }
   .issuetree--widget {
     border: 1px solid #ddd;
+    border-left: 7px solid #3399ff;
     padding: 5px;
     font-size: 11px;
     width: 240px; }
     .issuetree--widget .issuetree__issue {
       font-size: 11px;
       font-weight: bold; }
+    .issuetree--widget.issuetree--status-active {
+      border-left: 7px solid #fe9; }
+    .issuetree--widget.issuetree--status-fixed {
+      border-left: 7px solid #6e9; }
+    .issuetree--widget.issuetree--status-no-active {
+      border-left: 7px solid #3399ff; }

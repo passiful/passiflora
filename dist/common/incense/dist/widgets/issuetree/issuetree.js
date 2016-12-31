@@ -9827,8 +9827,47 @@ module.exports = function( incense, $widget ){
 	this.answer = '1. 賛成'+"\n"+'2. 反対';
 	this.vote = {};
 	this.status = 'open';
+	this.commentCount = 0;
 
-	var $widgetBody = $('<div class="issuetree issuetree--widget issuetree--status-no-active">')
+	function editIssue(){
+		mode = 'edit';
+		$detailBodyIssue.append( $detailBodyIssue_textarea.val( _this.issue ) );
+		incense.setBehaviorChatComment(
+			$detailBodyIssue_textarea,
+			{
+				'submit': function(value){
+					applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
+				}
+			}
+		);
+		$detailBodyIssue_textarea
+			.on('change blur', function(e){
+				applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
+			})
+		;
+		$detailBodyIssue_textarea.focus();
+	}
+
+	function editAnswer(){
+		mode = 'edit';
+		$detailBodyAnswer.append( $detailBodyAnswer_textarea.val( _this.answer ) );
+		incense.setBehaviorChatComment(
+			$detailBodyAnswer_textarea,
+			{
+				'submit': function(value){
+					applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
+				}
+			}
+		);
+		$detailBodyAnswer_textarea
+			.on('change blur', function(e){
+				applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
+			})
+		;
+		$detailBodyAnswer_textarea.focus();
+	}
+
+	var $widgetBody = $('<div class="issuetree issuetree--widget">')
 		.append( $('<div class="row">')
 			.append( $('<div class="col-sm-6">')
 				.append( $('<div class="issuetree__block">')
@@ -9845,17 +9884,31 @@ module.exports = function( incense, $widget ){
 		)
 		.append( $('<div class="issuetree__comment-count">') )
 	;
-	var $detailBody = $('<div class="issuetree">')
+	var $detailBody = $('<div class="issuetree issuetree--modal">')
 		.append( $('<div class="row">')
 			.append( $('<div class="col-sm-6">')
 				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '問' ) )
+					.append( $('<div class="issuetree__heading">').text( '問' )
+						.append( $('<a href="javascript:;" class="issuetree__edit-button">')
+							.text('編集')
+							.click(function(){
+								editIssue();
+							})
+						)
+					)
 					.append( $('<div class="issuetree__issue incense-markdown">').html( incense.detoxHtml( incense.markdown(this.issue) ) || 'no-set' ) )
 				)
 			)
 			.append( $('<div class="col-sm-6">')
 				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '答' ) )
+					.append( $('<div class="issuetree__heading">').text( '答' )
+						.append( $('<a href="javascript:;" class="issuetree__edit-button">')
+							.text('編集')
+							.click(function(){
+								editAnswer();
+							})
+						)
+					)
 					.append( $('<div class="issuetree__answer incense-markdown">').html( incense.detoxHtml( incense.markdown(this.answer) ) || 'no-answer' ) )
 				)
 			)
@@ -9871,7 +9924,7 @@ module.exports = function( incense, $widget ){
 								.append( $('<span>')
 									.text('あなたの現在の立場 : ')
 								)
-								.append( $('<select>') )
+								.append( $('<select style="max-width: 100%;">') )
 							)
 							.append( $('<textarea class="form-control issuetree__discussion-timeline--chat-comment">') )
 						)
@@ -9976,22 +10029,7 @@ module.exports = function( incense, $widget ){
 	;
 	$detailBodyIssue
 		.dblclick(function(e){
-			mode = 'edit';
-			$detailBodyIssue.append( $detailBodyIssue_textarea.val( _this.issue ) );
-			incense.setBehaviorChatComment(
-				$detailBodyIssue_textarea,
-				{
-					'submit': function(value){
-						applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
-					}
-				}
-			);
-			$detailBodyIssue_textarea
-				.on('change blur', function(e){
-					applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
-				})
-			;
-			$detailBodyIssue_textarea.focus();
+			editIssue();
 		})
 		.click(function(e){
 			e.stopPropagation();
@@ -10017,22 +10055,7 @@ module.exports = function( incense, $widget ){
 	;
 	$detailBodyAnswer
 		.dblclick(function(e){
-			mode = 'edit';
-			$detailBodyAnswer.append( $detailBodyAnswer_textarea.val( _this.answer ) );
-			incense.setBehaviorChatComment(
-				$detailBodyAnswer_textarea,
-				{
-					'submit': function(value){
-						applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
-					}
-				}
-			);
-			$detailBodyAnswer_textarea
-				.on('change blur', function(e){
-					applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
-				})
-			;
-			$detailBodyAnswer_textarea.focus();
+			editAnswer();
 		})
 		.click(function(e){
 			e.stopPropagation();
@@ -10084,7 +10107,7 @@ module.exports = function( incense, $widget ){
 	 */
 	function openDetailWindow(){
 		incense.modal.dialog({
-			'title': 'issue',
+			'title': 'Issue #widget.'+_this.id,
 			'body': $detailBody,
 			'buttons': [
 				$('<button>')
@@ -10097,8 +10120,7 @@ module.exports = function( incense, $widget ){
 			]
 		});
 
-		updateStatus();
-		updateAnswer();
+		updateView();
 		updateRelations();
 
 		setTimeout(function(){
@@ -10124,9 +10146,10 @@ module.exports = function( incense, $widget ){
 	;
 
 	/**
-	 * 答欄を更新する
+	 * 表示を更新する
 	 */
-	function updateAnswer(){
+	function updateView(callback){
+		callback = callback || function(){};
 		var optionValueList = {};
 		var myAnswer = _this.vote[incense.getUserInfo().id];
 		$detailBodyAnswer.html( incense.detoxHtml( incense.markdown(_this.answer) ) || 'no-answer' );
@@ -10240,22 +10263,19 @@ module.exports = function( incense, $widget ){
 
 		$widgetBody
 			.removeClass('issuetree--status-active')
-			.removeClass('issuetree--status-no-active')
+			.removeClass('issuetree--status-fixed')
+		;
+		$detailBody
+			.removeClass('issuetree--status-active')
 			.removeClass('issuetree--status-fixed')
 		;
 		if( _this.status == 'close' ){
-			$widgetBody
-				.addClass('issuetree--status-fixed')
-			;
+			$widgetBody.addClass('issuetree--status-fixed');
+			$detailBody.addClass('issuetree--status-fixed');
 		}else{
-			if( maxAnswerCount > 1 || otherVoteCount ){
-				$widgetBody
-					.addClass('issuetree--status-active')
-				;
-			}else{
-				$widgetBody
-					.addClass('issuetree--status-no-active')
-				;
+			if( _this.commentCount >= 1 ){
+				$widgetBody.addClass('issuetree--status-active');
+				$detailBody.addClass('issuetree--status-active');
 			}
 		}
 
@@ -10289,16 +10309,8 @@ module.exports = function( incense, $widget ){
 				.text(myAnswer)
 			);
 		}
-		// console.log(optionValueList);
-		// console.log(optionValueList);
-		// $yourStanceSelector
-	}
 
-	/**
-	 * 課題のステータス表示を更新する
-	 */
-	function updateStatus(callback){
-		callback = callback || function(){};
+		// updateStatus --------
 		$detailBodyStatus
 			.html('')
 			.append(
@@ -10333,7 +10345,7 @@ module.exports = function( incense, $widget ){
 			)
 		;
 
-	} // updateStatus()
+	} // updateView()
 
 	/**
 	 * 投票操作のメッセージを送信する
@@ -10364,10 +10376,15 @@ module.exports = function( incense, $widget ){
 		// var $detailBodySubIssues = $detailBody.find('.issuetree__sub-issues');
 		$detailBodyParentIssue.html('---');
 		if( _this.parent && incense.widgetMgr.get(_this.parent) ){
-			$detailBodyParentIssue.html('').append( $('<div>')
-				.append( $('<div>').text(incense.widgetMgr.get(_this.parent).issue) )
-				.append( $('<div>').append( incense.widgetMgr.mkLinkToWidget( _this.parent ) ) )
-			);
+			var $link = incense.widgetMgr.mkLinkToWidget( _this.parent );
+			$detailBodyParentIssue.html('')
+				.append( $link
+					.html('')
+					.addClass('issuetree__issue-unit')
+					.append( $('<div>').text(incense.widgetMgr.get(_this.parent).issue) )
+					.append( $('<div class="issuetree__issue-unit--widget-id">').append( '#widget.'+_this.parent ) )
+				)
+			;
 		}
 
 		incense.widgetMgr.getChildren( _this.id, function(children){
@@ -10377,8 +10394,12 @@ module.exports = function( incense, $widget ){
 				var $ul = $('<ul>');
 				for( var idx in children ){
 					var $li = $('<li>')
-						.append( $('<div>').text(children[idx].issue) )
-						.append( $('<div>').append( incense.widgetMgr.mkLinkToWidget( children[idx].id ) ) )
+						.append( incense.widgetMgr.mkLinkToWidget( children[idx].id )
+							.html('')
+							.addClass('issuetree__issue-unit')
+							.append( $('<div>').text(children[idx].issue) )
+							.append( $('<div class="issuetree__issue-unit--widget-id">').append( '#widget.'+children[idx].id ) )
+						)
 					;
 					$ul.append( $li );
 				}
@@ -10410,31 +10431,57 @@ module.exports = function( incense, $widget ){
 		var $messageUnit = $('<div>');
 		var user = incense.userMgr.get(message.owner);
 
-		switch( message.content.command ){
-			case 'comment':
-				// コメントの投稿
-				userMessage = incense.detoxHtml( incense.markdown( message.content.comment ) );
-
-				var totalCommentCount = $detailBodyTimeline.find('>div').size();
-				$widgetBody.find('.issuetree__comment-count').text( (totalCommentCount+1) + '件のコメント' );
-
-				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.addClass( user.id == incense.getUserInfo().id ? 'issuetree--myitem' : '' )
-					.append( $('<div class="issuetree__owner">')
-						.append( $('<span class="issuetree__owner-name">').text(user.name) )
-						.append( $('<span class="issuetree__owner-id">').text(user.id) )
+		function mkTimelineElement( $messageContent ){
+			var $rtn = $('<div class="incense__message-unit">');
+			if( user.id == incense.getUserInfo().id ){
+				$rtn.addClass('incense__message-unit--myitem');
+			}
+			$userIcon = $('<div class="incense__message-unit__owner-icon">');
+			if( user.icon ){
+				$userIcon
+					.append( $('<img>')
+						.attr({
+							'src': user.icon
+						})
+						.css({
+							'width': 30,
+							'height': 30
+						})
 					)
-					.append( $('<div class="issuetree__content incense-markdown">').html(userMessage) )
-				);
-				incense.adjustTimelineScrolling( $detailBodyTimeline );
-
-				// メインチャットに追加
-				incense.insertTimeline( message, $messageUnit
+				;
+			}
+			$rtn
+				.append( $userIcon )
+				.append( $('<div class="incense__message-unit__message-body">')
 					.append( $('<div class="incense__message-unit__owner">')
 						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
 						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
 					)
+					.append( $messageContent )
+				)
+			;
+			return $rtn;
+		}
+
+		switch( message.content.command ){
+			case 'comment':
+				// コメントの投稿
+				userMessage = incense.detoxHtml( incense.markdown( message.content.comment ) );
+				this.commentCount ++;
+				updateView();
+
+				var totalCommentCount = $detailBodyTimeline.find('>div').size();
+				$widgetBody.find('.issuetree__comment-count').text( (this.commentCount) + '件のコメント' );
+
+				// 詳細画面のディスカッションに追加
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__content incense-markdown">').html(userMessage)
+				) );
+				// 	.addClass( user.id == incense.getUserInfo().id ? 'issuetree--myitem' : '' )
+				incense.adjustTimelineScrolling( $detailBodyTimeline );
+
+				// メインチャットに追加
+				incense.insertTimeline( message, $messageUnit
 					.append( $('<div class="incense__message-unit__content incense-markdown">').html(userMessage) )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
@@ -10447,18 +10494,14 @@ module.exports = function( incense, $widget ){
 				$widget.find('.issuetree__issue').html( incense.detoxHtml( incense.markdown(_this.issue) ) || 'no-set' );
 
 				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.append( $('<div class="">').html(message.owner + ' が、問を "' + _this.issue + '" に変更しました。') )
-				);
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__operation">').html(message.owner + ' が、問を "' + _this.issue + '" に変更しました。')
+				) );
 				incense.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
-					.append( $('<div class="">').html('問を "' + _this.issue + '" に変更しました。') )
+					.append( $('<div class="incense__message-unit__operation">').html('問を "' + _this.issue + '" に変更しました。') )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -10466,21 +10509,17 @@ module.exports = function( incense, $widget ){
 			case 'update_answer':
 				// 答の更新
 				_this.answer = message.content.val;
-				updateAnswer();
+				updateView();
 
 				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.append( $('<div class="">').html(message.owner + ' が、答を "' + _this.answer + '" に変更しました。') )
-				);
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__operation">').html(message.owner + ' が、答を "' + _this.answer + '" に変更しました。')
+				) );
 				incense.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
-					.append( $('<div class="">').html('答を "' + _this.answer + '" に変更しました。') )
+					.append( $('<div class="incense__message-unit__operation">').html('答を "' + _this.answer + '" に変更しました。') )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -10488,24 +10527,19 @@ module.exports = function( incense, $widget ){
 			case 'changeStatusTo':
 				// console.log(message.content);
 				_this.status = message.content.option;
-				updateStatus();
-				updateAnswer();
+				updateView();
 
 				var timelineMessage = user.name + ' は、問を' + (_this.status=='open'?'再び開きました':'完了しました') + '。';
 
 				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.append( $('<div class="">').text( timelineMessage ) )
-				);
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__operation">').text( timelineMessage )
+				) );
 				incense.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
-					.append( $('<div>').text( timelineMessage ) )
+					.append( $('<div class="incense__message-unit__operation">').text( timelineMessage ) )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -10513,21 +10547,17 @@ module.exports = function( incense, $widget ){
 			case 'vote':
 				// 投票更新
 				_this.vote[message.owner] = message.content.option;
-				updateAnswer();
+				updateView();
 
 				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.append( $('<div class="">').text(user.name + ' が、 "' + message.content.option + '" に投票しました。') )
-				);
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__operation">').text(user.name + ' が、 "' + message.content.option + '" に投票しました。')
+				) );
 				incense.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
-					.append( $('<div>').text(message.owner + ' が、 "' + message.content.option + '" に投票しました。') )
+					.append( $('<div class="incense__message-unit__operation">').text(message.owner + ' が、 "' + message.content.option + '" に投票しました。') )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;

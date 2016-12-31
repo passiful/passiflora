@@ -18220,6 +18220,7 @@ window.Incense = function(){
 		$fieldOuter,
 		$fieldInner;
 	var boardId;
+	var zoomRate = 1;
 
 	/**
 	 * 初期化
@@ -18322,14 +18323,6 @@ window.Incense = function(){
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
-				console.log('incense: setting on window resize event handler...');
-				windowResized();
-				$(window).resize(function(){
-					windowResized();
-				});
-				rlv();
-			}); })
-			.then(function(){ return new Promise(function(rlv, rjt){
 				// (biflora 送信テスト)
 				console.log('incense: biflora test...');
 				biflora.send(
@@ -18354,7 +18347,7 @@ window.Incense = function(){
 				);
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
-				// boardId のこれまでのメッセージを取得する
+				// ログインユーザー自身の情報を取得する
 				console.log('incense: getting myself');
 				biflora.send(
 					'getMySelf',
@@ -18525,12 +18518,13 @@ window.Incense = function(){
 								var targetWidgetId = event.dataTransfer.getData("widget-id");
 								var fromOffsetX = event.dataTransfer.getData("offset-x");
 								var fromOffsetY = event.dataTransfer.getData("offset-y");
+
 								// console.log(targetWidgetId, fromX, fromY);
 								// console.log(e.offsetX, e.offsetY);
 								// console.log(e);
-								var toX = $fieldOuter.scrollLeft() + e.pageX - fromOffsetX - $fieldOuter.offset().left;
+								var toX = e.offsetX - fromOffsetX;
 								if( toX < 0 ){ toX = 0; }
-								var toY = $fieldOuter.scrollTop() + e.pageY - fromOffsetY - $fieldOuter.offset().top;
+								var toY = e.offsetY - fromOffsetY;
 								if( toY < 0 ){ toY = 0; }
 								_this.sendMessage(
 									{
@@ -18553,6 +18547,8 @@ window.Incense = function(){
 
 				$('body').on('click', function(){
 					_this.fieldContextMenu.close();
+					window.location.hash = '';
+
 				});
 
 				rlv();
@@ -18569,9 +18565,32 @@ window.Incense = function(){
 						'contentType': 'application/x-passiflora-command'
 					},
 					function(rtn){
+						// console.log(rtn);
 						rlv();
 					}
 				);
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				console.log('incense: setting on window resize event handler...');
+				windowResized();
+				$(window).on('resize', function(){
+					windowResized();
+				});
+				rlv();
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				console.log('incense: setting on window hash change event handler...');
+				var hash = window.location.hash;
+				console.log(hash);
+				if( hash.match( /^\#widget\.([0-9]+)$/ ) ){
+					var widgetId = RegExp.$1;
+					setTimeout(function(){
+						_this.widgetMgr.unselect();
+						_this.widgetMgr.select(widgetId);
+						_this.widgetMgr.focus(widgetId);
+					}, 1000);
+				}
+				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// 返却
@@ -18595,6 +18614,7 @@ window.Incense = function(){
 		});
 
 		_this.updateRelations();
+		_this.widgetMgr.updateSelection();
 
 		callback();
 		return;
@@ -18633,9 +18653,9 @@ window.Incense = function(){
 	/**
 	 * メインタイムラインにメッセージを表示する
 	 */
-	this.insertTimeline = function( message, $messageUnit ){
-		$messageUnit = $messageUnit || $('<div>');
-		$messageUnit
+	this.insertTimeline = function( message, $messageContent ){
+		$messageContent = $messageContent || $('<div>');
+		var $message = $('<div>')
 			.addClass('incense__message-unit')
 			.attr({
 				'data-message-id': message.id,
@@ -18643,13 +18663,39 @@ window.Incense = function(){
 			})
 		;
 		if( userInfo.id == message.owner ){
-			$messageUnit
+			$message
 				.addClass('incense__message-unit--myitem')
 			;
 		}
 		// console.log( this.userMgr.getAll() );
+		var ownerInfo = this.userMgr.get(message.owner);
+		$userIcon = $('<div class="incense__message-unit__owner-icon">');
+		if( ownerInfo.icon ){
+			$userIcon
+				.append( $('<img>')
+					.attr({
+						'src': ownerInfo.icon
+					})
+					.css({
+						'width': 30,
+						'height': 30
+					})
+				)
+			;
+		}
+		$message
+			.append( $userIcon )
+			.append( $('<div class="incense__message-unit__message-body">')
+				.append( $('<div class="incense__message-unit__owner">')
+					.attr({'title': new Date(message.microtime)})
+					.append( $('<span class="incense__message-unit__owner-name">').text(ownerInfo.name) )
+					.append( $('<span class="incense__message-unit__owner-id">').text(ownerInfo.id) )
+				)
+				.append( $messageContent )
+			)
+		;
 
-		$timelineList.append( $messageUnit );
+		$timelineList.append( $message );
 
 		this.adjustTimelineScrolling($timelineList);
 
@@ -18672,152 +18718,12 @@ window.Incense = function(){
 	/**
 	 * Markdown 変換する
 	 */
-	this.markdown = function(md){
-		// md = md.replace(/(\r\n|\r|\n)/g, '<br />');
-
-		var marked = require('marked');
-		marked.setOptions({
-			renderer: new marked.Renderer(),
-			gfm: true,
-			tables: true,
-			breaks: false,
-			pedantic: false,
-			sanitize: false,
-			smartLists: true,
-			smartypants: false
-		});
-		var html = marked(md);
-		var $div = $('<div>').html(html);
-		$div.find('a').attr({'target': '_blank'});
-		return $div.html();
-	}
+	this.markdown = require('./libs/_markdown.js');
 
 	/**
 	 * 投稿されたHTMLを無害化する
 	 */
-	this.detoxHtml = function(html){
-		var $div = $('<div>').html(html);
-		$div.find('script').remove();
-		$div.find('style').remove();
-		$div.find('form').remove();
-		$div.find('link').remove();
-		$div.find('meta').remove();
-		$div.find('title').remove();
-		$div.find('[href]')
-			.each(function(){
-				var $this = $(this);
-				var href = $this.attr('href');
-				if( href.match(/^javascript\:/) ){
-					$this.attr({
-						'href': 'javascript:alert(\'Invalidated.\');'
-					}).removeAttr('target');
-				}else{
-					$this.attr({
-						'target': '_blank'
-					});
-				}
-			})
-		;
-		$div.find('*')
-			.removeAttr('style')
-			.removeAttr('class')
-			.removeAttr('onabort')
-			.removeAttr('onauxclick')
-			.removeAttr('onbeforecopy')
-			.removeAttr('onbeforecut')
-			.removeAttr('onbeforepaste')
-			.removeAttr('onbeforeunload')
-			.removeAttr('onblur')
-			.removeAttr('oncancel')
-			.removeAttr('oncanplay')
-			.removeAttr('oncanplaythrough')
-			.removeAttr('onchange')
-			.removeAttr('onclick')
-			.removeAttr('onclose')
-			.removeAttr('oncontextmenu')
-			.removeAttr('oncopy')
-			.removeAttr('oncuechange')
-			.removeAttr('oncut')
-			.removeAttr('ondblclick')
-			.removeAttr('ondrag')
-			.removeAttr('ondragend')
-			.removeAttr('ondragenter')
-			.removeAttr('ondragleave')
-			.removeAttr('ondragover')
-			.removeAttr('ondragstart')
-			.removeAttr('ondrop')
-			.removeAttr('ondurationchange')
-			.removeAttr('onemptied')
-			.removeAttr('onended')
-			.removeAttr('onerror')
-			.removeAttr('onfocus')
-			.removeAttr('ongotpointercapture')
-			.removeAttr('onhashchange')
-			.removeAttr('oninput')
-			.removeAttr('oninvalid')
-			.removeAttr('onkeydown')
-			.removeAttr('onkeypress')
-			.removeAttr('onkeyup')
-			.removeAttr('onlanguagechange')
-			.removeAttr('onload')
-			.removeAttr('onloadeddata')
-			.removeAttr('onloadedmetadata')
-			.removeAttr('onloadstart')
-			.removeAttr('onlostpointercapture')
-			.removeAttr('onmessage')
-			.removeAttr('onmousedown')
-			.removeAttr('onmouseenter')
-			.removeAttr('onmouseleave')
-			.removeAttr('onmousemove')
-			.removeAttr('onmouseout')
-			.removeAttr('onmouseover')
-			.removeAttr('onmouseup')
-			.removeAttr('onmousewheel')
-			.removeAttr('onoffline')
-			.removeAttr('ononline')
-			.removeAttr('onpagehide')
-			.removeAttr('onpageshow')
-			.removeAttr('onpaste')
-			.removeAttr('onpause')
-			.removeAttr('onplay')
-			.removeAttr('onplaying')
-			.removeAttr('onpointercancel')
-			.removeAttr('onpointerdown')
-			.removeAttr('onpointerenter')
-			.removeAttr('onpointerleave')
-			.removeAttr('onpointermove')
-			.removeAttr('onpointerout')
-			.removeAttr('onpointerover')
-			.removeAttr('onpointerup')
-			.removeAttr('onpopstate')
-			.removeAttr('onprogress')
-			.removeAttr('onratechange')
-			.removeAttr('onrejectionhandled')
-			.removeAttr('onreset')
-			.removeAttr('onresize')
-			.removeAttr('onscroll')
-			.removeAttr('onsearch')
-			.removeAttr('onseeked')
-			.removeAttr('onseeking')
-			.removeAttr('onselect')
-			.removeAttr('onselectstart')
-			.removeAttr('onshow')
-			.removeAttr('onstalled')
-			.removeAttr('onstorage')
-			.removeAttr('onsubmit')
-			.removeAttr('onsuspend')
-			.removeAttr('ontimeupdate')
-			.removeAttr('ontoggle')
-			.removeAttr('onunhandledrejection')
-			.removeAttr('onunload')
-			.removeAttr('onvolumechange')
-			.removeAttr('onwaiting')
-			.removeAttr('onwebkitfullscreenchange')
-			.removeAttr('onwebkitfullscreenerror')
-			.removeAttr('onwheel')
-		;
-		return $div.html();
-	}
+	this.detoxHtml = require('./libs/_detoxHtml.js');
 
 	/**
 	 * ログインユーザー情報を取得
@@ -18844,6 +18750,24 @@ window.Incense = function(){
 	}
 
 	/**
+	 * ボードの拡大率を設定する
+	 */
+	this.zoom = function( rate ){
+		zoomRate = rate;
+		$fieldOuter.find('>div').css({
+			'transform': 'scale('+zoomRate+','+zoomRate+')',
+			'transform-origin': '0 0'
+		});
+	}
+
+	/**
+	 * ボードの拡大率を取得する
+	 */
+	this.getZoomRate = function( rate ){
+		return zoomRate;
+	}
+
+	/**
 	 * 親子関係の表現を更新する
 	 */
 	this.updateRelations = function( callback ){
@@ -18851,9 +18775,11 @@ window.Incense = function(){
 		// <path stroke="black" stroke-width="2" fill="none" d="M120,170 180,170 150,230z" />
 
 		function getCenterOfGravity($elm){
-			var toX = 0 - $field.offset().left + $fieldOuter.scrollLeft() + $elm.offset().left + $elm.outerWidth()/2;
+			// console.log($elm.position().left, $elm.outerWidth());
+			// console.log(($elm.position().left*(1/zoomRate)), $elm.outerWidth());
+			var toX = 0 + ($elm.position().left*(1/zoomRate)) + $elm.outerWidth()/2;
 			if( toX < 0 ){ toX = 0; }
-			var toY = 0 - $field.offset().top + $fieldOuter.scrollTop() + $elm.offset().top + $elm.outerHeight()/2;
+			var toY = 0 + ($elm.position().top*(1/zoomRate)) + $elm.outerHeight()/2;
 			if( toY < 0 ){ toY = 0; }
 			return {'x':toX, 'y':toY};
 		}
@@ -18900,7 +18826,136 @@ window.Incense = function(){
 
 };
 
-},{"./apis/_locker.js":80,"./apis/_receiveBroadcast.js":81,"./libs/_fieldContextMenu.js":83,"./libs/_locker.js":84,"./libs/_messageOperator.js":85,"./libs/_modal.js":86,"./libs/_userMgr.js":87,"./libs/_widgetBase.js":88,"./libs/_widgetMgr.js":89,"./widgets/issuetree/issuetree.js":90,"./widgets/stickies/stickies.js":91,"es6-promise":4,"iterate79":8,"jquery":9,"marked":10,"twig":13,"utils79":15}],83:[function(require,module,exports){
+},{"./apis/_locker.js":80,"./apis/_receiveBroadcast.js":81,"./libs/_detoxHtml.js":83,"./libs/_fieldContextMenu.js":84,"./libs/_locker.js":85,"./libs/_markdown.js":86,"./libs/_messageOperator.js":87,"./libs/_modal.js":88,"./libs/_userMgr.js":89,"./libs/_widgetBase.js":90,"./libs/_widgetMgr.js":91,"./widgets/issuetree/issuetree.js":92,"./widgets/stickies/stickies.js":93,"es6-promise":4,"iterate79":8,"jquery":9,"twig":13,"utils79":15}],83:[function(require,module,exports){
+/**
+ * 投稿されたHTMLを無害化する - _detoxHtml.js
+ */
+module.exports = function( html ){
+    var $ = require('jquery');
+	var $div = $('<div>').html(html);
+	$div.find('script').remove();
+	$div.find('style').remove();
+	$div.find('form').remove();
+	$div.find('link').remove();
+	$div.find('meta').remove();
+	$div.find('title').remove();
+	$div.find('[href]')
+		.each(function(){
+			var $this = $(this);
+			var href = $this.attr('href');
+			if( href.match(/^javascript\:/) ){
+				$this.attr({
+					'href': 'javascript:alert(\'Invalidated.\');'
+				}).removeAttr('target');
+			}else{
+				$this.attr({
+					'target': '_blank'
+				});
+			}
+		})
+	;
+	$div.find('*')
+		.removeAttr('style')
+		.removeAttr('class')
+		.removeAttr('onabort')
+		.removeAttr('onauxclick')
+		.removeAttr('onbeforecopy')
+		.removeAttr('onbeforecut')
+		.removeAttr('onbeforepaste')
+		.removeAttr('onbeforeunload')
+		.removeAttr('onblur')
+		.removeAttr('oncancel')
+		.removeAttr('oncanplay')
+		.removeAttr('oncanplaythrough')
+		.removeAttr('onchange')
+		.removeAttr('onclick')
+		.removeAttr('onclose')
+		.removeAttr('oncontextmenu')
+		.removeAttr('oncopy')
+		.removeAttr('oncuechange')
+		.removeAttr('oncut')
+		.removeAttr('ondblclick')
+		.removeAttr('ondrag')
+		.removeAttr('ondragend')
+		.removeAttr('ondragenter')
+		.removeAttr('ondragleave')
+		.removeAttr('ondragover')
+		.removeAttr('ondragstart')
+		.removeAttr('ondrop')
+		.removeAttr('ondurationchange')
+		.removeAttr('onemptied')
+		.removeAttr('onended')
+		.removeAttr('onerror')
+		.removeAttr('onfocus')
+		.removeAttr('ongotpointercapture')
+		.removeAttr('onhashchange')
+		.removeAttr('oninput')
+		.removeAttr('oninvalid')
+		.removeAttr('onkeydown')
+		.removeAttr('onkeypress')
+		.removeAttr('onkeyup')
+		.removeAttr('onlanguagechange')
+		.removeAttr('onload')
+		.removeAttr('onloadeddata')
+		.removeAttr('onloadedmetadata')
+		.removeAttr('onloadstart')
+		.removeAttr('onlostpointercapture')
+		.removeAttr('onmessage')
+		.removeAttr('onmousedown')
+		.removeAttr('onmouseenter')
+		.removeAttr('onmouseleave')
+		.removeAttr('onmousemove')
+		.removeAttr('onmouseout')
+		.removeAttr('onmouseover')
+		.removeAttr('onmouseup')
+		.removeAttr('onmousewheel')
+		.removeAttr('onoffline')
+		.removeAttr('ononline')
+		.removeAttr('onpagehide')
+		.removeAttr('onpageshow')
+		.removeAttr('onpaste')
+		.removeAttr('onpause')
+		.removeAttr('onplay')
+		.removeAttr('onplaying')
+		.removeAttr('onpointercancel')
+		.removeAttr('onpointerdown')
+		.removeAttr('onpointerenter')
+		.removeAttr('onpointerleave')
+		.removeAttr('onpointermove')
+		.removeAttr('onpointerout')
+		.removeAttr('onpointerover')
+		.removeAttr('onpointerup')
+		.removeAttr('onpopstate')
+		.removeAttr('onprogress')
+		.removeAttr('onratechange')
+		.removeAttr('onrejectionhandled')
+		.removeAttr('onreset')
+		.removeAttr('onresize')
+		.removeAttr('onscroll')
+		.removeAttr('onsearch')
+		.removeAttr('onseeked')
+		.removeAttr('onseeking')
+		.removeAttr('onselect')
+		.removeAttr('onselectstart')
+		.removeAttr('onshow')
+		.removeAttr('onstalled')
+		.removeAttr('onstorage')
+		.removeAttr('onsubmit')
+		.removeAttr('onsuspend')
+		.removeAttr('ontimeupdate')
+		.removeAttr('ontoggle')
+		.removeAttr('onunhandledrejection')
+		.removeAttr('onunload')
+		.removeAttr('onvolumechange')
+		.removeAttr('onwaiting')
+		.removeAttr('onwebkitfullscreenchange')
+		.removeAttr('onwebkitfullscreenerror')
+		.removeAttr('onwheel')
+	;
+	return $div.html();
+}
+
+},{"jquery":9}],84:[function(require,module,exports){
 /**
  * _fieldContextMenu.js
  */
@@ -18975,7 +19030,7 @@ module.exports = function( app, $fieldContextMenu ){
 	return;
 }
 
-},{"jquery":9}],84:[function(require,module,exports){
+},{"jquery":9}],85:[function(require,module,exports){
 /**
  * lockApi - locker.js
  */
@@ -19074,7 +19129,32 @@ module.exports = function( incense ){
 	return;
 }
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
+/**
+ * Markdown 変換する - _markdown.js
+ */
+module.exports = function( md ){
+    var $ = require('jquery');
+	// md = md.replace(/(\r\n|\r|\n)/g, '<br />');
+
+	var marked = require('marked');
+	marked.setOptions({
+		renderer: new marked.Renderer(),
+		gfm: true,
+		tables: true,
+		breaks: false,
+		pedantic: false,
+		sanitize: false,
+		smartLists: true,
+		smartypants: false
+	});
+	var html = marked(md);
+	var $div = $('<div>').html(html);
+	$div.find('a').attr({'target': '_blank'});
+	return $div.html();
+}
+
+},{"jquery":9,"marked":10}],87:[function(require,module,exports){
 /**
  * messageOperator.js
  */
@@ -19114,8 +19194,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						str += message.content.widgetType;
 						str += ' を作成しました。';
 						app.insertTimeline( message, $messageUnit
-							.addClass('incense__message-unit--operation')
-							.append( $('<div class="incense__message-unit__operation-message">').text(str) )
+							.append( $('<div class="incense__message-unit__operation">').text(str) )
 						);
 						break;
 					case 'moveWidget':
@@ -19131,8 +19210,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						str += '#widget.'+message.content.newParentWidgetId;
 						str += ' に変更しました。';
 						app.insertTimeline( message, $messageUnit
-							.addClass('incense__message-unit--operation')
-							.append( $('<div class="incense__message-unit__operation-message">').text(str) )
+							.append( $('<div class="incense__message-unit__operation">').text(str) )
 						);
 						break;
 					case 'deleteWidget':
@@ -19143,25 +19221,22 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						str += '#widget.'+message.content.targetWidgetId;
 						str += ' を削除しました。';
 						app.insertTimeline( message, $messageUnit
-							.addClass('incense__message-unit--operation')
-							.append( $('<div class="incense__message-unit__operation-message">').text(str) )
+							.append( $('<div class="incense__message-unit__operation">').text(str) )
 						);
 						break;
 					case 'userLogin':
-						app.userMgr.login( message.connectionId, message.content.userInfo, function(err, userInfo){
+						app.userMgr.login( message.content.userInfo, function(err, userInfo){
 							// console.log('user "'+userInfo.name+'" Login.');
 							var str = '';
-							str += message.content.userInfo.name;
-							str += ' がログインしました。';
+							str += 'ユーザー "' + message.content.userInfo.name + '" がログインしました。';
 							app.insertTimeline( message, $messageUnit
-								.addClass('incense__message-unit--operation')
-								.append( $('<div class="incense__message-unit__operation-message">').text(str) )
+								.append( $('<div class="incense__message-unit__operation">').text(str) )
 							);
 						} );
 						break;
 					case 'userLogout':
-						// message.content = JSON.parse(message.content);
-						app.userMgr.logout( message.connectionId, function(err, userInfo){
+						// console.log(message);
+						app.userMgr.logout( message.content.userInfo.id, function(err, userInfo){
 							if(userInfo === undefined){
 								console.error( 'userLogout: userInfo が undefined です。' );
 								return;
@@ -19169,11 +19244,9 @@ module.exports = function( app, $timelineList, $fieldInner ){
 							// console.log(userInfo);
 							// console.log('user "'+userInfo.name+'" Logout.');
 							var str = '';
-							str += userInfo.name;
-							str += ' がログアウトしました。';
+							str += 'ユーザー "' + userInfo.name + '" がログアウトしました。';
 							app.insertTimeline( message, $messageUnit
-								.addClass('incense__message-unit--operation')
-								.append( $('<div class="incense__message-unit__operation-message">').text(str) )
+								.append( $('<div class="incense__message-unit__operation">').text(str) )
 							);
 						} );
 						break;
@@ -19186,10 +19259,6 @@ module.exports = function( app, $timelineList, $fieldInner ){
 			case 'text/html':
 				var user = app.userMgr.get(message.owner);
 				app.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
 					.append( $('<div class="incense__message-unit__content incense-markdown">').html( incense.detoxHtml( message.content ) ) )
 				);
 				break;
@@ -19315,7 +19384,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	return;
 }
 
-},{"iterate79":8,"jquery":9}],86:[function(require,module,exports){
+},{"iterate79":8,"jquery":9}],88:[function(require,module,exports){
 /**
  * _modal.js
  */
@@ -19327,7 +19396,7 @@ module.exports = function($field){
 			+ '  <div class="incense-modal__dialog">'+"\n"
 			+ '    <div class="incense-modal__content">'+"\n"
 			+ '      <div class="incense-modal__header">'+"\n"
-			+ '        <button type="button" class="incense-modal__close" data-dismiss="modal">'+"\n"
+			+ '        <button type="button" class="btn btn-default incense-modal__close" data-dismiss="modal">'+"\n"
 			+ '          <span>&times;</span>'+"\n"
 			+ '        </button>'+"\n"
 			+ '        <h4 class="incense-modal__title"></h4>'+"\n"
@@ -19423,62 +19492,57 @@ module.exports = function($field){
 
 }
 
-},{"jquery":9}],87:[function(require,module,exports){
+},{"jquery":9}],89:[function(require,module,exports){
 /**
  * userMgr.js
  */
 module.exports = function( app, $timelineList, $field, $fieldInner ){
 	var _this = this;
-	var userConnectionList = {};
 	var userList = {};
 
 
 	/**
 	 * ユーザー情報を登録する
 	 */
-	this.login = function(connectionId, userInfo, callback){
+	this.login = function(userInfo, callback){
+		// console.log(userInfo);
 		callback = callback || function(err, userInfo){};
-		userConnectionList[connectionId] = userInfo;
-		userList[userInfo.id] = userInfo;
-		callback(null, userConnectionList[connectionId]);
+		var err = null;
+		var rtn = false;
+		try {
+			if( !userInfo.id.length ){
+				callback(err, rtn);return;
+			}else{
+				userList[userInfo.id] = userInfo;
+				rtn = userList[userInfo.id];
+			}
+		} catch (e) {
+			err = '[LOGIN ERROR] invalid user info.';
+			console.error(err, userInfo);
+		}
+		callback(err, rtn);
 		return;
 	}
 
 	/**
 	 * ユーザー情報を削除する
 	 */
-	this.logout = function(connectionId, callback){
+	this.logout = function(userId, callback){
 		callback = callback || function(err, {}){};
 		try {
-			var rtn = userConnectionList[connectionId];
+			// ログアウトしても、ユーザーの情報を忘れる必要はない。
+			// "議論に参加してくれた貢献者" ということで記録に留めることにする。
+			// userList[userId] = undefined;
+			// delete( userList[userId] );
 
-			userList[rtn.id] = undefined;
-			delete( userList[rtn.id] );
-			userConnectionList[connectionId] = undefined;
-			delete( userConnectionList[connectionId] );
-
-			callback( null, rtn );
+			callback( null, userList[userId] );
 			return;
 		} catch (e) {
-			console.error('[ERROR] failed to logout: '+connectionId, rtn);
-			callback('[ERROR] failed to logout: '+connectionId, rtn);
+			console.error('[ERROR] failed to logout: '+userId);
+			callback('[ERROR] failed to logout: '+userId, false);
 			return;
 		}
 		return;
-	}
-
-	/**
-	 * 接続IDからユーザー情報を取得する
-	 */
-	this.getUserByConnectionId = function(connectionId){
-		return userConnectionList[connectionId];
-	}
-
-	/**
-	 * 接続IDからユーザー情報を取得する
-	 */
-	this.getAllConnection = function(){
-		return userConnectionList;
 	}
 
 	/**
@@ -19507,7 +19571,7 @@ module.exports = function( app, $timelineList, $field, $fieldInner ){
 	return;
 }
 
-},{}],88:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 /**
  * widgets: base class
  */
@@ -19538,7 +19602,7 @@ module.exports = function( incense, $widget ){
 	return;
 }
 
-},{}],89:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 /**
  * widgetMgr.js
  */
@@ -19705,6 +19769,43 @@ module.exports = function( incense, $timelineList, $field, $fieldOuter, $fieldIn
 				event.dataTransfer.setData("offset-y", e.offsetY );
 				// console.log(e);
 			})
+			.bind('dragover', function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				// console.log(e);
+			})
+			.bind('dragleave', function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				// console.log(e);
+			})
+			.bind('drop', function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				// console.log(e);
+				var event = e.originalEvent;
+				var method = event.dataTransfer.getData("method");
+				switch(method){
+					case 'moveWidget':
+						var targetWidgetId = event.dataTransfer.getData("widget-id");
+						var fromOffsetX = event.dataTransfer.getData("offset-x");
+						var fromOffsetY = event.dataTransfer.getData("offset-y");
+						incense.sendMessage(
+							{
+								'content': JSON.stringify({
+									'operation': 'setParentWidget',
+									'targetWidgetId': targetWidgetId,
+									'newParentWidgetId': $(this).attr('data-widget-id')
+								}),
+								'contentType': 'application/x-passiflora-command'
+							},
+							function(result){
+								console.log(result);
+							}
+						);
+						break;
+				}
+			})
 		);
 		// console.log(content);
 		widgetIndex[id] = _.defaults( new incense.widgetList[content.widgetType].api(incense, $widget), new (incense.widgetBase)(incense, $widget) );
@@ -19794,6 +19895,7 @@ module.exports = function( incense, $timelineList, $field, $fieldOuter, $fieldIn
 			})
 		;
 		$fieldSelection.append( $selected );
+		window.location.hash = '#widget.'+id;
 
 		return;
 	}
@@ -19905,6 +20007,7 @@ module.exports = function( incense, $timelineList, $field, $fieldOuter, $fieldIn
 				_this.unselect();
 				_this.select(widgetId);
 				_this.focus(widgetId);
+				window.location.hash = '#widget.' + widgetId;
 				return false;
 			})
 		;
@@ -19922,7 +20025,7 @@ module.exports = function( incense, $timelineList, $field, $fieldOuter, $fieldIn
 	return;
 }
 
-},{"jquery":9,"underscore":14}],90:[function(require,module,exports){
+},{"jquery":9,"underscore":14}],92:[function(require,module,exports){
 /**
  * widgets: issuetree.js
  */
@@ -19935,8 +20038,47 @@ module.exports = function( incense, $widget ){
 	this.answer = '1. 賛成'+"\n"+'2. 反対';
 	this.vote = {};
 	this.status = 'open';
+	this.commentCount = 0;
 
-	var $widgetBody = $('<div class="issuetree issuetree--widget issuetree--status-no-active">')
+	function editIssue(){
+		mode = 'edit';
+		$detailBodyIssue.append( $detailBodyIssue_textarea.val( _this.issue ) );
+		incense.setBehaviorChatComment(
+			$detailBodyIssue_textarea,
+			{
+				'submit': function(value){
+					applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
+				}
+			}
+		);
+		$detailBodyIssue_textarea
+			.on('change blur', function(e){
+				applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
+			})
+		;
+		$detailBodyIssue_textarea.focus();
+	}
+
+	function editAnswer(){
+		mode = 'edit';
+		$detailBodyAnswer.append( $detailBodyAnswer_textarea.val( _this.answer ) );
+		incense.setBehaviorChatComment(
+			$detailBodyAnswer_textarea,
+			{
+				'submit': function(value){
+					applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
+				}
+			}
+		);
+		$detailBodyAnswer_textarea
+			.on('change blur', function(e){
+				applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
+			})
+		;
+		$detailBodyAnswer_textarea.focus();
+	}
+
+	var $widgetBody = $('<div class="issuetree issuetree--widget">')
 		.append( $('<div class="row">')
 			.append( $('<div class="col-sm-6">')
 				.append( $('<div class="issuetree__block">')
@@ -19953,17 +20095,31 @@ module.exports = function( incense, $widget ){
 		)
 		.append( $('<div class="issuetree__comment-count">') )
 	;
-	var $detailBody = $('<div class="issuetree">')
+	var $detailBody = $('<div class="issuetree issuetree--modal">')
 		.append( $('<div class="row">')
 			.append( $('<div class="col-sm-6">')
 				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '問' ) )
+					.append( $('<div class="issuetree__heading">').text( '問' )
+						.append( $('<a href="javascript:;" class="issuetree__edit-button">')
+							.text('編集')
+							.click(function(){
+								editIssue();
+							})
+						)
+					)
 					.append( $('<div class="issuetree__issue incense-markdown">').html( incense.detoxHtml( incense.markdown(this.issue) ) || 'no-set' ) )
 				)
 			)
 			.append( $('<div class="col-sm-6">')
 				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '答' ) )
+					.append( $('<div class="issuetree__heading">').text( '答' )
+						.append( $('<a href="javascript:;" class="issuetree__edit-button">')
+							.text('編集')
+							.click(function(){
+								editAnswer();
+							})
+						)
+					)
 					.append( $('<div class="issuetree__answer incense-markdown">').html( incense.detoxHtml( incense.markdown(this.answer) ) || 'no-answer' ) )
 				)
 			)
@@ -19979,7 +20135,7 @@ module.exports = function( incense, $widget ){
 								.append( $('<span>')
 									.text('あなたの現在の立場 : ')
 								)
-								.append( $('<select>') )
+								.append( $('<select style="max-width: 100%;">') )
 							)
 							.append( $('<textarea class="form-control issuetree__discussion-timeline--chat-comment">') )
 						)
@@ -20084,22 +20240,7 @@ module.exports = function( incense, $widget ){
 	;
 	$detailBodyIssue
 		.dblclick(function(e){
-			mode = 'edit';
-			$detailBodyIssue.append( $detailBodyIssue_textarea.val( _this.issue ) );
-			incense.setBehaviorChatComment(
-				$detailBodyIssue_textarea,
-				{
-					'submit': function(value){
-						applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
-					}
-				}
-			);
-			$detailBodyIssue_textarea
-				.on('change blur', function(e){
-					applyTextareaEditContent( $detailBodyIssue_textarea, 'issue' );
-				})
-			;
-			$detailBodyIssue_textarea.focus();
+			editIssue();
 		})
 		.click(function(e){
 			e.stopPropagation();
@@ -20125,22 +20266,7 @@ module.exports = function( incense, $widget ){
 	;
 	$detailBodyAnswer
 		.dblclick(function(e){
-			mode = 'edit';
-			$detailBodyAnswer.append( $detailBodyAnswer_textarea.val( _this.answer ) );
-			incense.setBehaviorChatComment(
-				$detailBodyAnswer_textarea,
-				{
-					'submit': function(value){
-						applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
-					}
-				}
-			);
-			$detailBodyAnswer_textarea
-				.on('change blur', function(e){
-					applyTextareaEditContent( $detailBodyAnswer_textarea, 'answer' );
-				})
-			;
-			$detailBodyAnswer_textarea.focus();
+			editAnswer();
 		})
 		.click(function(e){
 			e.stopPropagation();
@@ -20192,7 +20318,7 @@ module.exports = function( incense, $widget ){
 	 */
 	function openDetailWindow(){
 		incense.modal.dialog({
-			'title': 'issue',
+			'title': 'Issue #widget.'+_this.id,
 			'body': $detailBody,
 			'buttons': [
 				$('<button>')
@@ -20205,8 +20331,7 @@ module.exports = function( incense, $widget ){
 			]
 		});
 
-		updateStatus();
-		updateAnswer();
+		updateView();
 		updateRelations();
 
 		setTimeout(function(){
@@ -20232,9 +20357,10 @@ module.exports = function( incense, $widget ){
 	;
 
 	/**
-	 * 答欄を更新する
+	 * 表示を更新する
 	 */
-	function updateAnswer(){
+	function updateView(callback){
+		callback = callback || function(){};
 		var optionValueList = {};
 		var myAnswer = _this.vote[incense.getUserInfo().id];
 		$detailBodyAnswer.html( incense.detoxHtml( incense.markdown(_this.answer) ) || 'no-answer' );
@@ -20348,22 +20474,19 @@ module.exports = function( incense, $widget ){
 
 		$widgetBody
 			.removeClass('issuetree--status-active')
-			.removeClass('issuetree--status-no-active')
+			.removeClass('issuetree--status-fixed')
+		;
+		$detailBody
+			.removeClass('issuetree--status-active')
 			.removeClass('issuetree--status-fixed')
 		;
 		if( _this.status == 'close' ){
-			$widgetBody
-				.addClass('issuetree--status-fixed')
-			;
+			$widgetBody.addClass('issuetree--status-fixed');
+			$detailBody.addClass('issuetree--status-fixed');
 		}else{
-			if( maxAnswerCount > 1 || otherVoteCount ){
-				$widgetBody
-					.addClass('issuetree--status-active')
-				;
-			}else{
-				$widgetBody
-					.addClass('issuetree--status-no-active')
-				;
+			if( _this.commentCount >= 1 ){
+				$widgetBody.addClass('issuetree--status-active');
+				$detailBody.addClass('issuetree--status-active');
 			}
 		}
 
@@ -20397,16 +20520,8 @@ module.exports = function( incense, $widget ){
 				.text(myAnswer)
 			);
 		}
-		// console.log(optionValueList);
-		// console.log(optionValueList);
-		// $yourStanceSelector
-	}
 
-	/**
-	 * 課題のステータス表示を更新する
-	 */
-	function updateStatus(callback){
-		callback = callback || function(){};
+		// updateStatus --------
 		$detailBodyStatus
 			.html('')
 			.append(
@@ -20441,7 +20556,7 @@ module.exports = function( incense, $widget ){
 			)
 		;
 
-	} // updateStatus()
+	} // updateView()
 
 	/**
 	 * 投票操作のメッセージを送信する
@@ -20472,10 +20587,15 @@ module.exports = function( incense, $widget ){
 		// var $detailBodySubIssues = $detailBody.find('.issuetree__sub-issues');
 		$detailBodyParentIssue.html('---');
 		if( _this.parent && incense.widgetMgr.get(_this.parent) ){
-			$detailBodyParentIssue.html('').append( $('<div>')
-				.append( $('<div>').text(incense.widgetMgr.get(_this.parent).issue) )
-				.append( $('<div>').append( incense.widgetMgr.mkLinkToWidget( _this.parent ) ) )
-			);
+			var $link = incense.widgetMgr.mkLinkToWidget( _this.parent );
+			$detailBodyParentIssue.html('')
+				.append( $link
+					.html('')
+					.addClass('issuetree__issue-unit')
+					.append( $('<div>').text(incense.widgetMgr.get(_this.parent).issue) )
+					.append( $('<div class="issuetree__issue-unit--widget-id">').append( '#widget.'+_this.parent ) )
+				)
+			;
 		}
 
 		incense.widgetMgr.getChildren( _this.id, function(children){
@@ -20485,8 +20605,12 @@ module.exports = function( incense, $widget ){
 				var $ul = $('<ul>');
 				for( var idx in children ){
 					var $li = $('<li>')
-						.append( $('<div>').text(children[idx].issue) )
-						.append( $('<div>').append( incense.widgetMgr.mkLinkToWidget( children[idx].id ) ) )
+						.append( incense.widgetMgr.mkLinkToWidget( children[idx].id )
+							.html('')
+							.addClass('issuetree__issue-unit')
+							.append( $('<div>').text(children[idx].issue) )
+							.append( $('<div class="issuetree__issue-unit--widget-id">').append( '#widget.'+children[idx].id ) )
+						)
 					;
 					$ul.append( $li );
 				}
@@ -20518,31 +20642,57 @@ module.exports = function( incense, $widget ){
 		var $messageUnit = $('<div>');
 		var user = incense.userMgr.get(message.owner);
 
-		switch( message.content.command ){
-			case 'comment':
-				// コメントの投稿
-				userMessage = incense.detoxHtml( incense.markdown( message.content.comment ) );
-
-				var totalCommentCount = $detailBodyTimeline.find('>div').size();
-				$widgetBody.find('.issuetree__comment-count').text( (totalCommentCount+1) + '件のコメント' );
-
-				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.addClass( user.id == incense.getUserInfo().id ? 'issuetree--myitem' : '' )
-					.append( $('<div class="issuetree__owner">')
-						.append( $('<span class="issuetree__owner-name">').text(user.name) )
-						.append( $('<span class="issuetree__owner-id">').text(user.id) )
+		function mkTimelineElement( $messageContent ){
+			var $rtn = $('<div class="incense__message-unit">');
+			if( user.id == incense.getUserInfo().id ){
+				$rtn.addClass('incense__message-unit--myitem');
+			}
+			$userIcon = $('<div class="incense__message-unit__owner-icon">');
+			if( user.icon ){
+				$userIcon
+					.append( $('<img>')
+						.attr({
+							'src': user.icon
+						})
+						.css({
+							'width': 30,
+							'height': 30
+						})
 					)
-					.append( $('<div class="issuetree__content incense-markdown">').html(userMessage) )
-				);
-				incense.adjustTimelineScrolling( $detailBodyTimeline );
-
-				// メインチャットに追加
-				incense.insertTimeline( message, $messageUnit
+				;
+			}
+			$rtn
+				.append( $userIcon )
+				.append( $('<div class="incense__message-unit__message-body">')
 					.append( $('<div class="incense__message-unit__owner">')
 						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
 						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
 					)
+					.append( $messageContent )
+				)
+			;
+			return $rtn;
+		}
+
+		switch( message.content.command ){
+			case 'comment':
+				// コメントの投稿
+				userMessage = incense.detoxHtml( incense.markdown( message.content.comment ) );
+				this.commentCount ++;
+				updateView();
+
+				var totalCommentCount = $detailBodyTimeline.find('>div').size();
+				$widgetBody.find('.issuetree__comment-count').text( (this.commentCount) + '件のコメント' );
+
+				// 詳細画面のディスカッションに追加
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__content incense-markdown">').html(userMessage)
+				) );
+				// 	.addClass( user.id == incense.getUserInfo().id ? 'issuetree--myitem' : '' )
+				incense.adjustTimelineScrolling( $detailBodyTimeline );
+
+				// メインチャットに追加
+				incense.insertTimeline( message, $messageUnit
 					.append( $('<div class="incense__message-unit__content incense-markdown">').html(userMessage) )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
@@ -20555,18 +20705,14 @@ module.exports = function( incense, $widget ){
 				$widget.find('.issuetree__issue').html( incense.detoxHtml( incense.markdown(_this.issue) ) || 'no-set' );
 
 				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.append( $('<div class="">').html(message.owner + ' が、問を "' + _this.issue + '" に変更しました。') )
-				);
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__operation">').html(message.owner + ' が、問を "' + _this.issue + '" に変更しました。')
+				) );
 				incense.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
-					.append( $('<div class="">').html('問を "' + _this.issue + '" に変更しました。') )
+					.append( $('<div class="incense__message-unit__operation">').html('問を "' + _this.issue + '" に変更しました。') )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -20574,21 +20720,17 @@ module.exports = function( incense, $widget ){
 			case 'update_answer':
 				// 答の更新
 				_this.answer = message.content.val;
-				updateAnswer();
+				updateView();
 
 				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.append( $('<div class="">').html(message.owner + ' が、答を "' + _this.answer + '" に変更しました。') )
-				);
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__operation">').html(message.owner + ' が、答を "' + _this.answer + '" に変更しました。')
+				) );
 				incense.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
-					.append( $('<div class="">').html('答を "' + _this.answer + '" に変更しました。') )
+					.append( $('<div class="incense__message-unit__operation">').html('答を "' + _this.answer + '" に変更しました。') )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -20596,24 +20738,19 @@ module.exports = function( incense, $widget ){
 			case 'changeStatusTo':
 				// console.log(message.content);
 				_this.status = message.content.option;
-				updateStatus();
-				updateAnswer();
+				updateView();
 
 				var timelineMessage = user.name + ' は、問を' + (_this.status=='open'?'再び開きました':'完了しました') + '。';
 
 				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.append( $('<div class="">').text( timelineMessage ) )
-				);
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__operation">').text( timelineMessage )
+				) );
 				incense.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
-					.append( $('<div>').text( timelineMessage ) )
+					.append( $('<div class="incense__message-unit__operation">').text( timelineMessage ) )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -20621,21 +20758,17 @@ module.exports = function( incense, $widget ){
 			case 'vote':
 				// 投票更新
 				_this.vote[message.owner] = message.content.option;
-				updateAnswer();
+				updateView();
 
 				// 詳細画面のディスカッションに追加
-				$detailBodyTimeline.append( $('<div>')
-					.append( $('<div class="">').text(user.name + ' が、 "' + message.content.option + '" に投票しました。') )
-				);
+				$detailBodyTimeline.append( mkTimelineElement(
+					$('<div class="incense__message-unit__operation">').text(user.name + ' が、 "' + message.content.option + '" に投票しました。')
+				) );
 				incense.adjustTimelineScrolling( $detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__owner">')
-						.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-						.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-					)
-					.append( $('<div>').text(message.owner + ' が、 "' + message.content.option + '" に投票しました。') )
+					.append( $('<div class="incense__message-unit__operation">').text(message.owner + ' が、 "' + message.content.option + '" に投票しました。') )
 					.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -20660,7 +20793,7 @@ module.exports = function( incense, $widget ){
 	return;
 }
 
-},{"jquery":9}],91:[function(require,module,exports){
+},{"jquery":9}],93:[function(require,module,exports){
 /**
  * widgets: stickies.js
  */
@@ -20784,11 +20917,7 @@ module.exports = function( incense, $widget ){
 			userMessage = 'stickies の内容 "'+before + '" を削除しました。';
 		}
 		incense.insertTimeline( message, $messageUnit
-			.append( $('<div class="incense__message-unit__owner">')
-				.append( $('<span class="incense__message-unit__owner-name">').text(user.name) )
-				.append( $('<span class="incense__message-unit__owner-id">').text(user.id) )
-			)
-			.append( $('<div>').text(userMessage) )
+			.append( $('<div class="incense__message-unit__operation">').text(userMessage) )
 			.append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 		);
 

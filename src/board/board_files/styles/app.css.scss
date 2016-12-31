@@ -26,27 +26,20 @@ html, body{
 	}
 }
 .board{
+	display: flex;
 	height: 100%;
 	width: 100%;
-	position: absolute;
+	position: relative;
 	left:0; top:0;
 	overflow: hidden;
 	z-index: 500;
 
 	&__field{
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 70%;
+		width: calc(100% - 255px);
 		height: 100%;
-		overflow: auto;
 	}
 	&__timeline{
-		position: absolute;
-		top: 0;
-		right: 0;
-		width: 30%;
+		width: 250px;
 		height: 100%;
-		overflow: hidden;
 	}
 }

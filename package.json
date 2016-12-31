@@ -1,5 +1,6 @@
 {
   "main": "libs/main.js",
+  "version": "0.1.0-beta.1+nb",
   "private": true,
   "scripts": {
     "start": "node ./libs/main.js",

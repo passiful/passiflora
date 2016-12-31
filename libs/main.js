@@ -7,6 +7,7 @@ var utils79 = require('utils79');
 var ejs = require('ejs');
 var conf = require('./confo.js');
 console.log(conf);
+conf.packageJson = require('../package.json');
 
 var biflora = require('biflora');
 

@@ -2,11 +2,18 @@ html, body {
   font-size: medium;
   font-family: Meiryo, "Hiragino Kaku Gothic ProN", Verdana, sans-serif; }
 
-header {
-  background-color: #99b;
-  padding: 20px; }
-
+header,
 footer {
   margin: 1em 0;
   background-color: #99b;
-  padding: 20px; }
+  padding: 20px;
+  color: #fff; }
+  header a,
+  footer a {
+    color: #fff; }
+    header a:hover,
+    footer a:hover {
+      color: #eee; }
+
+footer {
+  text-align: center; }

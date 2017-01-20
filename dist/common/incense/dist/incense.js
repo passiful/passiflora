@@ -18647,6 +18647,9 @@ window.Incense = function(){
 			}
 			return;
 		});
+		$textarea.on('dblclick', function(e){
+			e.stopPropagation();
+		});
 		return $textarea;
 	} // setBehaviorChatComment()
 
@@ -18752,18 +18755,34 @@ window.Incense = function(){
 	/**
 	 * ボードの拡大率を設定する
 	 */
-	this.zoom = function( rate ){
-		zoomRate = rate;
+	this.zoom = function( rateTo ){
+		var scrollInfo = {
+			"width": $fieldOuter.width(),
+			"height": $fieldOuter.height(),
+			"scrollTop": $fieldOuter.scrollTop(),
+			"scrollLeft": $fieldOuter.scrollLeft()
+		};
+		var currentRate = (1/zoomRate);
+		var center = {
+			"top": (scrollInfo.scrollTop + (scrollInfo.height/2)) * (1/zoomRate),
+			"left": (scrollInfo.scrollLeft + (scrollInfo.width/2)) * (1/zoomRate)
+		};
+
+		zoomRate = rateTo;
 		$fieldOuter.find('>div').css({
 			'transform': 'scale('+zoomRate+','+zoomRate+')',
 			'transform-origin': '0 0'
 		});
+		$fieldOuter.animate({
+			'scrollTop': (center.top * zoomRate) - (scrollInfo.height/2),
+			'scrollLeft': (center.left * zoomRate) - (scrollInfo.width/2)
+		}, { 'duration': 200, 'easing': 'linear' });
 	}
 
 	/**
 	 * ボードの拡大率を取得する
 	 */
-	this.getZoomRate = function( rate ){
+	this.getZoomRate = function(){
 		return zoomRate;
 	}
 
@@ -19160,6 +19179,7 @@ module.exports = function( md ){
  */
 module.exports = function( app, $timelineList, $fieldInner ){
 	var _this = this;
+	var Promise = require('es6-promise').Promise;
 	var $ = require('jquery');
 	var it79 = require('iterate79');
 	var newestMessageNumber = 0;
@@ -19187,7 +19207,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 				message.content = JSON.parse(message.content);
 				switch( message.content.operation ){
 					case 'createWidget':
-						app.widgetMgr.create( message.id, message.content );
+						app.widgetMgr.create( message.boardMessageId, message.content );
 						var str = '';
 						str += message.owner;
 						str += ' が ';
@@ -19198,10 +19218,10 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						);
 						break;
 					case 'moveWidget':
-						app.widgetMgr.move( message.id, message.content );
+						app.widgetMgr.move( message.boardMessageId, message.content );
 						break;
 					case 'setParentWidget':
-						app.widgetMgr.setParentWidget( message.id, message.content );
+						app.widgetMgr.setParentWidget( message.boardMessageId, message.content );
 						var str = '';
 						str += message.owner;
 						str += ' が ';
@@ -19214,7 +19234,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 						);
 						break;
 					case 'deleteWidget':
-						app.widgetMgr.delete( message.id, message.content.targetWidgetId );
+						app.widgetMgr.delete( message.boardMessageId, message.content.targetWidgetId );
 						var str = '';
 						str += message.owner;
 						str += ' が ';
@@ -19273,21 +19293,21 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	this.exec = function(message, callback){
 		callback = callback || function(){};
 
-		if( newestMessageNumber >= message.id ){
+		if( newestMessageNumber >= message.boardMessageId ){
 			// 既に処理済みのメッセージとみなし、キューに追加しない。
-			console.error(message.id + ' は、すでに処理済みのメッセージです。');
+			console.error(message.boardMessageId + ' は、すでに処理済みのメッセージです。');
 			console.error(message);
 			callback(); return;
 		}
-		if( newestMessageNumber[message.id] ){
+		if( newestMessageNumber[message.boardMessageId] ){
 			// 既に登録済みのメッセージとみなし、キューに追加しない。
-			console.error(message.id + ' は、すでにキューに登録済みのメッセージです。');
+			console.error(message.boardMessageId + ' は、すでにキューに登録済みのメッセージです。');
 			console.error(message);
 			callback(); return;
 		}
 
 
-		messageQueue[message.id] = message;//メッセージを Queue に追加
+		messageQueue[message.boardMessageId] = message;//メッセージを Queue に追加
 		messageQueueLength ++;
 		// console.log(message);
 
@@ -19297,7 +19317,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 		isQueueProgress = true;
 
 		function queueLoop(){
-			setTimeout(function(){
+			new Promise(function(rlv){rlv();}).then(function(){ return new Promise(function(rlv, rjt){
 				if( !messageQueue[newestMessageNumber+1] ){
 					// 次のメッセージがなければストップ
 					if( messageQueueLength ){
@@ -19323,7 +19343,8 @@ module.exports = function( app, $timelineList, $fieldInner ){
 					messageQueueLength --;
 					queueLoop();//再帰処理
 				});
-			}, 0);
+
+			}); });
 
 			return;
 		}
@@ -19365,7 +19386,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	}
 
 	/**
-	 * ウィジェットを配置する
+	 * ウィジェットを移動する
 	 */
 	this.moveWidget = function(id, content){
 		$targetWidget = $fieldInner.find('[data-widget-id='+content.targetWidgetId+']');
@@ -19384,7 +19405,7 @@ module.exports = function( app, $timelineList, $fieldInner ){
 	return;
 }
 
-},{"iterate79":8,"jquery":9}],88:[function(require,module,exports){
+},{"es6-promise":4,"iterate79":8,"jquery":9}],88:[function(require,module,exports){
 /**
  * _modal.js
  */

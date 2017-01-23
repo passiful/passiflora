@@ -18279,6 +18279,7 @@ window.Incense = function(){
 				$fieldInner = $field.find('.incense__board-inner');
 
 				_this.$field = $field;
+				_this.$fieldOuter = $fieldOuter;
 				_this.$fieldInner = $fieldInner;
 				$fieldRelations.append( $('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 10000 10000">') );
 
@@ -18365,9 +18366,9 @@ window.Incense = function(){
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// ボードの中央へスクロール移動
-				$fieldOuter.scrollTop( $fieldInner.height()/2 - $fieldOuter.height()/2 );
-				$fieldOuter.scrollLeft( $fieldInner.width()/2 - $fieldOuter.width()/2 );
-				rlv();
+				_this.scrollToBoardCenter(function(){
+					rlv();
+				});
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
 				// boardId のこれまでのメッセージを取得する
@@ -18424,8 +18425,13 @@ window.Incense = function(){
 				console.log('incense: setting board events...');
 				var mkWidget = function(e){
 					// console.log(e);
+					var zoomRate = incense.getZoomRate();
+					var position = {
+						'x': ($fieldOuter.scrollLeft() + e.pageX)/zoomRate - $fieldOuter.offset().left/zoomRate,
+						'y': ($fieldOuter.scrollTop() + e.pageY)/zoomRate - $fieldOuter.offset().top/zoomRate
+					};
 					_this.fieldContextMenu.open(
-						{'x':e.offsetX, 'y':e.offsetY},
+						position,
 						(function(){
 							var rtn = [];
 							var widgets = _this.widgetList;
@@ -18434,8 +18440,8 @@ window.Incense = function(){
 								menu.label = widgets[widgetName].name;
 								menu.data = {
 									'widget-name': widgetName,
-									'x': e.offsetX,
-									'y': e.offsetY
+									'x': position.x,
+									'y': position.y
 								};
 								menu.action = function(data){
 									// console.log(data);
@@ -18718,6 +18724,7 @@ window.Incense = function(){
 	 * ウィジェットの一覧を取得する
 	 */
 	this.getWidgetList = function( callback ){
+		callback = callback||function(){};
 		_this.widgetMgr.getList(function(widgetList){
 			callback( widgetList );
 		});
@@ -18725,9 +18732,23 @@ window.Incense = function(){
 	}
 
 	/**
+	 * ボードの中央へスクロール
+	 */
+	this.scrollToBoardCenter = function( callback ){
+		callback = callback||function(){};
+		var zoomRate = this.getZoomRate();
+		$fieldOuter.scrollTop( $fieldInner.height()/2*zoomRate - $fieldOuter.height()/2 );
+		$fieldOuter.scrollLeft( $fieldInner.width()/2*zoomRate - $fieldOuter.width()/2 );
+		callback();
+		return;
+	}
+
+	/**
 	 * ボードの拡大率を設定する
 	 */
 	this.zoom = function( rateTo ){
+		_this.fieldContextMenu.close(); // コンテキストメニューを閉じる
+
 		var scrollInfo = {
 			"width": $fieldOuter.width(),
 			"height": $fieldOuter.height(),
@@ -18974,7 +18995,7 @@ module.exports = function( app, $fieldContextMenu ){
 								'href': 'javascript:;',
 								'data-widget-data': JSON.stringify(menu.data)
 							})
-							.click(function(e){
+							.on('click', function(e){
 								e.stopPropagation();
 								_this.close();
 								try {
@@ -18990,20 +19011,23 @@ module.exports = function( app, $fieldContextMenu ){
 			})(menu[idx]);
 		}
 
+		var zoomRate = (1/incense.getZoomRate());
 		$fieldContextMenu.append( $contextmenu
 			.css({
 				'position': 'absolute',
-				'top': position.y-5,
-				'left': position.x-5,
-				'z-index': app.widgetsMaxZIndex ++
+				'top': position.y - 5*zoomRate,
+				'left': position.x - 5*zoomRate,
+				'z-index': app.widgetsMaxZIndex ++,
+				'transform': 'scale('+zoomRate+','+zoomRate+')',
+				'transform-origin': '0 0'
 			})
-			.click(function(e){
+			.on('click', function(e){
 				e.stopPropagation();
 			})
-			.dblclick(function(e){
+			.on('dblclick', function(e){
 				e.stopPropagation();
 			})
-			.contextmenu(function(e){
+			.on('contextmenu', function(e){
 				e.stopPropagation();
 			})
 			.html('')
@@ -19066,6 +19090,11 @@ module.exports = function( incense ){
 			return true; break;
 		}
 		e.preventDefault();
+		if( incense.modal.isOpened() ){
+			incense.modal.close();
+		}else if( incense.widgetDetailModal.isOpened() ){
+			incense.widgetDetailModal.close();
+		}
 	});
 
 	Keypress.simple_combo(cmdKeyName+" -", function(e) {
@@ -19524,7 +19553,7 @@ module.exports = function($field){
 			callback();
 		});
 		return $dialog;
-	}//dialog()
+	} // open()
 
 	/**
 	 * ダイアログを閉じる
@@ -19535,13 +19564,24 @@ module.exports = function($field){
 			$dialog.hide();
 			setTimeout(function(){
 				$dialog.remove();
+				$dialog = undefined;
 				callback();
 			}, 110);
 			return $dialog;
 		}
 		callback();
 		return $dialog;
-	}//close()
+	} // close()
+
+	/**
+	 * modal dialog が開いているか確認する
+	 */
+	this.isOpened = function(){
+		if($dialog){
+			return true;
+		}
+		return false;
+	}
 
 }
 
@@ -19729,7 +19769,7 @@ module.exports = function($field){
 			callback();
 		});
 		return $dialog;
-	}//dialog()
+	} // open()
 
 	/**
 	 * ダイアログを閉じる
@@ -19742,6 +19782,7 @@ module.exports = function($field){
 			setTimeout(function(){
 				incense.widgetMgr.updateSelection();
 				$dialog.remove();
+				$dialog = undefined;
 				callback();
 			}, 0);
 			return $dialog;
@@ -19749,7 +19790,17 @@ module.exports = function($field){
 		incense.widgetMgr.updateSelection();
 		callback();
 		return $dialog;
-	}//close()
+	} // close()
+
+	/**
+	 * modal dialog が開いているか確認する
+	 */
+	this.isOpened = function(){
+		if($dialog){
+			return true;
+		}
+		return false;
+	}
 
 }
 
@@ -19801,8 +19852,15 @@ module.exports = function( incense, $timelineList, $field, $fieldOuter, $fieldIn
 				var widgetId = $this.attr('data-widget-id');
 				_this.unselect();
 				_this.select( widgetId );
+
+				var zoomRate = incense.getZoomRate();
+				var position = {
+					'x': (incense.$fieldOuter.scrollLeft() + e.pageX)/zoomRate - incense.$fieldOuter.offset().left/zoomRate,
+					'y': (incense.$fieldOuter.scrollTop() + e.pageY)/zoomRate - incense.$fieldOuter.offset().top/zoomRate
+				};
+
 				incense.fieldContextMenu.open(
-					{'x':Number($this.attr('data-offset-x')), 'y':Number($this.attr('data-offset-y'))},
+					position,
 					(function(){
 						var rtn = [
 							{
@@ -20269,37 +20327,8 @@ module.exports = function( incense, $widget ){
 				)
 				.append( $('<div class="issuetree__block">')
 					.append( $('<div class="issuetree__heading">').text( '子課題' ) )
-					.append( $('<button class="btn btn-default">')
+					.append( $('<button class="btn btn-default issuetree__create-child-button">')
 						.text('新しい子課題を作成')
-						.on('click', function(e){
-							incense.sendMessage(
-								{
-									'contentType': 'application/x-passiflora-command',
-									'content': JSON.stringify({
-										'operation':'createWidget',
-										'widgetType': _this.widgetType,
-										'x': incense.$field.scrollLeft() + $widget.offset().left + $widget.outerWidth() + 10,
-										'y': incense.$field.scrollTop() + $widget.offset().top + 10,
-										'parent': _this.id
-									})
-								} ,
-								function(rtn){
-									// console.log(rtn);
-									incense.sendMessage(
-										{
-											'content': JSON.stringify({
-												'command': 'update_relations'
-											}),
-											'contentType': 'application/x-passiflora-widget-message',
-											'targetWidget': _this.id
-										},
-										function(){
-											console.log('issuetree: update relations.');
-										}
-									);
-								}
-							);
-						})
 					)
 					.append( $('<div class="issuetree__sub-issues">') )
 				)
@@ -20377,42 +20406,6 @@ module.exports = function( incense, $widget ){
 	_this.$detailBodyParentIssue = _this.$detailBody.find('.issuetree__parent-issue');
 	_this.$detailBodySubIssues = _this.$detailBody.find('.issuetree__sub-issues');
 
-	incense.setBehaviorChatComment(
-		_this.$detailBody.find('textarea.issuetree__discussion-timeline--chat-comment'),
-		{
-			'submit': function(value){
-				function sendComment(value, stance, callback){
-					callback = callback || function(){};
-					incense.sendMessage(
-						{
-							'content': JSON.stringify({
-								'command': 'comment',
-								'comment': value,
-								'stance': stance
-							}),
-							'contentType': 'application/x-passiflora-widget-message',
-							'targetWidget': _this.id
-						},
-						function(){
-							console.log('issuetree chat-comment submited.');
-							callback();
-						}
-					);
-				}
-
-				var myAnswer = _this.vote[incense.getUserInfo().id];
-				var newAnswer = _this.$yourStanceSelector.val();
-				if( newAnswer.length && newAnswer != myAnswer ){
-					sendVoteMessage(newAnswer, function(){
-						sendComment(value, newAnswer);
-					});
-				}else{
-					sendComment(value, (myAnswer || ''));
-				}
-			}
-		}
-	);
-
 	/**
 	 * 詳細画面を開く
 	 */
@@ -20454,6 +20447,74 @@ module.exports = function( incense, $widget ){
 				})
 				.on('click', function(e){
 					e.stopPropagation();
+				})
+			;
+
+			incense.setBehaviorChatComment(
+				_this.$detailBody.find('textarea.issuetree__discussion-timeline--chat-comment'),
+				{
+					'submit': function(value){
+						function sendComment(value, stance, callback){
+							callback = callback || function(){};
+							incense.sendMessage(
+								{
+									'content': JSON.stringify({
+										'command': 'comment',
+										'comment': value,
+										'stance': stance
+									}),
+									'contentType': 'application/x-passiflora-widget-message',
+									'targetWidget': _this.id
+								},
+								function(){
+									console.log('issuetree chat-comment submited.');
+									callback();
+								}
+							);
+						}
+
+						var myAnswer = _this.vote[incense.getUserInfo().id];
+						var newAnswer = _this.$yourStanceSelector.val();
+						if( newAnswer.length && newAnswer != myAnswer ){
+							sendVoteMessage(newAnswer, function(){
+								sendComment(value, newAnswer);
+							});
+						}else{
+							sendComment(value, (myAnswer || ''));
+						}
+					}
+				}
+			);
+
+			_this.$detailBody.find('.issuetree__create-child-button')
+				.on('click', function(e){
+					incense.sendMessage(
+						{
+							'contentType': 'application/x-passiflora-command',
+							'content': JSON.stringify({
+								'operation':'createWidget',
+								'widgetType': _this.widgetType,
+								'x': incense.$fieldOuter.scrollLeft() + $widget.offset().left + $widget.outerWidth() + 10,
+								'y': incense.$fieldOuter.scrollTop() + $widget.offset().top + 10,
+								'parent': _this.id
+							})
+						} ,
+						function(rtn){
+							// console.log(rtn);
+							incense.sendMessage(
+								{
+									'content': JSON.stringify({
+										'command': 'update_relations'
+									}),
+									'contentType': 'application/x-passiflora-widget-message',
+									'targetWidget': _this.id
+								},
+								function(){
+									console.log('issuetree: update relations.');
+								}
+							);
+						}
+					);
 				})
 			;
 

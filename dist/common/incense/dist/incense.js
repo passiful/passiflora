@@ -18304,9 +18304,9 @@ window.Incense = function(){
 						'name': 'Stickies',
 						'api': require('./widgets/stickies/stickies.js')
 					},
-					'issuetree': {
-						'name': 'Issue Tree',
-						'api': require('./widgets/issuetree/issuetree.js')
+					'discussiontree': {
+						'name': 'Discussion Tree',
+						'api': require('./widgets/discussiontree/discussiontree.js')
 					}
 				};
 
@@ -18883,7 +18883,7 @@ window.Incense = function(){
 
 };
 
-},{"./apis/_locker.js":80,"./apis/_receiveBroadcast.js":81,"./libs/_detoxHtml.js":83,"./libs/_fieldContextMenu.js":84,"./libs/_keypress.js":85,"./libs/_locker.js":86,"./libs/_markdown.js":87,"./libs/_messageOperator.js":88,"./libs/_modal.js":89,"./libs/_userMgr.js":90,"./libs/_widgetBase.js":91,"./libs/_widgetDetailModal.js":92,"./libs/_widgetMgr.js":93,"./widgets/issuetree/issuetree.js":94,"./widgets/stickies/stickies.js":95,"es6-promise":4,"iterate79":8,"jquery":9,"twig":13,"utils79":15}],83:[function(require,module,exports){
+},{"./apis/_locker.js":80,"./apis/_receiveBroadcast.js":81,"./libs/_detoxHtml.js":83,"./libs/_fieldContextMenu.js":84,"./libs/_keypress.js":85,"./libs/_locker.js":86,"./libs/_markdown.js":87,"./libs/_messageOperator.js":88,"./libs/_modal.js":89,"./libs/_userMgr.js":90,"./libs/_widgetBase.js":91,"./libs/_widgetDetailModal.js":92,"./libs/_widgetMgr.js":93,"./widgets/discussiontree/discussiontree.js":94,"./widgets/stickies/stickies.js":95,"es6-promise":4,"iterate79":8,"jquery":9,"twig":13,"utils79":15}],83:[function(require,module,exports){
 /**
  * 投稿されたHTMLを無害化する - _detoxHtml.js
  */
@@ -20290,75 +20290,75 @@ module.exports = function( incense, $timelineList, $field, $fieldOuter, $fieldIn
 
 },{"jquery":9,"underscore":14}],94:[function(require,module,exports){
 /**
- * widgets: issuetree.js
+ * widgets: discussiontree.js
  */
 module.exports = function( incense, $widget ){
 	var _this = this;
 	var $ = require('jquery');
 	var mode = null;
 
-	this.issue = '未設定';
-	this.answer = '1. 賛成'+"\n"+'2. 反対';
+	this.question = '未設定';
+	this.answer = '';
 	this.vote = {};
 	this.status = 'open';
 	this.commentCount = 0;
 	this.lastTimelineMessage = {};
 
-	_this.$widgetBody = $('<div class="issuetree issuetree--widget">')
+	_this.$widgetBody = $('<div class="discussiontree discussiontree--widget">')
 		.append( $('<div class="row">')
 			.append( $('<div class="col-sm-6">')
-				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '問' ) )
-					.append( $('<div class="issuetree__issue incense-markdown">').html( incense.detoxHtml( incense.markdown(this.issue) ) || 'no-set' ) )
+				.append( $('<div class="discussiontree__block">')
+					.append( $('<div class="discussiontree__heading">').text( '問' ) )
+					.append( $('<div class="discussiontree__question incense-markdown">').html( incense.detoxHtml( incense.markdown(this.question) ) || 'no-set' ) )
 				)
 			)
 			.append( $('<div class="col-sm-6">')
-				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '答' ) )
-					.append( $('<div class="issuetree__answer">').html( incense.detoxHtml( incense.markdown(_this.answer) ) || 'no-answer' ) )
+				.append( $('<div class="discussiontree__block">')
+					.append( $('<div class="discussiontree__heading">').text( '答' ) )
+					.append( $('<div class="discussiontree__answer">').html( incense.detoxHtml( incense.markdown(_this.answer) ) || 'no-answer' ) )
 				)
 			)
 		)
-		.append( $('<div class="issuetree__comment-count">') )
+		.append( $('<div class="discussiontree__comment-count">') )
 	;
-	_this.$detailBody = $('<div class="issuetree issuetree--modal">')
+	_this.$detailBody = $('<div class="discussiontree discussiontree--modal">')
 		.append( $('<div class="row">')
 			.append( $('<div class="col-sm-6">')
-				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '問' )
-						.append( $('<a href="javascript:;" class="issuetree__edit-button" data-issuetree-btn-function="editIssue">')
+				.append( $('<div class="discussiontree__block">')
+					.append( $('<div class="discussiontree__heading">').text( '問' )
+						.append( $('<a href="javascript:;" class="discussiontree__edit-button" data-discussiontree-btn-function="editQuestion">')
 							.text('編集')
 						)
 					)
-					.append( $('<div class="issuetree__issue incense-markdown">').html( incense.detoxHtml( incense.markdown(this.issue) ) || 'no-set' ) )
+					.append( $('<div class="discussiontree__question incense-markdown">').html( incense.detoxHtml( incense.markdown(this.question) ) || 'no-set' ) )
 				)
 			)
 			.append( $('<div class="col-sm-6">')
-				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '答' )
-						.append( $('<a href="javascript:;" class="issuetree__edit-button" data-issuetree-btn-function="editAnswer">')
+				.append( $('<div class="discussiontree__block">')
+					.append( $('<div class="discussiontree__heading">').text( '答' )
+						.append( $('<a href="javascript:;" class="discussiontree__edit-button" data-discussiontree-btn-function="editAnswer">')
 							.text('編集')
 						)
 					)
-					.append( $('<div class="issuetree__answer incense-markdown">').html( incense.detoxHtml( incense.markdown(this.answer) ) || 'no-answer' ) )
+					.append( $('<div class="discussiontree__answer incense-markdown">').html( incense.detoxHtml( incense.markdown(this.answer) ) || 'no-answer' ) )
 				)
 			)
 		)
 		.append( $('<div class="row">')
 			.append( $('<div class="col-md-8">')
-				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( 'ディスカッション' ) )
-					.append( $('<div class="issuetree__discussion-timeline">')
-						.append( $('<div class="issuetree__discussion-timeline--timeline">') )
-						.append( $('<div class="issuetree__discussion-timeline--form">')
-							.append( $('<div class="issuetree__discussion-timeline--stance">')
+				.append( $('<div class="discussiontree__block">')
+					.append( $('<div class="discussiontree__heading">').text( 'ディスカッション' ) )
+					.append( $('<div class="discussiontree__discussion-timeline">')
+						.append( $('<div class="discussiontree__discussion-timeline--timeline">') )
+						.append( $('<div class="discussiontree__discussion-timeline--form">')
+							.append( $('<div class="discussiontree__discussion-timeline--stance">')
 								.append( $('<span>')
 									.text('あなたの現在の立場 : ')
 								)
 								.append( $('<select style="max-width: 100%;">') )
 							)
-							.append( $('<div class="issuetree__discussion-timeline--form__inputform">')
-								.append( $('<textarea class="form-control issuetree__discussion-timeline--chat-comment">') )
+							.append( $('<div class="discussiontree__discussion-timeline--form__inputform">')
+								.append( $('<textarea class="form-control discussiontree__discussion-timeline--chat-comment">') )
 								.append( $('<button class="btn btn-primary">send</button>') )
 							)
 						)
@@ -20366,26 +20366,26 @@ module.exports = function( incense, $widget ){
 				)
 			)
 			.append( $('<div class="col-md-4">')
-				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( 'ステータス' ) )
-					.append( $('<div class="issuetree__status">') )
+				.append( $('<div class="discussiontree__block">')
+					.append( $('<div class="discussiontree__heading">').text( 'ステータス' ) )
+					.append( $('<div class="discussiontree__status">') )
 				)
-				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '親課題' ) )
-					.append( $('<div class="issuetree__parent-issue">') )
+				.append( $('<div class="discussiontree__block">')
+					.append( $('<div class="discussiontree__heading">').text( '親ディスカッション' ) )
+					.append( $('<div class="discussiontree__parent-question">') )
 				)
-				.append( $('<div class="issuetree__block">')
-					.append( $('<div class="issuetree__heading">').text( '子課題' ) )
-					.append( $('<button class="btn btn-default issuetree__create-child-button">')
-						.text('新しい子課題を作成')
+				.append( $('<div class="discussiontree__block">')
+					.append( $('<div class="discussiontree__heading">').text( 'サブディスカッション' ) )
+					.append( $('<button class="btn btn-default discussiontree__create-child-button">')
+						.text('新しいサブディスカッションを作成')
 					)
-					.append( $('<div class="issuetree__sub-issues">') )
+					.append( $('<div class="discussiontree__sub-questions">') )
 				)
 			)
 		)
 	;
-	_this.$detailBodyTimeline = _this.$detailBody.find('.issuetree__discussion-timeline--timeline');
-	_this.$yourStanceSelector = _this.$detailBody.find('.issuetree__discussion-timeline--stance select');
+	_this.$detailBodyTimeline = _this.$detailBody.find('.discussiontree__discussion-timeline--timeline');
+	_this.$yourStanceSelector = _this.$detailBody.find('.discussiontree__discussion-timeline--stance select');
 
 	/**
 	 * テキストエリアでの編集内容を反映する
@@ -20409,13 +20409,13 @@ module.exports = function( incense, $widget ){
 				'targetWidget': $widget.attr('data-widget-id')
 			},
 			function(){
-				console.log('issuetree change submited.');
+				console.log('discussiontree change submited.');
 			}
 		);
 		$textarea.val('').remove();
 	}
 
-	_this.$detailBodyIssue = _this.$detailBody.find('.issuetree__issue')
+	_this.$detailBodyQuestion = _this.$detailBody.find('.discussiontree__question')
 		.css({
 			'position': 'relative',
 			'top': 0,
@@ -20423,7 +20423,7 @@ module.exports = function( incense, $widget ){
 			'width': '100%'
 		})
 	;
-	_this.$detailBodyIssue_textarea = $('<textarea>')
+	_this.$detailBodyQuestion_textarea = $('<textarea>')
 		.css({
 			'position': 'absolute',
 			'top': 0,
@@ -20433,7 +20433,7 @@ module.exports = function( incense, $widget ){
 		})
 	;
 
-	_this.$detailBodyAnswer = _this.$detailBody.find('.issuetree__answer')
+	_this.$detailBodyAnswer = _this.$detailBody.find('.discussiontree__answer')
 		.css({
 			'position': 'relative',
 			'top': 0,
@@ -20451,29 +20451,29 @@ module.exports = function( incense, $widget ){
 		})
 	;
 
-	_this.$detailBodyStatus = _this.$detailBody.find('.issuetree__status');
-	_this.$detailBodyParentIssue = _this.$detailBody.find('.issuetree__parent-issue');
-	_this.$detailBodySubIssues = _this.$detailBody.find('.issuetree__sub-issues');
+	_this.$detailBodyStatus = _this.$detailBody.find('.discussiontree__status');
+	_this.$detailBodyParentQuestion = _this.$detailBody.find('.discussiontree__parent-question');
+	_this.$detailBodySubQuestions = _this.$detailBody.find('.discussiontree__sub-questions');
 
 	/**
 	 * 詳細画面を開く
 	 */
 	function openDetailWindow(){
 		incense.widgetDetailModal.open({
-			'title': 'Issue #widget.'+_this.id,
+			'title': 'Discussion #widget.'+_this.id,
 			'body': _this.$detailBody
 		}, function(){
 
 			updateView();
 			updateRelations();
 
-			_this.$detailBody.find('.issuetree__edit-button')
+			_this.$detailBody.find('.discussiontree__edit-button')
 				.show()
 				.on('click', function(e){
-					var method = $(this).attr('data-issuetree-btn-function');
+					var method = $(this).attr('data-discussiontree-btn-function');
 					switch(method){
-						case 'editIssue':
-							editIssue();
+						case 'editQuestion':
+							editQuestion();
 							break;
 						case 'editAnswer':
 							editAnswer();
@@ -20482,9 +20482,9 @@ module.exports = function( incense, $widget ){
 				})
 			;
 
-			_this.$detailBodyIssue
+			_this.$detailBodyQuestion
 				.on('dblclick', function(e){
-					editIssue();
+					editQuestion();
 				})
 				.on('click', function(e){
 					e.stopPropagation();
@@ -20513,7 +20513,7 @@ module.exports = function( incense, $widget ){
 							'targetWidget': _this.id
 						},
 						function(){
-							console.log('issuetree chat-comment submited.');
+							console.log('discussiontree chat-comment submited.');
 							callback();
 						}
 					);
@@ -20530,16 +20530,16 @@ module.exports = function( incense, $widget ){
 				}
 			}
 			incense.setBehaviorChatComment(
-				_this.$detailBody.find('.issuetree__discussion-timeline--form__inputform textarea.issuetree__discussion-timeline--chat-comment'),
+				_this.$detailBody.find('.discussiontree__discussion-timeline--form__inputform textarea.discussiontree__discussion-timeline--chat-comment'),
 				{
 					'submit': function(value){
 						submitFnc(value);
 					}
 				}
 			);
-			_this.$detailBody.find('.issuetree__discussion-timeline--form__inputform button')
+			_this.$detailBody.find('.discussiontree__discussion-timeline--form__inputform button')
 				.on('click', function(e){
-					var $textarea = _this.$detailBody.find('.issuetree__discussion-timeline--form__inputform textarea.issuetree__discussion-timeline--chat-comment');
+					var $textarea = _this.$detailBody.find('.discussiontree__discussion-timeline--form__inputform textarea.discussiontree__discussion-timeline--chat-comment');
 					var value = $textarea.val();
 					if( !value ){
 						return;
@@ -20549,7 +20549,7 @@ module.exports = function( incense, $widget ){
 				})
 			;
 
-			_this.$detailBody.find('.issuetree__create-child-button')
+			_this.$detailBody.find('.discussiontree__create-child-button')
 				.on('click', function(e){
 					incense.sendMessage(
 						{
@@ -20573,7 +20573,7 @@ module.exports = function( incense, $widget ){
 									'targetWidget': _this.id
 								},
 								function(){
-									console.log('issuetree: update relations.');
+									console.log('discussiontree: update relations.');
 								}
 							);
 						}
@@ -20607,28 +20607,28 @@ module.exports = function( incense, $widget ){
 	/**
 	 * 問を編集する
 	 */
-	function editIssue(){
+	function editQuestion(){
 		mode = 'edit';
-		_this.$detailBodyIssue.append( _this.$detailBodyIssue_textarea.val( _this.issue ) );
-		_this.$detailBody.find('.issuetree__edit-button').hide();
+		_this.$detailBodyQuestion.append( _this.$detailBodyQuestion_textarea.val( _this.question ) );
+		_this.$detailBody.find('.discussiontree__edit-button').hide();
 		incense.setBehaviorChatComment(
-			_this.$detailBodyIssue_textarea,
+			_this.$detailBodyQuestion_textarea,
 			{
 				'submit': function(value){
-					applyTextareaEditContent( _this.$detailBodyIssue_textarea, 'issue' );
-					_this.$detailBody.find('.issuetree__edit-button').show();
+					applyTextareaEditContent( _this.$detailBodyQuestion_textarea, 'question' );
+					_this.$detailBody.find('.discussiontree__edit-button').show();
 					setTimeout(function(){editAnswer();}, 100);
 				}
 			}
 		);
-		_this.$detailBodyIssue_textarea
+		_this.$detailBodyQuestion_textarea
 			.on('change blur', function(e){
-				applyTextareaEditContent( _this.$detailBodyIssue_textarea, 'issue' );
-				_this.$detailBody.find('.issuetree__edit-button').show();
+				applyTextareaEditContent( _this.$detailBodyQuestion_textarea, 'question' );
+				_this.$detailBody.find('.discussiontree__edit-button').show();
 				setTimeout(function(){editAnswer();}, 100);
 			})
 		;
-		_this.$detailBodyIssue_textarea.focus();
+		_this.$detailBodyQuestion_textarea.focus();
 	}
 
 	/**
@@ -20637,20 +20637,20 @@ module.exports = function( incense, $widget ){
 	function editAnswer(){
 		mode = 'edit';
 		_this.$detailBodyAnswer.append( _this.$detailBodyAnswer_textarea.val( _this.answer ) );
-		_this.$detailBody.find('.issuetree__edit-button').hide();
+		_this.$detailBody.find('.discussiontree__edit-button').hide();
 		incense.setBehaviorChatComment(
 			_this.$detailBodyAnswer_textarea,
 			{
 				'submit': function(value){
 					applyTextareaEditContent( _this.$detailBodyAnswer_textarea, 'answer' );
-					_this.$detailBody.find('.issuetree__edit-button').show();
+					_this.$detailBody.find('.discussiontree__edit-button').show();
 				}
 			}
 		);
 		_this.$detailBodyAnswer_textarea
 			.on('change blur', function(e){
 				applyTextareaEditContent( _this.$detailBodyAnswer_textarea, 'answer' );
-				_this.$detailBody.find('.issuetree__edit-button').show();
+				_this.$detailBody.find('.discussiontree__edit-button').show();
 			})
 		;
 		_this.$detailBodyAnswer_textarea.focus();
@@ -20691,7 +20691,7 @@ module.exports = function( incense, $widget ){
 						'text-align': 'right'
 					})
 					.append( $('<button class="btn btn-default">')
-						.text('vote')
+						.text('GOOD!')
 						.attr({
 							'data-passiflora-vote-option': optionValue
 						})
@@ -20708,7 +20708,7 @@ module.exports = function( incense, $widget ){
 				);
 			}
 
-			var $voteUserList = $('<ul class="issuetree__voteuser">')
+			var $voteUserList = $('<ul class="discussiontree__voteuser">')
 			for( var userName in _this.vote ){
 				// console.log(optionValue);
 				if( _this.vote[userName] == optionValue ){
@@ -20718,7 +20718,7 @@ module.exports = function( incense, $widget ){
 					);
 					// console.log( userName, incense.getUserInfo().id );
 					if( userName == incense.getUserInfo().id ){
-						$li.addClass('issuetree__voteuser--me');
+						$li.addClass('discussiontree__voteuser--me');
 					}
 					optionValueList[optionValue].voteUsers.push( incense.getUserInfo().id );
 				}
@@ -20728,7 +20728,7 @@ module.exports = function( incense, $widget ){
 			}
 		});
 
-		var $widgetAnser = $widget.find('.issuetree__answer');
+		var $widgetAnser = $widget.find('.discussiontree__answer');
 		var maxAnswer = null;
 		var maxVoteCount = 0;
 		var maxAnswerCount = 0;
@@ -20751,7 +20751,7 @@ module.exports = function( incense, $widget ){
 			for( var idx in optionValueList ){
 				if(optionValueList[idx].voteUsers.length == maxVoteCount){
 					$answerList.append( $('<li>')
-						.text( optionValueList[idx].value + ' : ' + optionValueList[idx].voteUsers.length + '票' )
+						.text( optionValueList[idx].value + ' : ' + optionValueList[idx].voteUsers.length + 'good' )
 					);
 					maxAnswerCount ++;
 				}else{
@@ -20760,7 +20760,7 @@ module.exports = function( incense, $widget ){
 			}
 			if( otherVoteCount ){
 				$answerList.append( $('<li>')
-				.text( 'その他 : ' + otherVoteCount + '票' )
+				.text( 'その他 : ' + otherVoteCount + 'good' )
 			);
 			}
 
@@ -20773,20 +20773,20 @@ module.exports = function( incense, $widget ){
 		}
 
 		_this.$widgetBody
-			.removeClass('issuetree--status-active')
-			.removeClass('issuetree--status-fixed')
+			.removeClass('discussiontree--status-active')
+			.removeClass('discussiontree--status-fixed')
 		;
 		_this.$detailBody
-			.removeClass('issuetree--status-active')
-			.removeClass('issuetree--status-fixed')
+			.removeClass('discussiontree--status-active')
+			.removeClass('discussiontree--status-fixed')
 		;
 		if( _this.status == 'close' ){
-			_this.$widgetBody.addClass('issuetree--status-fixed');
-			_this.$detailBody.addClass('issuetree--status-fixed');
+			_this.$widgetBody.addClass('discussiontree--status-fixed');
+			_this.$detailBody.addClass('discussiontree--status-fixed');
 		}else{
 			if( _this.commentCount >= 1 ){
-				_this.$widgetBody.addClass('issuetree--status-active');
-				_this.$detailBody.addClass('issuetree--status-active');
+				_this.$widgetBody.addClass('discussiontree--status-active');
+				_this.$detailBody.addClass('discussiontree--status-active');
 			}
 		}
 
@@ -20831,11 +20831,11 @@ module.exports = function( incense, $widget ){
 				$('<p>').append( $('<button class="btn btn-default">')
 					.text( (_this.status=='open' ? 'close' : 'reopen') )
 					.attr({
-						'data-issuetree-status-to': (_this.status=='open' ? 'close' : 'open')
+						'data-discussiontree-status-to': (_this.status=='open' ? 'close' : 'open')
 					})
 					.on('click', function(e){
 						var $this = $(this);
-						var statusTo = $this.attr('data-issuetree-status-to');
+						var statusTo = $this.attr('data-discussiontree-status-to');
 						incense.sendMessage(
 							{
 								'content': JSON.stringify({
@@ -20846,7 +20846,7 @@ module.exports = function( incense, $widget ){
 								'targetWidget': _this.id
 							},
 							function(){
-								console.log('issuetree changing status to "'+statusTo+'" submited.');
+								console.log('discussiontree changing status to "'+statusTo+'" submited.');
 								callback();
 							}
 						);
@@ -20859,7 +20859,7 @@ module.exports = function( incense, $widget ){
 	} // updateView()
 
 	/**
-	 * 投票操作のメッセージを送信する
+	 * GOOD操作のメッセージを送信する
 	 */
 	function sendVoteMessage(vote, callback){
 		callback = callback || function(){};
@@ -20873,7 +20873,7 @@ module.exports = function( incense, $widget ){
 				'targetWidget': _this.id
 			},
 			function(){
-				console.log('issuetree vote submited.');
+				console.log('discussiontree vote submited.');
 				callback();
 			}
 		);
@@ -20883,36 +20883,36 @@ module.exports = function( incense, $widget ){
 	 * 親子関係欄を更新する
 	 */
 	function updateRelations(){
-		_this.$detailBodyParentIssue.html('---');
+		_this.$detailBodyParentQuestion.html('---');
 		if( _this.parent && incense.widgetMgr.get(_this.parent) ){
 			var $link = incense.widgetMgr.mkLinkToWidget( _this.parent );
-			_this.$detailBodyParentIssue.html('')
+			_this.$detailBodyParentQuestion.html('')
 				.append( $link
 					.html('')
-					.addClass('issuetree__issue-unit')
-					.append( $('<div>').text(incense.widgetMgr.get(_this.parent).issue) )
-					.append( $('<div class="issuetree__issue-unit--widget-id">').append( '#widget.'+_this.parent ) )
+					.addClass('discussiontree__question-unit')
+					.append( $('<div>').text(incense.widgetMgr.get(_this.parent).question) )
+					.append( $('<div class="discussiontree__question-unit--widget-id">').append( '#widget.'+_this.parent ) )
 				)
 			;
 		}
 
 		incense.widgetMgr.getChildren( _this.id, function(children){
-			_this.$detailBodySubIssues.html('---');
+			_this.$detailBodySubQuestions.html('---');
 			if( children.length ){
-				_this.$detailBodySubIssues.html('');
+				_this.$detailBodySubQuestions.html('');
 				var $ul = $('<ul>');
 				for( var idx in children ){
 					var $li = $('<li>')
 						.append( incense.widgetMgr.mkLinkToWidget( children[idx].id )
 							.html('')
-							.addClass('issuetree__issue-unit')
-							.append( $('<div>').text(children[idx].issue) )
-							.append( $('<div class="issuetree__issue-unit--widget-id">').append( '#widget.'+children[idx].id ) )
+							.addClass('discussiontree__question-unit')
+							.append( $('<div>').text(children[idx].question) )
+							.append( $('<div class="discussiontree__question-unit--widget-id">').append( '#widget.'+children[idx].id ) )
 						)
 					;
 					$ul.append( $li );
 				}
-				_this.$detailBodySubIssues.append( $ul );
+				_this.$detailBodySubQuestions.append( $ul );
 			}
 		} );
 		return;
@@ -20922,9 +20922,9 @@ module.exports = function( incense, $widget ){
 	 * widget の内容を端的に説明するテキストを取得する
 	 */
 	this.getSummary = function(){
-		var issue = incense.detoxHtml( incense.markdown(this.issue) );
+		var question = incense.detoxHtml( incense.markdown(this.question) );
 		var answer = incense.detoxHtml( incense.markdown(this.answer) );
-		var rtn = '問: ' + $(issue).text() + ' - 答: ' + $(answer).text();
+		var rtn = '問: ' + $(question).text() + ' - 答: ' + $(answer).text();
 		return rtn;
 	}
 
@@ -21006,13 +21006,13 @@ module.exports = function( incense, $widget ){
 				updateView();
 
 				var totalCommentCount = _this.$detailBodyTimeline.find('>div').size();
-				_this.$widgetBody.find('.issuetree__comment-count').text( (this.commentCount) + '件のコメント' );
+				_this.$widgetBody.find('.discussiontree__comment-count').text( (this.commentCount) + '件のコメント' );
 
 				// 詳細画面のディスカッションに追加
 				mkTimelineElement(
 					$('<div class="incense__message-unit__content incense-markdown">').html(userMessage)
 				);
-				// 	.addClass( user.id == incense.getUserInfo().id ? 'issuetree--myitem' : '' )
+				// 	.addClass( user.id == incense.getUserInfo().id ? 'discussiontree--myitem' : '' )
 				incense.adjustTimelineScrolling( _this.$detailBodyTimeline );
 
 				// メインチャットに追加
@@ -21022,21 +21022,21 @@ module.exports = function( incense, $widget ){
 				);
 				break;
 
-			case 'update_issue':
+			case 'update_question':
 				// 問の更新
-				_this.issue = message.content.val;
-				_this.$detailBodyIssue.html( incense.detoxHtml( incense.markdown(_this.issue) ) || 'no-set' );
-				$widget.find('.issuetree__issue').html( incense.detoxHtml( incense.markdown(_this.issue) ) || 'no-set' );
+				_this.question = message.content.val;
+				_this.$detailBodyQuestion.html( incense.detoxHtml( incense.markdown(_this.question) ) || 'no-set' );
+				$widget.find('.discussiontree__question').html( incense.detoxHtml( incense.markdown(_this.question) ) || 'no-set' );
 
 				// 詳細画面のディスカッションに追加
 				mkTimelineElement(
-					$('<div class="incense__message-unit__operation">').html(message.owner + ' が、問を "' + _this.issue + '" に変更しました。')
+					$('<div class="incense__message-unit__operation">').html(message.owner + ' が、問を "' + _this.question + '" に変更しました。')
 				);
 				incense.adjustTimelineScrolling( _this.$detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__operation">').html('問を "' + _this.issue + '" に変更しました。') )
+					.append( $('<div class="incense__message-unit__operation">').html('問を "' + _this.question + '" に変更しました。') )
 					// .append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;
@@ -21080,19 +21080,19 @@ module.exports = function( incense, $widget ){
 				break;
 
 			case 'vote':
-				// 投票更新
+				// GOOD更新
 				_this.vote[message.owner] = message.content.option;
 				updateView();
 
 				// 詳細画面のディスカッションに追加
 				mkTimelineElement(
-					$('<div class="incense__message-unit__operation">').text(user.name + ' が、 "' + message.content.option + '" に投票しました。')
+					$('<div class="incense__message-unit__operation">').text(user.name + ' が、 "' + message.content.option + '" を GOOD しました。')
 				);
 				incense.adjustTimelineScrolling( _this.$detailBodyTimeline );
 
 				// メインチャットに追加
 				incense.insertTimeline( message, $messageUnit
-					.append( $('<div class="incense__message-unit__operation">').text(message.owner + ' が、 "' + message.content.option + '" に投票しました。') )
+					.append( $('<div class="incense__message-unit__operation">').text(message.owner + ' が、 "' + message.content.option + '" を GOOD しました。') )
 					// .append( $('<div class="incense__message-unit__targetWidget">').append( incense.widgetMgr.mkLinkToWidget( message.targetWidget ) ) )
 				);
 				break;

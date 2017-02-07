@@ -43,7 +43,7 @@ module.exports = function(conf){
 
 				req.main.board.createNewBoard(
 					{
-						"theme": req.body.board_theme
+						"title": req.body.board_theme
 					} ,
 					function( boardId ){
 						result.boardId = boardId;

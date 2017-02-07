@@ -7,7 +7,7 @@ module.exports = function(conf, incense, main){
 	 * 新しいボードを生成する
 	 */
 	this.createNewBoard = function( boardInfo, callback ){
-		incense.board.createNewBoard(callback);
+		incense.board.createNewBoard(boardInfo, callback);
 		return;
 	}
 

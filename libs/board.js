@@ -15,7 +15,7 @@ module.exports = function(conf, incense, main){
 	 * ボード情報を取得する
 	 */
 	this.getBoardInfo = function(boardId, callback){
-		callback({}); // incense は boardInfo を持たないように変更された
+		incense.board.getBoardInfo(boardId, callback);
 		return;
 	}
 

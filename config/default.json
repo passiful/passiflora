@@ -1,6 +1,11 @@
 {
 	"appName": "PASSIFLORA",
 	"dataDir": "./data/",
+	"db": {
+		"dbms": "sqlite",
+		"storage": "./data/__database.sqlite",
+		"tablePrefix": "incense"
+	},
 	"origin": "https://127.0.0.1:8080",
 	"sslOption":{
 		"key": "./config/ssl/server.key",

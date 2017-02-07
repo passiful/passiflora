@@ -14,6 +14,7 @@ var biflora = require('biflora');
 var Incense = require('incense');
 var incense = Incense.getBifloraMain({
 	'dataDir': conf.dataDir ,
+	'db': conf.db ,
 	'getUserInfo': function( socket, clientDefaultUserInfo, callback ){
 		// provide user info.
 		// eg: {'id': 'user_id', 'name': 'User Name'}

@@ -72,10 +72,11 @@ module.exports = function(conf){
 				rlv();
 				return;
 			})
-		}).catch(function(){
+		}).catch(function(e){
 			console.log('reject;');
+			console.log(e);
 			res.status(200);
-			res.set('Content-Type', 'text/html')
+			res.set('Content-Type', 'text/html');
 
 			res.send('rejected...').end();
 		});

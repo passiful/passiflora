@@ -9,19 +9,32 @@ html, body {
 
 .board-head {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 40px;
+  left: 0;
   z-index: 1000;
   color: #000;
-  background-color: #f9f9f9;
-  padding: 10px;
-  border-radius: 3px; }
+  background-color: transparent;
+  overflow: visible;
+  width: 15px;
+  height: 5px; }
+  .board-head__main-plate {
+    position: absolute;
+    top: 0;
+    left: auto;
+    right: 0;
+    padding: 10px;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee; }
   .board-head * {
     font-size: 13px;
     margin: 0; }
   .board-head h1 {
     font-size: 16px;
     font-weight: bold; }
+  .board-head:hover .board-head__main-plate {
+    left: 0;
+    right: auto; }
 
 .board {
   display: -webkit-box;

@@ -24,9 +24,11 @@
 	</head>
 	<body>
 		<header class="board-head">
-			<h1><%= boardInfo.title %></h1>
-			<p>boardID: <%= boardId %></p>
-			<p><a href="/">EXIT</a></p>
+			<div class="board-head__main-plate">
+				<h1><%= boardInfo.title %></h1>
+				<p>boardID: <%= boardId %></p>
+				<p><a href="/">EXIT</a></p>
+			</div>
 		</header>
 		<div class="board">
 			<div class="board__field"></div>

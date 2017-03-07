@@ -1,5 +1,7 @@
 @import url(./libs/bootstrap/dist/css/bootstrap.css);
 .incense { }
+  .incense textarea {
+    resize: none; }
   .incense.incense__board {
     position: relative;
     top: 0;
@@ -250,11 +252,9 @@
       background-color: #f9f9f9;
       border: 1px solid #eeeeee;
       text-align: left;
-      padding: 0.4em 1.5em;
-      border-radius: 10px;
+      padding: 0.4em 0.6em;
+      border-radius: 4px;
       word-wrap: break-word; }
-      .incense .incense__message-unit .incense__message-unit__content p {
-        white-space: pre-wrap; }
       .incense .incense__message-unit .incense__message-unit__content > :first-child {
         margin-top: 0; }
       .incense .incense__message-unit .incense__message-unit__content > :last-child {
@@ -293,7 +293,49 @@
     min-height: 5px;
     background-color: #eee; }
   .incense .incense-markdown * {
-    font-size: 100%; }
+    font-size: 100%;
+    font-weight: normal; }
+  .incense .incense-markdown h1 {
+    font-size: 130%; }
+  .incense .incense-markdown h2 {
+    font-size: 115%; }
+  .incense .incense-markdown h3 {
+    font-size: 105%; }
+  .incense .incense-markdown h1, .incense .incense-markdown h2, .incense .incense-markdown h3, .incense .incense-markdown h4, .incense .incense-markdown h5, .incense .incense-markdown h6 {
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.2em; }
+  .incense .incense-markdown blockquote,
+  .incense .incense-markdown pre,
+  .incense .incense-markdown ul, .incense .incense-markdown li,
+  .incense .incense-markdown p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em; }
+  .incense .incense-markdown p {
+    white-space: pre-wrap; }
+  .incense .incense-markdown blockquote {
+    padding: 0 0 0 1em;
+    border: none;
+    border-left: 4px solid #ddd; }
+  .incense .incense-markdown pre {
+    padding: 0.5em;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin-left: 1em; }
+  .incense .incense-markdown img {
+    max-width: 100%; }
+  .incense .incense-markdown ul {
+    padding-left: 0; }
+    .incense .incense-markdown ul li {
+      list-style-type: none;
+      position: relative;
+      padding-left: 1.5em; }
+      .incense .incense-markdown ul li:before {
+        content: "-";
+        position: absolute;
+        width: 1.5em;
+        text-align: center;
+        left: 0; }
   .incense .incense-no-pointer-event {
     pointer-events: none; }
   .incense .discussiontree {
@@ -334,6 +376,11 @@
     .incense .discussiontree .discussiontree__question {
       font-weight: bold;
       font-size: 24px; }
+    .incense .discussiontree .discussiontree__question,
+    .incense .discussiontree .discussiontree__answer {
+      min-height: 60px;
+      max-height: 300px;
+      overflow: auto; }
     .incense .discussiontree .discussiontree__voteuser {
       padding: 0;
       margin: 0; }
@@ -394,8 +441,8 @@
     font-size: 11px;
     min-width: 80px;
     min-height: 80px;
-    max-width: 120px;
-    max-height: 120px;
+    max-width: 240px;
+    max-height: auto;
     width: 100%;
     height: 100%;
     overflow: auto;

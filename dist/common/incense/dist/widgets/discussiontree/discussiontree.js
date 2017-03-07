@@ -9835,13 +9835,13 @@ module.exports = function( incense, $widget ){
 			.append( $('<div class="col-sm-6">')
 				.append( $('<div class="discussiontree__block">')
 					.append( $('<div class="discussiontree__heading">').text( '問' ) )
-					.append( $('<div class="discussiontree__question incense-markdown">').html( incense.detoxHtml( incense.markdown(this.question) ) || 'no-set' ) )
+					.append( $('<div class="discussiontree__question incense-markdown">').html( incense.markdown(this.question) || 'no-set' ) )
 				)
 			)
 			.append( $('<div class="col-sm-6">')
 				.append( $('<div class="discussiontree__block">')
 					.append( $('<div class="discussiontree__heading">').text( '答' ) )
-					.append( $('<div class="discussiontree__answer">').html( incense.detoxHtml( incense.markdown(_this.answer) ) || 'no-answer' ) )
+					.append( $('<div class="discussiontree__answer incense-markdown">').html( incense.markdown(_this.answer) || 'no-answer' ) )
 				)
 			)
 		)
@@ -10135,7 +10135,10 @@ module.exports = function( incense, $widget ){
 	 */
 	function editQuestion(){
 		mode = 'edit';
-		_this.$detailBodyQuestion.append( _this.$detailBodyQuestion_textarea.val( _this.question ) );
+		_this.$detailBodyQuestion
+			.css({'overflow':'hidden'})
+			.append( _this.$detailBodyQuestion_textarea.val( _this.question ) )
+		;
 		_this.$detailBody.find('.discussiontree__edit-button').hide();
 		incense.setBehaviorChatComment(
 			_this.$detailBodyQuestion_textarea,
@@ -10150,6 +10153,9 @@ module.exports = function( incense, $widget ){
 		_this.$detailBodyQuestion_textarea
 			.on('change blur', function(e){
 				applyTextareaEditContent( _this.$detailBodyQuestion_textarea, 'question' );
+				_this.$detailBodyQuestion
+					.css({'overflow':'auto'})
+				;
 				_this.$detailBody.find('.discussiontree__edit-button').show();
 				setTimeout(function(){editAnswer();}, 100);
 			})
@@ -10162,7 +10168,10 @@ module.exports = function( incense, $widget ){
 	 */
 	function editAnswer(){
 		mode = 'edit';
-		_this.$detailBodyAnswer.append( _this.$detailBodyAnswer_textarea.val( _this.answer ) );
+		_this.$detailBodyAnswer
+			.css({'overflow':'hidden'})
+			.append( _this.$detailBodyAnswer_textarea.val( _this.answer ) )
+		;
 		_this.$detailBody.find('.discussiontree__edit-button').hide();
 		incense.setBehaviorChatComment(
 			_this.$detailBodyAnswer_textarea,
@@ -10176,6 +10185,9 @@ module.exports = function( incense, $widget ){
 		_this.$detailBodyAnswer_textarea
 			.on('change blur', function(e){
 				applyTextareaEditContent( _this.$detailBodyAnswer_textarea, 'answer' );
+				_this.$detailBodyAnswer
+					.css({'overflow':'auto'})
+				;
 				_this.$detailBody.find('.discussiontree__edit-button').show();
 			})
 		;
@@ -10189,7 +10201,7 @@ module.exports = function( incense, $widget ){
 		callback = callback || function(){};
 		var optionValueList = {};
 		var myAnswer = _this.vote[incense.getUserInfo().id];
-		_this.$detailBodyAnswer.html( incense.detoxHtml( incense.markdown(_this.answer) ) || 'no-answer' );
+		_this.$detailBodyAnswer.html( incense.markdown(_this.answer) || 'no-answer' );
 		_this.$detailBodyAnswer.find('ol>li').each(function(){
 			var $this = $(this);
 			var optionValue = $this.html()+'';
@@ -10295,7 +10307,7 @@ module.exports = function( incense, $widget ){
 				.append( $answerList )
 			;
 		}else{
-			$widgetAnser.html( incense.detoxHtml( incense.markdown(_this.answer) ) || 'no-answer' );
+			$widgetAnser.html( incense.markdown(_this.answer) || 'no-answer' );
 		}
 
 		_this.$widgetBody
@@ -10416,7 +10428,7 @@ module.exports = function( incense, $widget ){
 				.append( $link
 					.html('')
 					.addClass('discussiontree__question-unit')
-					.append( $('<div>').text(incense.widgetMgr.get(_this.parent).question) )
+					.append( $('<div>').text(incense.widgetMgr.get(_this.parent).getSummary()) )
 					.append( $('<div class="discussiontree__question-unit--widget-id">').append( '#widget.'+_this.parent ) )
 				)
 			;
@@ -10432,7 +10444,7 @@ module.exports = function( incense, $widget ){
 						.append( incense.widgetMgr.mkLinkToWidget( children[idx].id )
 							.html('')
 							.addClass('discussiontree__question-unit')
-							.append( $('<div>').text(children[idx].question) )
+							.append( $('<div>').text(children[idx].getSummary()) )
 							.append( $('<div class="discussiontree__question-unit--widget-id">').append( '#widget.'+children[idx].id ) )
 						)
 					;
@@ -10527,7 +10539,7 @@ module.exports = function( incense, $widget ){
 		switch( message.content.command ){
 			case 'comment':
 				// コメントの投稿
-				userMessage = incense.detoxHtml( incense.markdown( message.content.comment ) );
+				userMessage = incense.markdown( message.content.comment );
 				this.commentCount ++;
 				updateView();
 
@@ -10551,8 +10563,8 @@ module.exports = function( incense, $widget ){
 			case 'update_question':
 				// 問の更新
 				_this.question = message.content.val;
-				_this.$detailBodyQuestion.html( incense.detoxHtml( incense.markdown(_this.question) ) || 'no-set' );
-				$widget.find('.discussiontree__question').html( incense.detoxHtml( incense.markdown(_this.question) ) || 'no-set' );
+				_this.$detailBodyQuestion.html( incense.markdown(_this.question) || 'no-set' );
+				$widget.find('.discussiontree__question').html( incense.markdown(_this.question) || 'no-set' );
 
 				// 詳細画面のディスカッションに追加
 				mkTimelineElement(

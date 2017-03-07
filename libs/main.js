@@ -12,7 +12,7 @@ conf.packageJson = require('../package.json');
 var biflora = require('biflora');
 
 var Incense = require('incense');
-var incense = Incense.getBifloraMain({
+var incense = new Incense({
 	'dataDir': conf.dataDir ,
 	'db': conf.db ,
 	'getUserInfo': function( socket, clientDefaultUserInfo, callback ){
@@ -71,7 +71,7 @@ app.use( expressSession({
 
 app.use( function(req, res, next){
 	req.main = {};
-	req.main.board = new (require('./board.js'))(conf, incense, req.main);
+	req.main.board = new (require('./board.js'))(conf, incense.getBifloraMain(), req.main);
 	next();
 } );
 
@@ -102,8 +102,8 @@ io.use( function(socket, next){
 
 biflora.setupWebSocket(
 	server,
-	Incense.getBifloraApi() ,
-	incense,
+	incense.getBifloraApi() ,
+	incense.getBifloraMain() ,
 	{
 		'namespace': '/',
 		'socketIo': io

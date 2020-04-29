@@ -36,7 +36,7 @@
     "fs-extra": "^0.30.0",
     "incense": "file:submodules/node-incense",
     "iterate79": "0.0.1",
-    "jquery": "^2.2.2",
+    "jquery": "^3.5.0",
     "marked": "^0.3.5",
     "phpjs": "^1.3.2",
     "purl": "^1.0.4",
